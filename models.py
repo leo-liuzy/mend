@@ -62,8 +62,8 @@ def get_model(config):
         model = BertClassifier(config.model.name)
     else:
         ModelClass = getattr(transformers, config.model.class_name)
-        LOG.info(f"Loading model class {ModelClass} with name {config.model.name} from cache dir {scr()}")
-        model = ModelClass.from_pretrained(config.model.name, cache_dir=scr())
+        LOG.info(f"Loading model class {ModelClass} with name `{config.model.name}`")
+        model = ModelClass.from_pretrained(config.model.name,)
 
     if config.model.pt is not None:
         LOG.info(f"Loading model initialization from {config.model.pt}")
@@ -157,7 +157,12 @@ def get_model(config):
 
 def get_tokenizer(config):
     tok_name = config.model.tokenizer_name if config.model.tokenizer_name is not None else config.model.name
-    return getattr(transformers, config.model.tokenizer_class).from_pretrained(tok_name, cache_dir=scr())
+    tokenizer = transformers.AutoTokenizer.from_pretrained(tok_name,)
+    if isinstance(tokenizer, transformers.LlamaTokenizer) or "Llama" in tok_name:
+        tokenizer.pad_token_id = tokenizer.eos_token_id
+        # tokenizer.padding_side = "left"
+    # return getattr(transformers, config.model.tokenizer_class).from_pretrained(tok_name,)
+    return tokenizer
 
 
 if __name__ == '__main__':

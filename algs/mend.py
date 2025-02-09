@@ -24,7 +24,7 @@ def update_counter(x, m, s, k):
 
 
 class GradientTransform(nn.Module):
-    def __init__(self, x_dim: int, delta_dim: int, cfg, n_modes = None):
+    def __init__(self, x_dim: int, delta_dim: int, cfg, n_modes=None):
         super().__init__()
 
         self.x_dim = x_dim
@@ -46,14 +46,33 @@ class GradientTransform(nn.Module):
         LOG.info(f"Building Gradient Transform with MLP class {MlpClass}")
 
         def delta_net():
-            return MlpClass(delta_dim, delta_dim, delta_dim * 2, cfg.n_hidden, init=cfg.init, act=cfg.act, rank=cfg.rank, n_modes=n_modes)
+            return MlpClass(
+                delta_dim,
+                delta_dim,
+                delta_dim * 2,
+                cfg.n_hidden,
+                init=cfg.init,
+                act=cfg.act,
+                rank=cfg.rank,
+                n_modes=n_modes,
+            )
 
         def x_net():
-            return MlpClass(x_dim, x_dim, x_dim * 2, cfg.n_hidden, init=cfg.init, act=cfg.act, rank=cfg.rank, n_modes=n_modes)
+            return MlpClass(
+                x_dim, x_dim, x_dim * 2, cfg.n_hidden, init=cfg.init, act=cfg.act, rank=cfg.rank, n_modes=n_modes
+            )
 
         def combined_net():
-            return MlpClass(delta_dim + x_dim, delta_dim + x_dim, (delta_dim + x_dim) * 2,
-                            cfg.n_hidden, init=cfg.init, act=cfg.act, rank=cfg.rank, n_modes=n_modes)
+            return MlpClass(
+                delta_dim + x_dim,
+                delta_dim + x_dim,
+                (delta_dim + x_dim) * 2,
+                cfg.n_hidden,
+                init=cfg.init,
+                act=cfg.act,
+                rank=cfg.rank,
+                n_modes=n_modes,
+            )
 
         def ID():
             return lambda x, mode=None: x
@@ -140,15 +159,16 @@ class MEND(EditableModel):
 
         if mend is None:
             if not config.mend.shared:
-                self.mend = nn.ModuleDict({
-                    n.replace(".", "#"): GradientTransform(*self.get_shape(p), config.mend)
-                    for (n, p) in _inner_params(model.named_parameters(), self.config.model.inner_params)
-                })
+                self.mend = nn.ModuleDict(
+                    {
+                        n.replace(".", "#"): GradientTransform(*self.get_shape(p), config.mend)
+                        for (n, p) in _inner_params(model.named_parameters(), self.config.model.inner_params)
+                    }
+                )
             else:
-                self.mend = nn.ModuleDict({
-                    str(tuple(s)): GradientTransform(*s, config.mend, len(shape_dict[s]))
-                    for s in shape_dict.keys()
-                })
+                self.mend = nn.ModuleDict(
+                    {str(tuple(s)): GradientTransform(*s, config.mend, len(shape_dict[s])) for s in shape_dict.keys()}
+                )
         else:
             self.mend = mend
 
@@ -170,7 +190,9 @@ class MEND(EditableModel):
 
         res = super().load_state_dict(state_dict, False)
         # We should only have missing keys for the model, and no unexpected keys
-        assert len([k for k in res.missing_keys if not k.startswith("model.")]) == 0, "Should only have missing keys for model."
+        assert (
+            len([k for k in res.missing_keys if not k.startswith("model.")]) == 0
+        ), "Should only have missing keys for model."
         assert len(res.unexpected_keys) == 0, "Shouldn't have any unexpected keys"
         return res
 
@@ -205,10 +227,7 @@ class MEND(EditableModel):
             targ = "ij"
         else:
             targ = "ji"
-        mean_grads = {
-            n: torch.einsum(f"bi,bj->{targ}", x, delta)
-            for n, (x, delta) in transformed_factors.items()
-        }
+        mean_grads = {n: torch.einsum(f"bi,bj->{targ}", x, delta) for n, (x, delta) in transformed_factors.items()}
 
         info_dict = {}
         idx = 0
@@ -218,7 +237,9 @@ class MEND(EditableModel):
             info_dict[f"grad/true_std{idx}"] = p.grad.std().item()
             info_dict[f"grad/pseudo_std{idx}"] = mean_grads[n].std().item()
             info_dict[f"grad/diff{idx}"] = (p.grad - mean_grads[n]).norm(2).item()
-            info_dict[f"grad/cos{idx}"] = F.cosine_similarity(p.grad.reshape(-1), mean_grads[n].reshape(-1), dim=0).item()
+            info_dict[f"grad/cos{idx}"] = F.cosine_similarity(
+                p.grad.reshape(-1), mean_grads[n].reshape(-1), dim=0
+            ).item()
             idx += 1
 
         self.model.zero_grad()
@@ -228,7 +249,7 @@ class MEND(EditableModel):
 
         edited_model = self.model
         if not isinstance(edited_model, higher.patch._MonkeyPatchBase):
-            edited_model = make_functional(edited_model, in_place=True)
+            edited_model = make_functional(edited_model, ) # ! Leo: original argument `in_place=True`
 
         new_params = []
         for n, p in edited_model.named_parameters():
@@ -247,7 +268,7 @@ class MEND(EditableModel):
         return MEND(edited_model, self.config, self.model_constructor, self.mend, edit_lrs=self.edit_lrs), info_dict
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import types
 
     model = transformers.GPT2LMHeadModel.from_pretrained("gpt2")

@@ -76,8 +76,8 @@ class BaseTrainer:
                 wandb_name += f" - {self.config.ref}"
             LOG.info(f"Writing wandb run \"{wandb_name}\" to {wandb_dir}")
             wandb.init(
-                project="efk",
-                entity="patchable-lm",
+                project="mend",
+                entity="leo-liuzy",
                 config=utils.flatten_dict(self.config),
                 name=wandb_name,
                 dir=wandb_dir,

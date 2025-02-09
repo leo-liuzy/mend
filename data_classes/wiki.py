@@ -29,6 +29,7 @@ class GenDataset(Dataset):
     def __init__(self, split: str, tokenizer, config, edit_path: str,
                  pct: int = 10, max_length: int = 200):
         version = 'wikitext-103-raw-v1'
+        # version = 'wikitext-2-raw-v1'
         split_str = f'{split}[:{pct}%]' if split == "train" else split
         LOG.info(f"Loading wikitext version {version}, split {split_str}")
         base_samples = load_dataset(
@@ -73,9 +74,9 @@ class GenDataset(Dataset):
             edit_batch = [self.edit_samples["completions"][idx] for idx in edit_idxs]
             loc_batch = [self.base_samples[idx % len(self.base_samples)] for idx in loc_idxs]
 
-            edit_toks = self.tok(edit_batch, padding=True, return_tensors="pt")
-            loc_toks = self.tok(loc_batch, padding=True, return_tensors="pt",
-                                truncation=self.config.data.wiki_webtext, max_length=self.max_length)
+            edit_toks = self.tok(edit_batch, padding=True, return_tensors="pt",)
+            # ! Leo: original arg `truncation=self.config.data.wiki_webtext`
+            loc_toks = self.tok(loc_batch, padding=True, return_tensors="pt", truncation=self.config.data.wiki_webtext, max_length=self.max_length,)
 
             edit_inner = {**edit_toks}
             edit_inner["labels"] = self.get_edit_labels(edit_toks["input_ids"])

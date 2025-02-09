@@ -24,15 +24,16 @@ def shift_targets(config):
 
 
 def scr():
-    if os.path.exists("/scr-ssd"):
-        scr_dir = "/scr-ssd/" + getpass.getuser()
-    else:
-        scr_dir = "/scr/" + getpass.getuser()
+    return "/home/zliu/shared_resources"
+    # if os.path.exists("/scr-ssd"):
+    #     scr_dir = "/scr-ssd/" + getpass.getuser()
+    # else:
+    #     scr_dir = "/scr/" + getpass.getuser()
 
-    if not os.path.exists(scr_dir):
-        os.makedirs(scr_dir)
+    # if not os.path.exists(scr_dir):
+    #     os.makedirs(scr_dir)
 
-    return scr_dir
+    # return scr_dir
 
 
 def uuid(digits=4):
