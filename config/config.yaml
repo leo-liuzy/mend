@@ -37,6 +37,8 @@ eval_only: False
 half: False
 save: False
 
+l_e_data: rephrase
+
 model:
   pt: null
 

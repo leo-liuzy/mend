@@ -221,8 +221,13 @@ class EditTrainer(BaseTrainer):
         with torch.set_grad_enabled(training):
             # Editing loss
             # ! original line: `post_edit_logits = edited_model(**batch["edit_outer"])`
-            post_edit_logits = edited_model(input_ids=batch["edit_outer"]["input_ids"], attention_mask=batch["edit_outer"]["attention_mask"])
-            l_edit = self.model.edit_loss_fn(post_edit_logits, batch["edit_outer"]["labels"])["nll"]
+            if self.config.l_e_data == "rephrase":
+                post_edit_logits = edited_model(input_ids=batch["edit_outer"]["input_ids"], attention_mask=batch["edit_outer"]["attention_mask"])
+                l_edit = self.model.edit_loss_fn(post_edit_logits, batch["edit_outer"]["labels"])["nll"]
+            else:
+                assert self.config.l_e_data == "source"
+                post_edit_logits = edited_model(input_ids=batch["edit_inner"]["input_ids"], attention_mask=batch["edit_inner"]["attention_mask"])
+                l_edit = self.model.edit_loss_fn(post_edit_logits, batch["edit_inner"]["labels"])["nll"]
 
             # Locality loss
             # ! original line: `post_base_logits = edited_model(**batch["loc"])`
@@ -239,7 +244,11 @@ class EditTrainer(BaseTrainer):
         l_total_edit = l_total_edit.detach()
         # Collect some useful metrics
         with torch.no_grad():
-            post_edit_dict = self.model.edit_loss_fn(post_edit_logits, batch["edit_outer"]["labels"])
+            if self.config.l_e_data == "rephrase":
+                post_edit_dict = self.model.edit_loss_fn(post_edit_logits, batch["edit_outer"]["labels"])
+            else:
+                assert self.config.l_e_data == "source"
+                post_edit_dict = self.model.edit_loss_fn(post_edit_logits, batch["edit_inner"]["labels"])
             del post_edit_logits
             post_loc_dict = self.model.loc_loss_fn(post_base_logits, batch["loc"]["labels"])
             del post_base_logits
@@ -315,7 +324,7 @@ class EditTrainer(BaseTrainer):
         elapsed = (time.time() - start_time) / (step + 1)
         prog = f"{step+1}/{steps}".ljust(20)
         acc = f"{stats['edit/acc_val']:<12.5f}"
-        if self.config.task in ["fc", "qa"]:
+        if self.config.task in ["fc", "qa", "zsre"]:
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"
             draw_diff = f"{stats['acc/pre_val']-stats['acc/post_val']:<12.5f}"
