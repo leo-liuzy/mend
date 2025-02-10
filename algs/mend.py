@@ -5,7 +5,15 @@ import copy
 import transformers
 import higher
 import logging
-from higher.patch import monkeypatch as make_functional
+# from higher.patch import monkeypatch as make_functional
+from higher.patch import (
+    _MonkeyPatchBase,
+    _torch,
+    _typing,
+    _utils,
+    buffer_sync,
+    make_functional,
+)
 from collections import defaultdict
 
 from editable_model import EditableModel
@@ -251,7 +259,9 @@ class MEND(EditableModel):
 
         edited_model = self.model
         if not isinstance(edited_model, higher.patch._MonkeyPatchBase):
-            edited_model = make_functional(edited_model, ) # ! Leo: original argument `in_place=True`
+            # ! Leo: migrate this from EasyEdit
+            edited_model = monkeypatch(edited_model, in_place=True)
+            # edited_model = make_functional(edited_model, ) # ! Leo: original argument `in_place=True`
 
         new_params = []
         for n, p in edited_model.named_parameters():
@@ -268,6 +278,59 @@ class MEND(EditableModel):
             edited_model = new_model
 
         return MEND(edited_model, self.config, self.model_constructor, self.mend, edit_lrs=self.edit_lrs), info_dict
+
+
+def monkeypatch(
+    module: _torch.nn.Module,
+    device: _typing.Optional[_torch.device] = None,
+    copy_initial_weights: bool = True,
+    track_higher_grads: bool = True,
+    in_place: bool = False,
+) -> _MonkeyPatchBase:
+    r"""Create a monkey-patched stateless version of a module.
+    This function produces a monkey-patched version of a module, and returns a
+    copy of its parameters for use as fast weights. Where the original module
+    or any of its submodules have state (e.g. batch norm), this will be copied
+    too, but further updates (e.g. during inner loop training) will cause these
+    to diverge without changing the state of the original module.
+    Args:
+        module: a ``torch.nn.Module`` subclass instance.
+        device (optional): a device to cast the fast weights and state to.
+        copy_initial_weights: if True, the weights of the patched module are
+            copied to form the initial weights of the patched module, and thus
+            are not part of the gradient tape when unrolling the patched module.
+            If this is set to False, the actual module weights will be the
+            initial weights of the patched module. This is useful when doing
+            MAML, for example.
+        track_higher_grads: if True, during unrolled optimization the graph be
+            retained, and the fast weights will bear grad funcs, so as to permit
+            backpropagation through the optimization process. Setting this to
+            False allows ``monkeypatch`` to be used in "test mode", without
+            potentially tracking higher order gradients. This can be useful when
+            running the training loop at test time, e.g. in k-shot learning
+            experiments, without incurring a significant memory overhead.
+    Returns:
+        ``fmodule``: a "stateless" version of the original module, for which calls
+        to forward take the additional kwarg-only parameter ``params``, which
+        should be a list of torch tensors requiring gradients, ideally
+        provided by this function (see below) or by an update step from one
+        of the optimizers in ``higher.optim``.
+    """
+
+    def encapsulator(fmodule: _MonkeyPatchBase, module: _torch.nn.Module) -> None:
+        if copy_initial_weights and not in_place:
+            params = _utils.get_func_params(module, device=device)
+        elif in_place:
+            params = [p if device is None else p.to(device) for p in module.parameters()]
+        else:  # Standard behavior
+            params = [p.clone() if device is None else p.clone().to(device) for p in module.parameters()]
+        buffer_sync(module, fmodule, device)
+        fmodule.update_params(params)
+
+    fmodule = make_functional(module, encapsulator=encapsulator)
+    fmodule.track_higher_grads = track_higher_grads
+
+    return fmodule
 
 
 if __name__ == "__main__":

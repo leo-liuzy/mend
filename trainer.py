@@ -233,13 +233,18 @@ class EditTrainer(BaseTrainer):
         l_total_edit = self.config.cedit * l_edit + self.config.cloc * l_loc
 
         if training:
-            safe_backward(l_total_edit, self.model.outer_parameters(), self.config.accumulate_bs)
-
+            safe_backward(l_total_edit, self.model.outer_parameters(), self.config.accumulate_bs, allow_unused=True)
+        
+        # ! Leo: we no longer need l_total_edit for gradient
+        l_total_edit = l_total_edit.detach()
         # Collect some useful metrics
         with torch.no_grad():
             post_edit_dict = self.model.edit_loss_fn(post_edit_logits, batch["edit_outer"]["labels"])
+            del post_edit_logits
             post_loc_dict = self.model.loc_loss_fn(post_base_logits, batch["loc"]["labels"])
+            del post_base_logits
             pre_loc_dict = self.model.loc_loss_fn(base_logits, batch["loc"]["labels"])
+            del base_logits
 
         info_dict = {}
         info_dict['loss/edit'] = l_edit.item()
@@ -267,6 +272,8 @@ class EditTrainer(BaseTrainer):
             if training:
                 safe_backward(l_base, self.model.outer_parameters(), self.config.accumulate_bs, allow_unused=True)
 
+            # ! Leo: we no longer need l_total_edit for gradient
+            l_base = l_base.detach()
             info_dict['loss/base'] = l_base.item()
             info_dict['nll/original'] = original_loc_dict["nll"].item()
             info_dict['acc/original'] = original_loc_dict["acc"].item()
