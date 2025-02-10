@@ -210,7 +210,8 @@ class EditTrainer(BaseTrainer):
         self.original_model.train(training)
 
         with torch.no_grad():
-            base_logits = self.model(**batch["loc"])
+            # ! original line: `base_logits = self.model(**batch["loc"])`
+            base_logits = self.model(input_ids=batch["loc"]["input_ids"], attention_mask=batch["loc"]["attention_mask"])
 
         # Do the edit
         start = time.time()
@@ -219,11 +220,13 @@ class EditTrainer(BaseTrainer):
 
         with torch.set_grad_enabled(training):
             # Editing loss
-            post_edit_logits = edited_model(**batch["edit_outer"])
+            # ! original line: `post_edit_logits = edited_model(**batch["edit_outer"])`
+            post_edit_logits = edited_model(input_ids=batch["edit_outer"]["input_ids"], attention_mask=batch["edit_outer"]["attention_mask"])
             l_edit = self.model.edit_loss_fn(post_edit_logits, batch["edit_outer"]["labels"])["nll"]
 
             # Locality loss
-            post_base_logits = edited_model(**batch["loc"])
+            # ! original line: `post_base_logits = edited_model(**batch["loc"])`
+            post_base_logits = edited_model(input_ids=batch["loc"]["input_ids"], attention_mask=batch["loc"]["attention_mask"])
             kl_mask = batch["loc"].get("decoder_attention_mask", batch["loc"]["attention_mask"])
             l_loc = kl_loc_loss(base_logits.detach(), post_base_logits, mask=kl_mask)
 

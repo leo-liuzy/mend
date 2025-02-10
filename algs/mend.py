@@ -200,7 +200,9 @@ class MEND(EditableModel):
         return list(self.mend.parameters()) + [self.edit_lrs]
 
     def edit(self, batch, condition=None, detach_history=False):
-        outputs = _logits(self.model(**batch))
+        # ! original line: `outputs = _logits(self.model(**batch))`
+        outputs = _logits(self.model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"]))
+        
         loss = self.edit_loss_fn(outputs, batch["labels"])["nll"]
 
         names = set([n for n, p in self.model.named_parameters()])

@@ -5,26 +5,19 @@ from utils import EditBatchSampler, dict_to
 import torch
 from transformers import BartTokenizerFast, BartTokenizer
 import logging
-import typing
-import json
 
 LOG = logging.getLogger(__name__)
 
 
-class ZsreDataset(Dataset):
-    """
-    ! Leo: adding support for running zsre with Decoder-only model
-
-    Args:
-        Dataset (_type_): _description_
-    """
+class Seq2SeqAugmentedKILT(Dataset):
     def __init__(
         self,
         tokenizer,
         data_path,
         config,
-        size: typing.Optional[int] = None,
         max_length=32,
+        return_view=False,
+        all_views=False,
     ):
         super().__init__()
         self.tok = tokenizer
@@ -44,7 +37,9 @@ class ZsreDataset(Dataset):
                     self.data.append(extracted)
 
         self.max_length = max_length
-        if self.config.data.zsre_nq: # ! Leo: original if-condition: `and "train" not in data_path`
+        self.all_views = all_views
+        self.return_view = return_view
+        if self.config.data.zsre_nq and "train" not in data_path:
             self.use_nq = True
             LOG.info("** Using natural questions for zsre base samples **")
             from data_classes.nq import NQDataset
@@ -52,6 +47,9 @@ class ZsreDataset(Dataset):
                                 tokenizer, config)
         else:
             self.use_nq = False
+
+    def is_bart(self):
+        return isinstance(self.tok, BartTokenizer) or isinstance(self.tok, BartTokenizerFast)
 
     def __len__(self):
         return len(self.data)
@@ -76,27 +74,11 @@ class ZsreDataset(Dataset):
 
     def collate_fn(self, batch):
         src = [b["src"] for b in batch]
-        
         ne = self.config.data.n_edits
-        """ 
-        ! original line
         trg = (
             [b["answers"][0] for b in batch[:-ne]] +
             [b["alt"] for b in batch[-ne:]]
         )
-        """
-        trg = (
-            [b["answers"][0] for b in batch[:-ne]] +
-            [b["alt"] for b in batch[-ne:]]
-        )
-        
-        
-        trg = [("" if len(trg_) != 0 and trg_[0] == " " else " ") + trg_ for trg_ in trg]
-        src = [src_ + trg_ for src_, trg_ in zip(src, trg)]
-        
-        rephrase = [b["rephrase"] for b in batch]
-        rephrase = [rephrase_ + trg_ for rephrase_, trg_ in zip(rephrase, trg)]
-        
 
         batches = {
             f"{k1}_{k2}": v2
@@ -104,18 +86,19 @@ class ZsreDataset(Dataset):
                 "src": src,
                 "trg": trg,
                 "cond": [b["cond"] for b in batch[-ne:]],
-                "rephrase": rephrase[-ne:],
+                "rephrase": [b["rephrase"] for b in batch[-ne:]],
             }.items()
             for k2, v2 in self.tok(
                 v1,
                 return_tensors="pt",
                 padding=True,
-                add_special_tokens=k1 == "src",
                 max_length=self.max_length,
                 truncation=True,
             ).items()
         }
 
+        if self.is_bart():  # For consistency with Cao et al
+            batches["trg_input_ids"][:, 0] = self.tok.eos_token_id
         batches["raw"] = batch
         return batches
 
@@ -138,25 +121,25 @@ class ZsreDataset(Dataset):
             toks = self.collate_fn([self[idx] for idx in idxs])
 
             ne = self.config.data.n_edits
-            edit_labels = self.get_edit_labels(toks["trg_input_ids"][-ne:])
-            label_length = edit_labels.size(1)
+            edit_decoder_inputs = toks["trg_input_ids"][-ne:]
+            edit_labels = self.get_edit_labels(edit_decoder_inputs)
+            edit_attention_mask = toks["trg_attention_mask"][-ne:]
 
             edit_inner = {}
             edit_inner["input_ids"] = toks["src_input_ids"][-ne:]
             edit_inner["attention_mask"] = toks["src_attention_mask"][-ne:]
+            if self.is_bart():
+                edit_inner["decoder_input_ids"] = edit_decoder_inputs
+                edit_inner["decoder_attention_mask"] = edit_attention_mask
             edit_inner["labels"] = edit_labels
-            assert label_length <= edit_inner["input_ids"].size(1)
 
             if self.config.data.rephrase:
                 edit_outer = {}
                 edit_outer["input_ids"] = toks["rephrase_input_ids"]
                 edit_outer["attention_mask"] = toks["rephrase_attention_mask"]
-                rephrase_length = edit_outer["input_ids"].size(1)
-                # this is bc rephrase_length might be shorter than src_length
-                if label_length > rephrase_length:
-                    assert (edit_labels[:, :label_length-rephrase_length] == -100).all()
-                    edit_labels = edit_labels[:, -rephrase_length:]
-                
+                if self.is_bart():
+                    edit_outer["decoder_input_ids"] = edit_decoder_inputs
+                    edit_outer["decoder_attention_mask"] = edit_attention_mask
                 edit_outer["labels"] = edit_labels
             else:
                 edit_outer = edit_inner
@@ -166,15 +149,19 @@ class ZsreDataset(Dataset):
                 batch = [self.nq[idx] for idx in loc_idxs]
                 questions = [b[0] for b in batch]
                 answers = [b[1] for b in batch]
-                answers = [("" if answer[0] == " " else " ") + answer for answer in answers]
-                questions = [q + a for (q, a) in zip(questions, answers) ]
-                
                 loc = dict(self.tok(questions, return_tensors="pt", padding=True, max_length=self.max_length, truncation=True))
-                trg_toks = dict(self.tok(answers, return_tensors="pt", padding=True, max_length=self.max_length, truncation=True, add_special_tokens=False))
+                trg_toks = dict(self.tok(answers, return_tensors="pt", padding=True, max_length=self.max_length, truncation=True))
+                if self.is_bart():
+                    trg_toks["input_ids"][:, 0] = self.tok.eos_token_id
+                    loc["decoder_input_ids"] = trg_toks["input_ids"]
+                loc["decoder_attention_mask"] = trg_toks["attention_mask"]
                 loc["labels"] = self.get_edit_labels(trg_toks["input_ids"])
             else:
                 loc["input_ids"] = toks["src_input_ids"][:-ne]
                 loc["attention_mask"] = toks["src_attention_mask"][:-ne]
+                if self.is_bart():
+                    loc["decoder_input_ids"] = toks["trg_input_ids"][:-ne]
+                loc["decoder_attention_mask"] = toks["trg_attention_mask"][:-ne]
                 loc["labels"] = self.get_edit_labels(toks["trg_input_ids"][:-ne])
 
             cond = {k[5:]: v for k, v in toks.items() if k.startswith("cond")}

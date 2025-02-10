@@ -17,7 +17,7 @@ cedit: 0.1
 cloc: 1.0
 cbase: 1.0
 val_steps: 500
-device: cuda
+device: cuda:0
 base_loss: distill
 oracle: False
 train: True

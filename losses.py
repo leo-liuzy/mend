@@ -46,9 +46,17 @@ def multiclass_log_probs(pred, targ, shift=True):
 
     pred = pred.clone()
     targ = targ.clone()
+        
+        
     if shift and pred.dim() == 3:  # Dealing with sequences
+        # ! Leo: the following if-condition is to deal with CLM on the input
+        if pred.size(1) == targ.size(1):
+            targ = targ[:, 1:]
         pred = pred[:, :-1]  # Remove last prediction in sequence
-        targ = targ[:, 1:]  # Shift to align predictions and targets
+        
+        # ! Leo added
+        pred = pred[:, -targ.size(1) :]
+        # ! original line: `targ = targ[:, 1:]`  # Shift to align predictions and targets
 
     mask = targ != -100
     targ[~mask] = NULL_TOKEN  # Can be any valid token, since we'll throw them out

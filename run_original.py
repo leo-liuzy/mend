@@ -53,11 +53,11 @@ def run(config):
         train_set = BinaryAugmentedKILT(tokenizer, f"{base_dir}/data/fever/fever-train-kilt.jsonl", config)
         val_set = BinaryAugmentedKILT(tokenizer, f"{base_dir}/data/fever/fever-dev-kilt.jsonl", config)
     elif config.task == "qa" or config.task == "zsre":
-        from data_classes.zsre import ZsreDataset
+        from data_classes.zsre_original import Seq2SeqAugmentedKILT
 
-        train_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl",
+        train_set = Seq2SeqAugmentedKILT(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl",
                                          config)
-        val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl",
+        val_set = Seq2SeqAugmentedKILT(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl",
                                        config)
     else:
         raise ValueError(f"Unrecognized task {config.task}")
