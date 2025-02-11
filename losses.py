@@ -41,7 +41,7 @@ def binary_log_probs(pred, targ):
     }
 
 
-def multiclass_log_probs(pred, targ, shift=True):
+def multiclass_log_probs(pred, targ, shift=True, exact_match=True):
     NULL_TOKEN = 0  # a placeholder used for masked target locations
 
     pred = pred.clone()
@@ -62,12 +62,19 @@ def multiclass_log_probs(pred, targ, shift=True):
     targ[~mask] = NULL_TOKEN  # Can be any valid token, since we'll throw them out
     unmasked_log_probs = pred.log_softmax(-1).gather(-1, targ.unsqueeze(-1)).squeeze(-1)
 
-    pred_ids = pred.argmax(-1).masked_fill(~mask, NULL_TOKEN)
-    correct = pred_ids == targ
-    if pred.dim() == 3:
-        correct = (pred_ids == targ).all(-1)  # We want to get the whole sequence right
-    acc = correct.float().mean()
-
+    if exact_match:
+        pred_ids = pred.argmax(-1).masked_fill(~mask, NULL_TOKEN)
+        correct = pred_ids == targ
+        if pred.dim() == 3:
+            correct = (pred_ids == targ).all(-1)  # We want to get the whole sequence right
+        acc = correct.float().mean()
+    else:
+        pred_ids = pred.argmax(-1).masked_fill(~mask, NULL_TOKEN)
+        correct = pred_ids == targ
+        correct = correct & mask
+        num_non_padding = mask.sum().float().item()
+        acc = correct.sum() / num_non_padding
+        
     n_tokens = mask.float().sum()
     log_prob = (unmasked_log_probs * mask.float()).sum() / n_tokens
     prob = (unmasked_log_probs.exp() * mask.float()).sum() / n_tokens
@@ -80,7 +87,7 @@ def multiclass_log_probs(pred, targ, shift=True):
     }
 
 
-def masked_log_probs(pred, targ, shift=True):
+def masked_log_probs(pred, targ, shift=True, exact_match=True):
     pred = pred.to(torch.float32)
 
     if not (pred.dim() == 2 or pred.dim() == 3):
@@ -89,4 +96,4 @@ def masked_log_probs(pred, targ, shift=True):
     if pred.shape[-1] == 1:
         return binary_log_probs(pred, targ)
     else:
-        return multiclass_log_probs(pred, targ, shift=shift)
+        return multiclass_log_probs(pred, targ, shift=shift, exact_match=exact_match)

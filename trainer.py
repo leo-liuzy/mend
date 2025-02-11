@@ -62,7 +62,7 @@ class BaseTrainer:
             json.dump(OmegaConf.to_container(config), f)
 
         model_dir = os.path.join(os.getcwd(), 'models')
-        if not (self.config.debug and not self.config.save):
+        if not (self.config.debug and not self.config.save) and not config.eval_only:
             os.makedirs(model_dir)
         run_date = os.getcwd().split('/')[-1]
         self.run_date = run_date

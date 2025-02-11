@@ -12,8 +12,8 @@ class EditableModel(nn.Module):
         self.config = config
         self.model_constructor = model_constructor
 
-        def _edit_loss_fn(pred, targ):
-            return masked_log_probs(pred, targ, shift=shift_targets(self.config))
+        def _edit_loss_fn(pred, targ, exact_match=True):
+            return masked_log_probs(pred, targ, shift=shift_targets(self.config), exact_match=exact_match)
         self.edit_loss_fn = _edit_loss_fn
         self.loc_loss_fn = _edit_loss_fn
 

@@ -38,6 +38,8 @@ half: False
 save: False
 
 l_e_data: rephrase
+edit_loss: p(y|x)
+edit_input: question
 
 model:
   pt: null
@@ -54,6 +56,10 @@ eval:
   verbose: True
   log_interval: 100
   final_eval: True
+
+generation:
+  max_new_tokens: 20
+  save_dir: 
 
 hydra:
   run:

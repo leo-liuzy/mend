@@ -55,10 +55,8 @@ def run(config):
     elif config.task == "qa" or config.task == "zsre":
         from data_classes.zsre import ZsreDataset
 
-        train_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl",
-                                         config)
-        val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl",
-                                       config)
+        train_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config)
+        val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config)
     else:
         raise ValueError(f"Unrecognized task {config.task}")
 
