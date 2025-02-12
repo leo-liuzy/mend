@@ -14,6 +14,35 @@ import math
 LOG = logging.getLogger(__name__)
 
 
+from enum import Enum
+
+
+class StrEnum(str, Enum):
+    """
+    This is equivalent to Python's :class:`enum.StrEnum` since version 3.11.
+    We include this here for compatibility with older version of Python.
+    """
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return f"'{str(self)}'"
+
+
+class EditLoss(StrEnum):
+    sft = "sft"
+
+    clm = "clm"
+    
+class EditInput(StrEnum):
+    question = "question"
+
+    two_doc = "2doc"
+    
+    single_doc = "1doc"
+    
+
 def _inner_params(named_parameters, inner_names):
     param_dict = dict(named_parameters)
     return [(n, param_dict[n]) for n in inner_names]
@@ -269,3 +298,4 @@ if __name__ == '__main__':
     for d in data:
         stopper.update(*d)
         print(stopper.current_iter, stopper.should_stop(), stopper.best_iter, d[1]["loss/edit"])
+

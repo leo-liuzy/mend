@@ -47,6 +47,7 @@ model:
 data:
   path: null
   rephrase: true
+  musique_propagation_only: false
   zsre_nq: true
   nq_path: ${hydra:runtime.cwd}/data/nq
   wiki_webtext: true

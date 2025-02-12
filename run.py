@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import utils
 
-
+from knowledge_propagation.utils import vars
 from trainer import EditTrainer
 import models
 
@@ -57,9 +57,14 @@ def run(config):
 
         train_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config)
         val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config)
+    elif config.task == "qa" or config.task == "musique":
+        from data_classes.musique import MusiqueDataset
+
+        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
+        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
     else:
         raise ValueError(f"Unrecognized task {config.task}")
-
+    # train_set[0]
     alg_module = importlib.import_module(f"algs.{config.alg}")
     LOG.info(f"Loading class {config.alg.upper()} from module {alg_module}")
     AlgClass = getattr(alg_module, config.alg.upper())

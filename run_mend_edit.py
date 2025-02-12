@@ -2,7 +2,6 @@ import copy
 import importlib
 import logging
 import random
-from enum import Enum
 
 import os
 import hydra
@@ -20,33 +19,8 @@ from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
 
 import models
 import utils
+from utils import EditLoss, EditInput
 
-
-class StrEnum(str, Enum):
-    """
-    This is equivalent to Python's :class:`enum.StrEnum` since version 3.11.
-    We include this here for compatibility with older version of Python.
-    """
-
-    def __str__(self) -> str:
-        return self.value
-
-    def __repr__(self) -> str:
-        return f"'{str(self)}'"
-
-
-class EditLoss(StrEnum):
-    sft = "sft"
-
-    clm = "clm"
-    
-class EditInput(StrEnum):
-    question = "question"
-
-    two_doc = "2doc"
-    
-    single_doc = "1doc"
-    
 
 OmegaConf.register_new_resolver("uuid", lambda: utils.uuid())
     
@@ -130,6 +104,7 @@ def run(config):
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
+    # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
     # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = val_data[i]
         if config.task == "zsre":
