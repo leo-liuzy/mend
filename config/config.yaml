@@ -59,6 +59,7 @@ eval:
 
 generation:
   max_new_tokens: 20
+  prompt: urial # no
   save_dir: 
 
 hydra:

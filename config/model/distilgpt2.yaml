@@ -1,5 +1,5 @@
 # name: MYX4567/distilgpt2-finetuned-wikitext2
-name: /data2/shared_resources/models/gpt/distilgpt2-finetuned-wikitext2
+name: ${oc.env:SHARE_RES_DIR}/models/gpt/distilgpt2-finetuned-wikitext2
 class_name: GPT2LMHeadModel
 tokenizer_class: GPT2TokenizerFast
 tokenizer_name: distilgpt2

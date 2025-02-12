@@ -67,7 +67,7 @@ def run(config):
     LOG.info(f"\n\n{OmegaConf.to_yaml(config)}\n")
     base_dir = hydra.utils.get_original_cwd()
     LOG.info(f"Project base directory: {base_dir}")
-
+    
     random.seed(config.seed)
     np.random.seed(config.seed)
     torch.manual_seed(config.seed)
@@ -89,7 +89,11 @@ def run(config):
     
     hydra.core.global_hydra.GlobalHydra.instance().clear()
     with hydra.initialize(config_path="../KE-by-CP/configs/evaluator", version_base=None,):
-        inferencer_cfg = hydra.compose(config_name="base_null.yaml",)["inferencers"][0]
+        if config.generation.prompt == "urial":
+            inferencer_cfg = hydra.compose(config_name="base.yaml",)["inferencers"][0]
+        else:
+            assert config.generation.prompt == "no"
+            inferencer_cfg = hydra.compose(config_name="base_null.yaml",)["inferencers"][0]
         inferencer_cfg.max_new_tokens = config.generation.max_new_tokens
         
     hydra.core.global_hydra.GlobalHydra.instance().clear()
@@ -116,9 +120,11 @@ def run(config):
     else:
         assert config.task == "musique"
         if config.edit_input == EditInput.two_doc:
-            val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_c_small/examples-paragraph.jsonl")
+            # val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_c_small/examples-paragraph.jsonl")
+            val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl")
         else:
-            val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_c_small/examples-paragraph-seen.jsonl")
+            # val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_c_small/examples-paragraph-seen.jsonl")
+            val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev-seen.jsonl")
     
     all_results = []
     # trainer.validate(log=True)
@@ -224,7 +230,7 @@ def run(config):
         
         os.makedirs(save_dir, exist_ok=True)
         all_results.to_excel(
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}.xlsx",
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}.xlsx",
             index=False,
         )
         
