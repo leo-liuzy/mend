@@ -324,7 +324,7 @@ class EditTrainer(BaseTrainer):
         elapsed = (time.time() - start_time) / (step + 1)
         prog = f"{step+1}/{steps}".ljust(20)
         acc = f"{stats['edit/acc_val']:<12.5f}"
-        if self.config.task in ["fc", "qa", "zsre", "musique"]:
+        if self.config.task in ["fc", "qa", "zsre", "musique", "musique_dropout"]:
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"
             draw_diff = f"{stats['acc/pre_val']-stats['acc/post_val']:<12.5f}"

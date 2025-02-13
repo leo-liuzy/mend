@@ -9,6 +9,7 @@ import typing
 import json
 from knowledge_propagation.utils import io
 from utils import EditLoss, EditInput
+import numpy as np
 
 
 LOG = logging.getLogger(__name__)
@@ -72,8 +73,14 @@ class MusiqueDataset(Dataset):
             }
         else:
             propagation_question = self.data[item]["multi_hop_efficacy"][0]
+            texts = self.data[item]["texts"]
+            assert len(texts) == 2
+            if hasattr(self.config, "doc_dropout") and np.random.rand() < self.config.doc_dropout:
+                texts = np.random.choice(texts, size=1).tolist()
+                assert len(texts) == 1
+            
             output = {
-                "src": self.data[item]["texts"],
+                "src": texts,
                 "propagation_question": propagation_question["question"],
                 "propagation_answer": propagation_question["answer"],
             }
@@ -82,7 +89,6 @@ class MusiqueDataset(Dataset):
     def collate_fn(self, batch):
         src = [s for b in batch for s in b["src"]]
         
-        ne = self.config.data.n_edits
         """ 
         ! original line
         trg = (
@@ -132,35 +138,26 @@ class MusiqueDataset(Dataset):
         while True:
             edit_idxs, loc_idxs = sampler.sample(batch_size)
             assert len(edit_idxs) == 1
-            idxs = loc_idxs + edit_idxs
-            toks = self.collate_fn([self[idx] for idx in idxs])
+            # idxs = loc_idxs + edit_idxs
+            toks = self.collate_fn([self[idx] for idx in edit_idxs])
 
-            ne = self.config.data.n_edits
-            if not self.config.two_doc_at_same_time:
-                edit_labels = self.get_edit_labels(toks["src_input_ids"][-ne:])
-                label_length = edit_labels.size(1)
+            # ne = self.config.data.n_edits
+            edit_labels = self.get_edit_labels(toks["src_input_ids"])
+            label_length = edit_labels.size(1)
 
-                edit_inner = {}
-                edit_inner["input_ids"] = toks["src_input_ids"][-ne:]
-                edit_inner["attention_mask"] = toks["src_attention_mask"][-ne:]
-                edit_inner["labels"] = edit_labels
-            else:
-                edit_labels = self.get_edit_labels(toks["src_input_ids"][-ne*2:])
-                label_length = edit_labels.size(1)
-
-                edit_inner = {}
-                edit_inner["input_ids"] = toks["src_input_ids"][-ne*2:]
-                edit_inner["attention_mask"] = toks["src_attention_mask"][-ne*2:]
-                edit_inner["labels"] = edit_labels
+            edit_inner = {}
+            edit_inner["input_ids"] = toks["src_input_ids"]
+            edit_inner["attention_mask"] = toks["src_attention_mask"]
+            edit_inner["labels"] = edit_labels
                 
             assert label_length <= edit_inner["input_ids"].size(1)
 
             if self.config.data.rephrase:
                 # in this case, rephrase means using propogation questions for L_e
                 edit_outer = {}
-                edit_outer["input_ids"] = toks["propagation_question_input_ids"][-ne:]
-                edit_outer["attention_mask"] = toks["propagation_question_attention_mask"][-ne:]
-                edit_outer["labels"] = self.get_edit_labels(toks["propagation_answer_input_ids"][-ne:])
+                edit_outer["input_ids"] = toks["propagation_question_input_ids"]
+                edit_outer["attention_mask"] = toks["propagation_question_attention_mask"]
+                edit_outer["labels"] = self.get_edit_labels(toks["propagation_answer_input_ids"])
                 if self.config.data.musique_propagation_only:
                     edit_inner = edit_outer
             else:

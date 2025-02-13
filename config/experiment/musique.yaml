@@ -3,3 +3,4 @@
 task: musique
 dataset: musique
 cbase: 1.0
+two_doc_at_same_time: false
