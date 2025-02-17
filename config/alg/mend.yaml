@@ -1,10 +1,10 @@
 # @package _global_
 
 alg: mend
-lr: 1e-6
+lr: 1e-6 #  lr for learning the hypernetwork parameters in model
 train_base: False
 edit_lr: 1e-4
-lr_lr: 1e-4
+lr_lr: 1e-4 # lr for learning the edit_lrs in model
 mend:
   one_sided: False
   n_hidden: 1
