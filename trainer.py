@@ -93,7 +93,7 @@ class BaseTrainer:
         obj = {
             "model": self.model.state_dict(),
             "opt": self.opt.state_dict(),
- is not None else None,
+            "lr_opt": self.lr_opt.state_dict() if self.lr_opt is not None else None,
             "val_stats": stats,
             "start_time": self.start_time,
             "elapsed_time": time_delta_seconds(self.start_time),
