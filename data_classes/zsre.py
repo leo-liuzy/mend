@@ -42,7 +42,10 @@ class ZsreDataset(Dataset):
                 extracted = extract(d)
                 if len(extracted["alternatives"]) > 0 and len(extracted["filtered_rephrases"]) > 0:
                     self.data.append(extracted)
-
+        
+        if size is not None:
+            self.data = self.data[:size]
+            
         self.max_length = max_length
         if self.config.data.zsre_nq: # ! Leo: original if-condition: `and "train" not in data_path`
             self.use_nq = True
