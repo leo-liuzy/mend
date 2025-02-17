@@ -55,7 +55,7 @@ def run(config):
     elif config.task == "qa" or config.task == "zsre":
         from data_classes.zsre import ZsreDataset
 
-        train_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config)
+        train_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config, size=getattr(config, "train_size", None))
         val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config)
     elif config.task == "qa" or config.task == "musique":
         from data_classes.musique import MusiqueDataset
