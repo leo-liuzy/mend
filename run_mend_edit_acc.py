@@ -101,7 +101,6 @@ def run(config):
             val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev-seen.jsonl")
     
     all_results = []
-    edit_model_infos = []
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
@@ -113,17 +112,6 @@ def run(config):
             targets =  [(" " if datum["alt"][0] != " " else "") + datum["alt"]]
             sentences = [datum["src"] + targets[0]]
             test_queries = [{"question": datum["src"], "answer": datum["alt"]}]
-            
-            test_queries_str = [test_queries[0]["question"] + (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]]
-            acc_toks = tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=False)
-            acc_toks = utils.dict_to(acc_toks, config.device)
-            sft_labels = val_set.get_edit_labels(
-                tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False)["input_ids"]
-            ).to(config.device)
-            
-            clm_labels = val_set.get_edit_labels(
-                tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=False)["input_ids"]
-            ).to(config.device)
         else:
             assert config.task == "musique"
             test_queries = [
@@ -132,20 +120,6 @@ def run(config):
                     "answer": datum["multi_hop_efficacy"][0]["answer"]
                  }
             ]
-            test_queries_str = [test_queries[0]["question"] + (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]]
-            acc_toks = tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=False)
-            acc_toks = utils.dict_to(acc_toks, config.device)
-            sft_labels = val_set.get_edit_labels(
-                tokenizer(
-                    [
-                        (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]
-                    ], padding=True, return_tensors="pt", add_special_tokens=False)["input_ids"]
-            ).to(config.device)
-            
-            clm_labels = val_set.get_edit_labels(
-                tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=False)["input_ids"]
-            ).to(config.device)
-            
             if config.edit_input == EditInput.question:
                 question = datum["multi_hop_efficacy"][0]
                 targets =  [(" " if question["answer"][0] != " " else "") + question["answer"]]
@@ -154,7 +128,7 @@ def run(config):
                 assert config.edit_loss == EditLoss.clm, f"Input `{config.edit_input}` is only supported for CLM loss"
                 sentences = targets = datum["texts"]
                 
-        
+                
         # generate 
         inferencer = QAInferencer(
             inferencer_cfg,
@@ -179,70 +153,44 @@ def run(config):
         edit_inner = utils.dict_to(edit_inner, config.device)
         with torch.no_grad():
             pre_edit_logits = trainer.model(
-                input_ids=acc_toks["input_ids"],
-                attention_mask=acc_toks["attention_mask"]
+                input_ids=edit_inner["input_ids"], 
+                attention_mask=edit_inner["attention_mask"]
             )
-            pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
-            pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
-            pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
-            pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
+            pre_edit_dict = trainer.model.edit_loss_fn(pre_edit_logits, edit_inner["labels"], exact_match=config.edit_loss == EditLoss.sft)
             
-        if config.do_generation:
-            pre_result_df = eval_inferencer(
-                inferencer,
-                trainer.model.model,
-                tokenizer=tokenizer,
-                generation_cfg=generation_config,
-            )
-        else:
-            pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
+        pre_result_df = eval_inferencer(
+            inferencer,
+            trainer.model.model,
+            tokenizer=tokenizer,
+            generation_cfg=generation_config,
+        )
         assert len(pre_result_df) == 1
         
         pre_result_df.insert(0, "input", sentences[0])
         pre_result_df.insert(1, "stage", "pre-edit")
-        pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc EM", pre_edit_sft_em_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc PM", pre_edit_sft_pm_dict["acc"].item())
+        pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] acc", pre_edit_dict["acc"].item())
         all_results.append(pre_result_df)
             
         # edit the model with MEND
         edited_model, model_info = trainer.model.edit(edit_inner)
-        model_info["input"] = sentences[0]
-        model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
-        edit_model_infos.append(model_info)
         
         with torch.set_grad_enabled(not config.eval_only):
-            # post_edit_logits = edited_model(input_ids=edit_inner["input_ids"], attention_mask=edit_inner["attention_mask"])
-            # post_edit_dict = trainer.model.edit_loss_fn(post_edit_logits, edit_inner["labels"], exact_match=config.edit_loss == EditLoss.sft)
-            post_edit_logits = edited_model(
-                input_ids=acc_toks["input_ids"],
-                attention_mask=acc_toks["attention_mask"]
-            )
-            post_edit_sft_pm_dict = trainer.model.edit_loss_fn(post_edit_logits, sft_labels, exact_match=False)
-            post_edit_sft_em_dict = trainer.model.edit_loss_fn(post_edit_logits, sft_labels, exact_match=True)
-            post_edit_clm_pm_dict = trainer.model.edit_loss_fn(post_edit_logits, clm_labels, exact_match=False)
-            post_edit_clm_em_dict = trainer.model.edit_loss_fn(post_edit_logits, clm_labels, exact_match=True)
+            post_edit_logits = edited_model(input_ids=edit_inner["input_ids"], attention_mask=edit_inner["attention_mask"])
+            post_edit_dict = trainer.model.edit_loss_fn(post_edit_logits, edit_inner["labels"], exact_match=config.edit_loss == EditLoss.sft)
 
-        if config.do_generation:
-            post_result_df = eval_inferencer(
-                inferencer,
-                edited_model.model,
-                tokenizer=tokenizer,
-                generation_cfg=generation_config,
-            )
-        else:
-            post_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
+        
+        post_result_df = eval_inferencer(
+            inferencer,
+            edited_model.model,
+            tokenizer=tokenizer,
+            generation_cfg=generation_config,
+        )
         assert len(post_result_df) == 1
         del edited_model
         
         post_result_df.insert(0, "input", sentences[0])
         post_result_df.insert(1, "stage", "post-edit")
-        # post_result_df.insert(post_result_df.shape[-1], "[Q][A] acc", post_edit_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc EM", post_edit_clm_em_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc PM", post_edit_clm_pm_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc EM", post_edit_sft_em_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc PM", post_edit_sft_pm_dict["acc"].item())
+        post_result_df.insert(post_result_df.shape[-1], "[Q][A] acc", post_edit_dict["acc"].item())
         all_results.append(post_result_df)
     
     all_results = pd.concat(all_results)
@@ -257,13 +205,10 @@ def run(config):
         
         os.makedirs(save_dir, exist_ok=True)
         all_results.to_excel(
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen.xlsx",
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}.xlsx",
             index=False,
         )
-        io.dump_jsonlines(
-            edit_model_infos,
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_edit-model-infos.jsonl"
-        )
+        
     
 if __name__ == "__main__":
     run()
