@@ -12,6 +12,7 @@ import utils
 from knowledge_propagation.utils import vars
 from trainer import EditTrainer
 import models
+import transformers
 
 
 OmegaConf.register_new_resolver("uuid", lambda: utils.uuid())
@@ -25,7 +26,10 @@ LOG = logging.getLogger(__name__)
 def add_padding(tokenizer, model):
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     model.resize_token_embeddings(len(tokenizer))
-    model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
+    if not isinstance(model, transformers.LlamaForCausalLM):
+    #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
+    # else:
+        model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
 
 
 @hydra.main(config_path='config', config_name='config')
@@ -63,6 +67,7 @@ def run(config):
         train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
         val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
     elif config.task == "qa" or config.task == "musique_dropout":
+        add_padding(tokenizer, model)
         from data_classes.musique_dropout import MusiqueDataset
 
         train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)

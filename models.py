@@ -159,10 +159,10 @@ def get_tokenizer(config):
     tok_name = config.model.tokenizer_name if config.model.tokenizer_name is not None else config.model.name
     tokenizer = transformers.AutoTokenizer.from_pretrained(tok_name,)
     if isinstance(tokenizer, transformers.LlamaTokenizer) or "Llama" in tok_name:
-        tokenizer.pad_token_id = tokenizer.eos_token_id
+        # tokenizer.pad_token_id = tokenizer.eos_token_id
         tokenizer.padding_side = "left"
     elif isinstance(tokenizer, transformers.GPT2Tokenizer) or isinstance(tokenizer, transformers.GPT2TokenizerFast):
-        tokenizer.pad_token_id = tokenizer.eos_token_id
+        # tokenizer.pad_token_id = tokenizer.eos_token_id
         tokenizer.padding_side = "left"
     else:
         raise NotImplementedError(f"From Leo: tokenizer is out of scope `{tokenizer}`")

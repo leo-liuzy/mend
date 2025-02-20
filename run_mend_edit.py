@@ -30,10 +30,32 @@ LOG = logging.getLogger(__name__)
 
 
 def add_padding(tokenizer, model):
+    import transformers
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     model.resize_token_embeddings(len(tokenizer))
-    model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
+    if not isinstance(model, transformers.LlamaForCausalLM):
+    #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
+    # else:
+        model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
 
+def add_eos(tokenizer_output, tokenizer):
+    return {
+        k: torch.concat(
+            [
+                v, 
+                torch.full(
+                    (v.shape[0], 1), # shape of the constant tensor
+                    (
+                        1 
+                        if k == "attention_mask" else
+                        tokenizer.eos_token_id # this is to teach the model to end after outputing the answer.
+                    )
+                )
+            ], 
+            dim=-1
+        )
+        for k, v in tokenizer_output.items()
+    }
 
 @hydra.main(config_path='config', config_name='config')
 def run(config):
@@ -48,6 +70,7 @@ def run(config):
 
     model = models.get_model(config)
     tokenizer = models.get_tokenizer(config)
+    add_padding(tokenizer, model)
     
     from data_classes.zsre import ZsreDataset
 
@@ -164,15 +187,17 @@ def run(config):
         )
         
         if config.edit_loss == EditLoss.sft:
-            sentences_toks = tokenizer(sentences, padding=True, return_tensors="pt")
-            targets_toks = tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False)
+            sentences_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt"), tokenizer)
+            targets_toks = add_eos(tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer)
         else:
             assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
-            sentences_toks = targets_toks = tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=False)
+            sentences_toks = targets_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer)
         
         edit_inner = {
+            # "input_ids": torch.concat([sentences_toks["input_ids"], sentences_toks["input_ids"].flip(-1)], dim=-1),
             "input_ids": sentences_toks["input_ids"],
             "attention_mask": sentences_toks["attention_mask"],
+            # "labels": val_set.get_edit_labels(torch.concat([targets_toks["input_ids"], sentences_toks["input_ids"].flip(-1)], dim=-1))d,
             "labels": val_set.get_edit_labels(targets_toks["input_ids"]),
         }
         
@@ -256,10 +281,10 @@ def run(config):
         LOG.info(f"Saving to dir: {save_dir}")
         
         os.makedirs(save_dir, exist_ok=True)
-        # all_results.to_excel(
-        #     f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen.xlsx",
-        #     index=False,
-        # )
+        all_results.to_excel(
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen.xlsx",
+            index=False,
+        )
         io.dump_jsonlines(
             edit_model_infos,
             f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_edit-model-infos.jsonl"

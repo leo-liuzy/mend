@@ -23,13 +23,22 @@ n_val=1000
 task=musique
 # task=zsre
 # archive=2025-02-10_08-19-14_2641409766
-exp_dir_name="llama3.2-1B_on_zsre-14K"
+exp_dir_name="llama3.2-1B_on_zsre-full"
 archive=${name2id[$exp_dir_name]}
 # prompt=no
 prompt=no
 
 # sft(q_p, a_p)
-python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=False
+# python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-repPenalty/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True
+python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-repPenalty/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True
+
+
+exp_dir_name="llama3.2-1B_on_musiqueQonly"
+archive=${name2id[$exp_dir_name]}
+
+python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-repPenalty/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True
+
+# python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-debug/${task} val_steps=20 edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True
 
 # clm(q_p + a_p)
 # python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=question generation.prompt=${prompt} +do_generation=True

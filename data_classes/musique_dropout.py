@@ -41,7 +41,10 @@ class MusiqueDataset(Dataset):
             assert config.edit_input in [EditInput.single_doc, EditInput.question]
             self.n_doc_per_instance = 1
         
-        if self.config.two_doc_at_same_time:
+        if config.two_doc_at_same_time:
+            assert config.edit_input == EditInput.two_doc
+        
+        if config.edit_input == EditInput.two_doc:
             assert self.n_doc_per_instance == 2
         
         assert self.config.data.rephrase, "propogation question must be used."
@@ -62,6 +65,7 @@ class MusiqueDataset(Dataset):
 
     def __getitem__(self, item, seed=None):
         if not self.config.two_doc_at_same_time:
+            
             data_item = item // self.n_doc_per_instance
             doc_idx = item % self.n_doc_per_instance
             
@@ -104,7 +108,19 @@ class MusiqueDataset(Dataset):
         
 
         batches = {
-            f"{k1}_{k2}": v2
+            f"{k1}_{k2}": 
+                torch.concat(
+                    [
+                        v2, 
+                        torch.full(
+                            (v2.shape[0], 1), # shape of the constant tensor
+                            (
+                                1 
+                                if k2 == "attention_mask" else
+                                self.tok.eos_token_id # this is to teach the model to end after outputing the answer.
+                            )
+                        )
+                    ], dim=-1)
             for k1, v1 in {
                 "src": src,
                 "propagation_question": questions,
@@ -142,15 +158,17 @@ class MusiqueDataset(Dataset):
             toks = self.collate_fn([self[idx] for idx in edit_idxs])
 
             # ne = self.config.data.n_edits
-            edit_labels = self.get_edit_labels(toks["src_input_ids"])
-            label_length = edit_labels.size(1)
-
             edit_inner = {}
-            edit_inner["input_ids"] = toks["src_input_ids"]
-            edit_inner["attention_mask"] = toks["src_attention_mask"]
-            edit_inner["labels"] = edit_labels
+            if self.config.edit_input == EditInput.question:
+                edit_inner["input_ids"] = toks["propagation_question_input_ids"]
+                edit_inner["attention_mask"] = toks["propagation_question_attention_mask"]
+                edit_inner["labels"] = self.get_edit_labels(toks["propagation_answer_input_ids"])
+            else:
+                edit_inner["input_ids"] = toks["src_input_ids"]
+                edit_inner["attention_mask"] = toks["src_attention_mask"]
+                edit_inner["labels"] = self.get_edit_labels(toks["src_input_ids"])
                 
-            assert label_length <= edit_inner["input_ids"].size(1)
+            assert edit_inner["labels"].size(1) <= edit_inner["input_ids"].size(1)
 
             if self.config.data.rephrase:
                 # in this case, rephrase means using propogation questions for L_e
