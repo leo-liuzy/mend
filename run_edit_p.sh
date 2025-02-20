@@ -1,11 +1,11 @@
-export CUDA_VISIBLE_DEVICES=6
+export CUDA_VISIBLE_DEVICES=3
 
 n_val=1000
 task=musique
 # task=zsre
-archive=2025-02-12_20-39-47_2326231633
+archive=2025-02-12_21-32-59_3112383942
 
-exp_dir_name=llama3.2-1B_on_musique_p0.5 #
+exp_dir_name=llama3.2-1B_on_musique_p0.25 #
 # prompt=no
 prompt=no
 
