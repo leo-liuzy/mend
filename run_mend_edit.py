@@ -256,10 +256,10 @@ def run(config):
         LOG.info(f"Saving to dir: {save_dir}")
         
         os.makedirs(save_dir, exist_ok=True)
-        all_results.to_excel(
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen.xlsx",
-            index=False,
-        )
+        # all_results.to_excel(
+        #     f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen.xlsx",
+        #     index=False,
+        # )
         io.dump_jsonlines(
             edit_model_infos,
             f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_edit-model-infos.jsonl"
