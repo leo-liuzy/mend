@@ -178,6 +178,8 @@ def run(config):
                 sentences = targets = datum["texts"]
                 
         
+        
+        
         # generate 
         inferencer = QAInferencer(
             inferencer_cfg,
@@ -201,6 +203,16 @@ def run(config):
             "labels": val_set.get_edit_labels(targets_toks["input_ids"]),
         }
         
+        print("Input for EDIT: ")
+        print("["+tokenizer.decode(sentences_toks["input_ids"][0])+"]")
+        print("Label for EDIT: ")
+        print("["+tokenizer.decode(targets_toks["input_ids"][0])+"]")
+        print()
+        
+        print("Input for [Q][A] Accuracy: ")
+        print("["+tokenizer.decode(acc_toks["input_ids"][0])+"]")
+        print("SFT label:", "["+tokenizer.decode(sft_labels[0])+"]")
+        print("CLM label(before ShiftLeft):", "["+tokenizer.decode(clm_labels[0])+"]")
         edit_inner = utils.dict_to(edit_inner, config.device)
         with torch.no_grad():
             pre_edit_logits = trainer.model(

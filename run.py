@@ -58,7 +58,8 @@ def run(config):
         val_set = BinaryAugmentedKILT(tokenizer, f"{base_dir}/data/fever/fever-dev-kilt.jsonl", config)
     elif config.task == "qa" or config.task == "zsre":
         from data_classes.zsre import ZsreDataset
-
+        add_padding(tokenizer, model)
+        
         train_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config, size=getattr(config, "train_size", None))
         val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config)
     elif config.task == "qa" or config.task == "musique":
