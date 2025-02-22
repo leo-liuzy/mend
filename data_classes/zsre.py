@@ -102,7 +102,12 @@ class ZsreDataset(Dataset):
         
 
         batches = {
+<<<<<<< HEAD
             f"{k1}_{k2}": torch.concat(
+=======
+            f"{k1}_{k2}": 
+                torch.concat(
+>>>>>>> 54cec85bb158e5164d0be973b423b0022ff941c0
                     [
                         v2, 
                         torch.full(
