@@ -70,7 +70,10 @@ def add_padding(tokenizer, model):
     # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
 
-def add_eos(tokenizer_output, tokenizer):
+def add_eos(tokenizer_output, tokenizer, ignore=False):
+    
+    if ignore:
+        return tokenizer_output
     return {
         k: torch.concat(
             [
@@ -200,11 +203,13 @@ def run(config):
             test_queries_q_str = [test_queries[0]["question"]]
             test_queries_a_str = [test_queries[0]["answer"]]
             test_queries_str = [test_queries[0]["question"] + (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]]
-            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer)
+            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer, ignore=not config.add_eos)
             acc_toks = utils.dict_to(acc_toks, config.device)
             sft_labels = val_set.get_edit_labels(
                 add_eos(
-                    tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer
+                    tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), 
+                    tokenizer, 
+                    ignore=not config.add_eos
                 )["input_ids"]
             ).to(config.device)
             
@@ -220,7 +225,7 @@ def run(config):
             test_queries_q_str = [test_queries[0]["question"]]
             test_queries_a_str = [test_queries[0]["answer"]]
             test_queries_str = [test_queries[0]["question"] + (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]]
-            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer)
+            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer, ignore=not config.add_eos)
             # tokenizer(test_queries_str, padding=True, return_tensors="pt", )
             acc_toks = utils.dict_to(acc_toks, config.device)
             sft_labels = val_set.get_edit_labels(
@@ -229,7 +234,7 @@ def run(config):
                         [
                             (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
                         ], padding=True, return_tensors="pt", add_special_tokens=False), 
-                    tokenizer
+                    tokenizer, ignore=not config.add_eos
                 )["input_ids"]
             ).to(config.device)
             
@@ -245,11 +250,11 @@ def run(config):
                 
         
         if config.edit_loss == EditLoss.sft:
-            sentences_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt"), tokenizer)
-            targets_toks = add_eos(tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer)
+            sentences_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt"), tokenizer, ignore=not config.add_eos)
+            targets_toks = add_eos(tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer, ignore=not config.add_eos)
         else:
             assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
-            sentences_toks = targets_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer)
+            sentences_toks = targets_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer, ignore=not config.add_eos)
         
         edit_inner = {
             # "input_ids": torch.concat([sentences_toks["input_ids"], sentences_toks["input_ids"].flip(-1)], dim=-1),

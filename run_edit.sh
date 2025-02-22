@@ -21,7 +21,7 @@ declare -A name2id=(
 )
 
 n_val=1000
-task=zsre
+task=musique
 prompt=no
 # task=zsre
 # archive=2025-02-10_08-19-14_2641409766
