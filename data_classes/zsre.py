@@ -102,7 +102,19 @@ class ZsreDataset(Dataset):
         
 
         batches = {
-            f"{k1}_{k2}": v2
+            f"{k1}_{k2}": 
+                torch.concat(
+                    [
+                        v2, 
+                        torch.full(
+                            (v2.shape[0], 1), # shape of the constant tensor
+                            (
+                                1 
+                                if k2 == "attention_mask" else
+                                self.tok.eos_token_id # this is to teach the model to end after outputing the answer.
+                            )
+                        )
+                    ], dim=-1)
             for k1, v1 in {
                 "src": src,
                 "trg": trg,

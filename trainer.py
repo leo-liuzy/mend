@@ -123,7 +123,7 @@ class BaseTrainer:
             wandb.log(info_dict, step=step)
 
     def run(self):
-        averager = RunningStatAverager("train")
+        averager = RunningStatAverager("train", exclude=[])
         stopper = EarlyStopper(self.config.early_stop_patience, self.config.early_stop_key)
         self.global_iter = 0
         for global_iter in range(0, self.config.max_iters):
@@ -324,7 +324,7 @@ class EditTrainer(BaseTrainer):
         elapsed = (time.time() - start_time) / (step + 1)
         prog = f"{step+1}/{steps}".ljust(20)
         acc = f"{stats['edit/acc_val']:<12.5f}"
-        if self.config.task in ["fc", "qa", "zsre", "musique", "musique_dropout"]:
+        if self.config.task in ["fc", "qa", "zsre", "musique", "musique_dropout", "musique_dropout_better"]:
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"
             draw_diff = f"{stats['acc/pre_val']-stats['acc/post_val']:<12.5f}"

@@ -12,10 +12,16 @@ from omegaconf import OmegaConf
 from tqdm import tqdm
 
 from trainer import EditTrainer
-from knowledge_propagation.utils import io, vars
+from knowledge_propagation.utils import io, vars, extractor
 from knowledge_propagation.modules.inferencers import QAInferencer
 from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
+
+from knowledge_propagation.modules.evaluators import (
+    ExactMatchEvaluator,
+    RougeEvaluator,
+    OpenAIEvaluator,
+)
 
 import models
 import utils
@@ -28,6 +34,32 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s [%(filename)s:%(lineno)d
                     level=logging.INFO)
 LOG = logging.getLogger(__name__)
 
+
+em_evaluator = ExactMatchEvaluator()
+rouge_evaluator = RougeEvaluator()
+llm_evaluator = OpenAIEvaluator()
+
+def score_df(df):
+    em_per_example = em_evaluator.compute_metric(
+        predictions=df["predicted_answer"],
+        references=df["answer"],
+        use_aggregator=False,
+    )
+    rouge_per_example = rouge_evaluator.compute_metric(
+        predictions=df["predicted_answer"],
+        references=df["answer"],
+        use_aggregator=False,
+    )
+    llm_acc_per_example = llm_evaluator.compute_metric(
+        questions=df["question"],
+        predictions=df["predicted_answer"],
+        references=df["answer"],
+        use_aggregator=False,
+        rescale_to_one=True,
+    )
+        
+    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example, **llm_acc_per_example}))
+    return model_response_w_score
 
 def add_padding(tokenizer, model):
     import transformers
@@ -56,6 +88,33 @@ def add_eos(tokenizer_output, tokenizer):
         )
         for k, v in tokenizer_output.items()
     }
+
+
+def generate(context: str, answer: str, config, model, tokenizer, generation_config, ):
+    inputs = tokenizer([context], return_tensors="pt", padding=True,)
+    ctx_decoded = tokenizer.batch_decode(inputs["input_ids"])[0]
+    # inputs = utils.dict_to(inputs, config.device)
+    inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    print("Input for generation:", "["+ tokenizer.batch_decode(inputs["input_ids"])[0] +"]")
+    
+    generation_output = model.generate(
+        **inputs,
+        # input_ids = inputs["input_ids"],
+        # attention_mask = inputs["attention_mask"],
+        generation_config=generation_config,
+        pad_token_id=tokenizer.pad_token_id,
+        return_dict_in_generate=True,
+    )
+    generated_texts = tokenizer.batch_decode(generation_output.sequences, skip_special_tokens=False)
+    generated_texts = [t.replace(ctx_decoded.strip(), "") for t in generated_texts]
+    
+    model_response = pd.DataFrame([
+        {
+            "question": context, "answer": answer, "predicted_answer_idx": 0,
+            "predicted_answer": generated_texts[0], 
+        }
+    ])
+    return score_df(model_response)
 
 @hydra.main(config_path='config', config_name='config')
 def run(config):
@@ -111,7 +170,7 @@ def run(config):
     )
     
     trainer = EditTrainer(alg, config, train_set, val_set)
-    
+    print("Task: ", config.task)
     if config.task == "zsre":
         val_data = val_set
     else:
@@ -127,26 +186,29 @@ def run(config):
     edit_model_infos = []
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
+    assert config.eval_only
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
     # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
     # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = val_data[i]
         if config.task == "zsre":
             assert config.edit_input == EditInput.question
-            targets =  [(" " if datum["alt"][0] != " " else "") + datum["alt"]]
+            targets =  [(" " if datum["answers"][0][0] != " " else "") + datum["answers"][0]]
             sentences = [datum["src"] + targets[0]]
-            test_queries = [{"question": datum["src"], "answer": datum["alt"]}]
+            test_queries = [{"question": datum["src"], "answer": datum["answers"][0]}]
             
+            test_queries_q_str = [test_queries[0]["question"]]
+            test_queries_a_str = [test_queries[0]["answer"]]
             test_queries_str = [test_queries[0]["question"] + (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]]
-            acc_toks = tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=False)
+            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer)
             acc_toks = utils.dict_to(acc_toks, config.device)
             sft_labels = val_set.get_edit_labels(
-                tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False)["input_ids"]
+                add_eos(
+                    tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer
+                )["input_ids"]
             ).to(config.device)
             
-            clm_labels = val_set.get_edit_labels(
-                tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=False)["input_ids"]
-            ).to(config.device)
+            clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
         else:
             assert config.task == "musique"
             test_queries = [
@@ -155,19 +217,23 @@ def run(config):
                     "answer": datum["multi_hop_efficacy"][0]["answer"]
                  }
             ]
+            test_queries_q_str = [test_queries[0]["question"]]
+            test_queries_a_str = [test_queries[0]["answer"]]
             test_queries_str = [test_queries[0]["question"] + (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]]
-            acc_toks = tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=False)
+            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer)
+            # tokenizer(test_queries_str, padding=True, return_tensors="pt", )
             acc_toks = utils.dict_to(acc_toks, config.device)
             sft_labels = val_set.get_edit_labels(
-                tokenizer(
-                    [
-                        (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]
-                    ], padding=True, return_tensors="pt", add_special_tokens=False)["input_ids"]
+                add_eos(
+                    tokenizer(
+                        [
+                            (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
+                        ], padding=True, return_tensors="pt", add_special_tokens=False), 
+                    tokenizer
+                )["input_ids"]
             ).to(config.device)
             
-            clm_labels = val_set.get_edit_labels(
-                tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=False)["input_ids"]
-            ).to(config.device)
+            clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
             
             if config.edit_input == EditInput.question:
                 question = datum["multi_hop_efficacy"][0]
@@ -177,14 +243,6 @@ def run(config):
                 assert config.edit_loss == EditLoss.clm, f"Input `{config.edit_input}` is only supported for CLM loss"
                 sentences = targets = datum["texts"]
                 
-        
-        # generate 
-        inferencer = QAInferencer(
-            inferencer_cfg,
-            config.seed,
-            rag_model=None,
-            queries=test_queries,
-        )
         
         if config.edit_loss == EditLoss.sft:
             sentences_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt"), tokenizer)
@@ -201,24 +259,35 @@ def run(config):
             "labels": val_set.get_edit_labels(targets_toks["input_ids"]),
         }
         
+        print("Input for EDIT: ")
+        print("["+tokenizer.decode(sentences_toks["input_ids"][0])+"]")
+        print("Label for EDIT: ")
+        print("["+tokenizer.decode(targets_toks["input_ids"][0])+"]")
+        print()
+        
+        
         edit_inner = utils.dict_to(edit_inner, config.device)
+        
+        print("Input for [Q][A] Accuracy: ")
+        print("["+tokenizer.decode(acc_toks["input_ids"][0])+"]")
+        print("SFT label:", "["+tokenizer.decode(sft_labels[0])+"]")
+        print("CLM label(before ShiftLeft):", "["+tokenizer.decode(clm_labels[0])+"]")
+        print()
         with torch.no_grad():
+            
             pre_edit_logits = trainer.model(
                 input_ids=acc_toks["input_ids"],
                 attention_mask=acc_toks["attention_mask"]
             )
+            
             pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
             pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
             pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
             pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
             
         if config.do_generation:
-            pre_result_df = eval_inferencer(
-                inferencer,
-                trainer.model.model,
-                tokenizer=tokenizer,
-                generation_cfg=generation_config,
-            )
+            
+            pre_result_df = generate(test_queries_q_str[0], test_queries_a_str[0], config, trainer.model.model, tokenizer, generation_config)
         else:
             pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
         assert len(pre_result_df) == 1
@@ -250,12 +319,7 @@ def run(config):
             post_edit_clm_em_dict = trainer.model.edit_loss_fn(post_edit_logits, clm_labels, exact_match=True)
 
         if config.do_generation:
-            post_result_df = eval_inferencer(
-                inferencer,
-                edited_model.model,
-                tokenizer=tokenizer,
-                generation_cfg=generation_config,
-            )
+            post_result_df = generate(test_queries_q_str[0], test_queries_a_str[0], config, edited_model.model, tokenizer, generation_config)
         else:
             post_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
         assert len(post_result_df) == 1

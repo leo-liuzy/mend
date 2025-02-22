@@ -72,6 +72,12 @@ def run(config):
 
         train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
         val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+    elif config.task == "qa" or config.task == "musique_dropout_better":
+        add_padding(tokenizer, model)
+        from data_classes.musique_dropout_better import MusiqueDataset
+
+        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
+        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
     else:
         raise ValueError(f"Unrecognized task {config.task}")
     # train_set[0]

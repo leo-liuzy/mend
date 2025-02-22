@@ -7,7 +7,7 @@ from transformers import BartTokenizerFast, BartTokenizer
 import logging
 import typing
 import json
-from knowledge_propagation.utils import io
+from knowledge_propagation.utils import io, vars
 from utils import EditLoss, EditInput
 import numpy as np
 
@@ -47,6 +47,21 @@ class MusiqueDataset(Dataset):
         if config.edit_input == EditInput.two_doc:
             assert self.n_doc_per_instance == 2
         
+        if self.config.add_icl:
+            self.eos_token_id = self.tok("\n", add_special_tokens=False)["input_ids"][0]
+        else:
+            self.eos_token_id = self.tok.eos_token_id
+        
+        self.icl_prompt = "\n".join([
+            "Q: When did the simpsons first air on television?",
+            "A: December 17, 1989",
+            "Q: Who has more super bowl wins afc or nfc?",
+            "A: NFC",
+            "Q: Is the federal court the same as the supreme court?",
+            "A: No"
+        ])
+        
+        
         assert self.config.data.rephrase, "propogation question must be used."
         self.max_length = max_length
         if self.config.data.zsre_nq: # ! Leo: original if-condition: `and "train" not in data_path`
@@ -83,11 +98,18 @@ class MusiqueDataset(Dataset):
                 texts = np.random.choice(texts, size=1).tolist()
                 assert len(texts) == 1
             
-            output = {
-                "src": texts,
-                "propagation_question": propagation_question["question"],
-                "propagation_answer": propagation_question["answer"],
-            }
+            if self.config.add_icl:
+                output = {
+                    "src": texts,
+                    "propagation_question": self.icl_prompt + "\nQ: " + propagation_question["question"] + "\nA:",
+                    "propagation_answer": propagation_question["answer"],
+                }
+            else:
+                output = {
+                    "src": texts,
+                    "propagation_question": propagation_question["question"],
+                    "propagation_answer": propagation_question["answer"],
+                }
         return output
 
     def collate_fn(self, batch):
@@ -117,7 +139,7 @@ class MusiqueDataset(Dataset):
                             (
                                 1 
                                 if k2 == "attention_mask" else
-                                self.tok.eos_token_id # this is to teach the model to end after outputing the answer.
+                                self.eos_token_id # this is to teach the model to end after outputing the answer.
                             )
                         )
                     ], dim=-1)
