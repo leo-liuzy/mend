@@ -94,7 +94,7 @@ def add_eos(tokenizer_output, tokenizer, ignore=False):
 
 
 def generate(context: str, answer: str, config, model, tokenizer, generation_config, ):
-    inputs = tokenizer([context], return_tensors="pt", padding=True,)
+    inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"])[0]
     # inputs = utils.dict_to(inputs, config.device)
     inputs = {k: v.to(config.device) for k, v in inputs.items()}
