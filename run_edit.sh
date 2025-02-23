@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=2
 
 declare -A name2id=(
     [llama3.2-1B_on_zsre-full]=2025-02-10_08-19-14_2641409766
@@ -25,17 +25,17 @@ task=musique
 prompt=no
 # task=zsre
 # archive=2025-02-10_08-19-14_2641409766
-exp_dir_name="llama3.2-1B_on_zsre-14K"
+exp_dir_name="llama3.2-1B_on_zsre-full"
 archive=${name2id[$exp_dir_name]}
 
 # sft(q_p, a_p)
-python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-debug/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True
+python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-debug-noEOS/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=False
 
-exp_dir_name="llama3.2-1B_on_musiqueQonly"
-archive=${name2id[$exp_dir_name]}
+# exp_dir_name="llama3.2-1B_on_musiqueQonly"
+# archive=${name2id[$exp_dir_name]}
 
 # sft(q_p, a_p)
-python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-debug/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True
+# python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-debug/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True
 
 
 # exp_dir_name="llama3.2-1B_on_musiqueQonly"
