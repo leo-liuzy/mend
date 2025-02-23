@@ -39,15 +39,6 @@ em_evaluator = ExactMatchEvaluator()
 rouge_evaluator = RougeEvaluator()
 llm_evaluator = OpenAIEvaluator()
 
-icl_prompt = "\n".join([
-    "Q: When did the simpsons first air on television?",
-    "A: December 17, 1989",
-    "Q: Who has more super bowl wins afc or nfc?",
-    "A: NFC",
-    "Q: Is the federal court the same as the supreme court?",
-    "A: No"
-])
-
 def score_df(df):
     em_per_example = em_evaluator.compute_metric(
         predictions=df["predicted_answer"],
@@ -208,9 +199,21 @@ def run(config):
             targets =  [(" " if datum["answers"][0][0] != " " else "") + datum["answers"][0]]
             sentences = [datum["src"] + targets[0]]
             test_queries = [{"question": datum["src"], "answer": datum["answers"][0]}]
-
-            if config.add_icl:
-                test_queries[0]["question"] = icl_prompt + "\nQ: " + test_queries[0]["question"] + "\nA:",
+            
+            test_queries_q_str = [test_queries[0]["question"]]
+            test_queries_a_str = [test_queries[0]["answer"]]
+            test_queries_str = [test_queries[0]["question"] + (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]]
+            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer, ignore=not config.add_eos)
+            acc_toks = utils.dict_to(acc_toks, config.device)
+            sft_labels = val_set.get_edit_labels(
+                add_eos(
+                    tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), 
+                    tokenizer, 
+                    ignore=not config.add_eos
+                )["input_ids"]
+            ).to(config.device)
+            
+            clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
         else:
             assert config.task == "musique"
             test_queries = [
@@ -219,46 +222,39 @@ def run(config):
                     "answer": datum["multi_hop_efficacy"][0]["answer"]
                  }
             ]
-            if config.add_icl:
-                test_queries[0]["question"] = icl_prompt + "\nQ: " + test_queries[0]["question"] + "\nA:",
+            test_queries_q_str = [test_queries[0]["question"]]
+            test_queries_a_str = [test_queries[0]["answer"]]
+            test_queries_str = [test_queries[0]["question"] + (" " if test_queries[0]["answer"][0] != " " else "") + test_queries[0]["answer"]]
+            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer, ignore=not config.add_eos)
+            # tokenizer(test_queries_str, padding=True, return_tensors="pt", )
+            acc_toks = utils.dict_to(acc_toks, config.device)
+            sft_labels = val_set.get_edit_labels(
+                add_eos(
+                    tokenizer(
+                        [
+                            (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
+                        ], padding=True, return_tensors="pt", add_special_tokens=False), 
+                    tokenizer, ignore=not config.add_eos
+                )["input_ids"]
+            ).to(config.device)
+            
+            clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
             
             if config.edit_input == EditInput.question:
-                question = test_queries[0]
+                question = datum["multi_hop_efficacy"][0]
                 targets =  [(" " if question["answer"][0] != " " else "") + question["answer"]]
                 sentences = [question["question"] + targets[0]]
             else:
                 assert config.edit_loss == EditLoss.clm, f"Input `{config.edit_input}` is only supported for CLM loss"
                 sentences = targets = datum["texts"]
-        
-        # prepare [Q][A] accuracy and generation inputs
-        
-        assert len(test_queries) == 1, "# TODO: make this support multiple input"
-        test_queries_q_str = [test_queries[0]["question"]]
-        test_queries_a_str = [test_queries[0]["answer"]]
-        test_queries_str = [test_queries_q_str[0] + (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]]
-        
-        acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer, ignore=not config.add_eos)
-        acc_toks = utils.dict_to(acc_toks, config.device)
-        sft_labels = val_set.get_edit_labels(
-            add_eos(
-                tokenizer(
-                    [
-                        (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str[0]
-                    ], padding=True, return_tensors="pt", add_special_tokens=False), 
-                tokenizer, ignore=not config.add_eos
-            )["input_ids"]
-        ).to(config.device)
-        
-        clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
+                
         
         if config.edit_loss == EditLoss.sft:
             sentences_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt"), tokenizer, ignore=not config.add_eos)
             targets_toks = add_eos(tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer, ignore=not config.add_eos)
         else:
             assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
-            sentences_toks = targets_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer, ignore=not config.add_eos)
-        
-        
+            sentences_toks = targets_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer, ignore=not config.add_eos)
         
         edit_inner = {
             # "input_ids": torch.concat([sentences_toks["input_ids"], sentences_toks["input_ids"].flip(-1)], dim=-1),
@@ -269,9 +265,9 @@ def run(config):
         }
         
         print("Input for EDIT: ")
-        print("["+tokenizer.batch_decode(sentences_toks["input_ids"])+"]")
+        print("["+tokenizer.decode(sentences_toks["input_ids"][0])+"]")
         print("Label for EDIT: ")
-        print("["+tokenizer.batch_decode(sentences_toks["input_ids"])+"]")
+        print("["+tokenizer.decode(targets_toks["input_ids"][0])+"]")
         print()
         
         
@@ -301,7 +297,7 @@ def run(config):
             pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
         assert len(pre_result_df) == 1
         
-        pre_result_df.insert(0, "input", sentences)
+        pre_result_df.insert(0, "input", sentences[0])
         pre_result_df.insert(1, "stage", "pre-edit")
         pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
         pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
