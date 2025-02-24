@@ -178,3 +178,5 @@ data
 outputs/
 *.err
 .nfs*
+models/
+wandb/

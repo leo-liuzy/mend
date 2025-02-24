@@ -79,7 +79,7 @@ def add_padding(tokenizer, model):
     # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
 
-def add_eos(tokenizer_output, tokenizer, ignore=False):
+def add_eos(tokenizer_output, eos_token_id, ignore=False):
     
     if ignore:
         return tokenizer_output
@@ -92,7 +92,7 @@ def add_eos(tokenizer_output, tokenizer, ignore=False):
                     (
                         1 
                         if k == "attention_mask" else
-                        tokenizer.eos_token_id # this is to teach the model to end after outputing the answer.
+                        eos_token_id # this is to teach the model to end after outputing the answer.
                     )
                 )
             ], 
@@ -105,9 +105,18 @@ def add_eos(tokenizer_output, tokenizer, ignore=False):
 def generate(context: str, answer: str, config, model, tokenizer, generation_config, ):
     inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"])[0]
-    # inputs = utils.dict_to(inputs, config.device)
+    
+    if hasattr(config, "add_icl") and config.add_icl:
+        eos_token = "\n"
+    else:
+        eos_token = tokenizer.eos_token
+        
+    if hasattr(config, "add_eos") and config.add_eos:
+        answer += eos_token
     inputs = {k: v.to(config.device) for k, v in inputs.items()}
-    print("Input for generation:", "["+ tokenizer.batch_decode(inputs["input_ids"])[0] +"]")
+    print("Input for generation:", "["+ "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"])) +"]")
+    print("Label for generation:", "["+ answer +"]")
+
     
     generation_output = model.generate(
         **inputs,
@@ -199,17 +208,23 @@ def run(config):
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
     assert config.eval_only
+    if hasattr(config, "add_icl") and config.add_icl:
+        eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
+    else:
+        eos_token_id = tokenizer.eos_token_id
+            
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
     # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
     # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = val_data[i]
+        
         if config.task == "zsre":
             assert config.edit_input == EditInput.question
             targets =  [(" " if datum["answers"][0][0] != " " else "") + datum["answers"][0]]
             sentences = [datum["src"] + targets[0]]
             test_queries = [{"question": datum["src"], "answer": datum["answers"][0]}]
 
-            if config.add_icl:
+            if hasattr(config, "add_icl") and config.add_icl:
                 test_queries[0]["question"] = icl_prompt + "\nQ: " + test_queries[0]["question"] + "\nA:",
         else:
             assert config.task == "musique"
@@ -219,8 +234,8 @@ def run(config):
                     "answer": datum["multi_hop_efficacy"][0]["answer"]
                  }
             ]
-            if config.add_icl:
-                test_queries[0]["question"] = icl_prompt + "\nQ: " + test_queries[0]["question"] + "\nA:",
+            if hasattr(config, "add_icl") and config.add_icl:
+                test_queries[0]["question"] = icl_prompt + "\nQ: " + test_queries[0]["question"] + "\nA:"
             
             if config.edit_input == EditInput.question:
                 question = test_queries[0]
@@ -237,26 +252,26 @@ def run(config):
         test_queries_a_str = [test_queries[0]["answer"]]
         test_queries_str = [test_queries_q_str[0] + (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]]
         
-        acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer, ignore=not config.add_eos)
+        acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True), eos_token_id, ignore=not config.add_eos)
         acc_toks = utils.dict_to(acc_toks, config.device)
         sft_labels = val_set.get_edit_labels(
             add_eos(
                 tokenizer(
                     [
-                        (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str[0]
+                        (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
                     ], padding=True, return_tensors="pt", add_special_tokens=False), 
-                tokenizer, ignore=not config.add_eos
+                eos_token_id, ignore=not config.add_eos
             )["input_ids"]
         ).to(config.device)
         
         clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
         
         if config.edit_loss == EditLoss.sft:
-            sentences_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt"), tokenizer, ignore=not config.add_eos)
-            targets_toks = add_eos(tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), tokenizer, ignore=not config.add_eos)
+            sentences_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt"), eos_token_id, ignore=not config.add_eos)
+            targets_toks = add_eos(tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), eos_token_id, ignore=not config.add_eos)
         else:
             assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
-            sentences_toks = targets_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=True), tokenizer, ignore=not config.add_eos)
+            sentences_toks = targets_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=True), eos_token_id, ignore=not config.add_eos)
         
         
         
@@ -269,9 +284,9 @@ def run(config):
         }
         
         print("Input for EDIT: ")
-        print("["+tokenizer.batch_decode(sentences_toks["input_ids"])+"]")
+        print("["+"\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(sentences_toks["input_ids"]))+"]")
         print("Label for EDIT: ")
-        print("["+tokenizer.batch_decode(sentences_toks["input_ids"])+"]")
+        print("["+"\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(sentences_toks["input_ids"]))+"]")
         print()
         
         
@@ -301,7 +316,7 @@ def run(config):
             pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
         assert len(pre_result_df) == 1
         
-        pre_result_df.insert(0, "input", sentences)
+        pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in sentences))
         pre_result_df.insert(1, "stage", "pre-edit")
         pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
         pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
@@ -334,7 +349,7 @@ def run(config):
         assert len(post_result_df) == 1
         del edited_model
         
-        post_result_df.insert(0, "input", sentences[0])
+        post_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in sentences))
         post_result_df.insert(1, "stage", "post-edit")
         # post_result_df.insert(post_result_df.shape[-1], "[Q][A] acc", post_edit_dict["acc"].item())
         post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc EM", post_edit_clm_em_dict["acc"].item())
@@ -355,12 +370,12 @@ def run(config):
         
         os.makedirs(save_dir, exist_ok=True)
         all_results.to_excel(
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen.xlsx",
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl.xlsx",
             index=False,
         )
         io.dump_jsonlines(
             edit_model_infos,
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_edit-model-infos.jsonl"
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl"
         )
     
 if __name__ == "__main__":

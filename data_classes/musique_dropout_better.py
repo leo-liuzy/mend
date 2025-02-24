@@ -61,7 +61,7 @@ class MusiqueDataset(Dataset):
             "A: No"
         ])
         
-        
+        self.show_first_example = False
         assert self.config.data.rephrase, "propogation question must be used."
         self.max_length = max_length
         if self.config.data.zsre_nq: # ! Leo: original if-condition: `and "train" not in data_path`
@@ -202,13 +202,15 @@ class MusiqueDataset(Dataset):
                     edit_inner = edit_outer
             else:
                 edit_outer = edit_inner
-            # print("Edit_inner:")
-            # print("Input:", self.tok.batch_decode(edit_inner["input_ids"]))
-            # print("Label:", self.tok.batch_decode(torch.where(edit_inner["labels"] == -100, self.tok.pad_token_id, edit_inner["labels"])))
-            
-            # print("Edit_outer:")
-            # print("Input:", self.tok.batch_decode(edit_outer["input_ids"]))
-            # print("Label:", self.tok.batch_decode(torch.where(edit_outer["labels"] == -100, self.tok.pad_token_id, edit_outer["labels"])))
+            if not self.show_first_example:
+                print("Edit_inner:")
+                print("Input:", self.tok.batch_decode(edit_inner["input_ids"]))
+                print("Label:", self.tok.batch_decode(torch.where(edit_inner["labels"] == -100, self.tok.pad_token_id, edit_inner["labels"])))
+                
+                print("Edit_outer:")
+                print("Input:", self.tok.batch_decode(edit_outer["input_ids"]))
+                print("Label:", self.tok.batch_decode(torch.where(edit_outer["labels"] == -100, self.tok.pad_token_id, edit_outer["labels"])))
+                self.show_first_example = True
             loc = {}
             if self.use_nq:
                 batch = [self.nq[idx] for idx in loc_idxs]
