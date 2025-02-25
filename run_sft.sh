@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=3
 
 export WANDB_MODE=online
 
@@ -18,7 +18,7 @@ epoch=2
 
 lr=1e-5
 
-output_dir=models/Llama-3.2-1B-eos-sft
+output_dir=models/Llama-3.2-1B-wiki-eos-sft
 # model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
 
 accelerate launch --config_file="fsdp_config.yaml" \
@@ -38,8 +38,8 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --dataset_text_field="text" \
     --lr_scheduler_type="linear" \
     --warmup_ratio=${warmup_ratio} \
-    --eval_strategy="epoch" \
-    --save_strategy="epoch" \
+    --eval_strategy="no" \
+    --save_strategy="no" \
     --save_total_limit=2 \
     --load_best_model_at_end=True \
     --logging_strategy="steps" \

@@ -104,15 +104,8 @@ def add_eos(tokenizer_output, eos_token_id, ignore=False):
 
 def generate(context: str, answer: str, config, model, tokenizer, generation_config, ):
     inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
-    ctx_decoded = tokenizer.batch_decode(inputs["input_ids"])[0]
+    ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
     
-    if hasattr(config, "add_icl") and config.add_icl:
-        eos_token = "\n"
-    else:
-        eos_token = tokenizer.eos_token
-        
-    if hasattr(config, "add_eos") and config.add_eos:
-        answer += eos_token
     inputs = {k: v.to(config.device) for k, v in inputs.items()}
     print("Input for generation:", "["+ "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"])) +"]")
     print("Label for generation:", "["+ answer +"]")
@@ -120,19 +113,23 @@ def generate(context: str, answer: str, config, model, tokenizer, generation_con
     
     generation_output = model.generate(
         **inputs,
-        # input_ids = inputs["input_ids"],
-        # attention_mask = inputs["attention_mask"],
         generation_config=generation_config,
         pad_token_id=tokenizer.pad_token_id,
         return_dict_in_generate=True,
     )
-    generated_texts = tokenizer.batch_decode(generation_output.sequences, skip_special_tokens=False)
-    generated_texts = [t.replace(ctx_decoded.strip(), "") for t in generated_texts]
+    generated_texts = tokenizer.batch_decode(generation_output.sequences, skip_special_tokens=True)
+    # import pdb; pdb.set_trace()
+    generated_texts = [t.replace(ctx_decoded, "") for t in generated_texts]
+    predicted_answer = generated_texts[0]
+    if hasattr(config, "add_icl") and config.add_icl:
+        # if using ICL, extract by the first new line
+        if "\n" in predicted_answer:
+            predicted_answer = predicted_answer[:predicted_answer.find("\n")]
     
     model_response = pd.DataFrame([
         {
-            "question": context, "answer": answer, "predicted_answer_idx": 0,
-            "predicted_answer": generated_texts[0], 
+            "question": context, "answer": answer.strip(), "predicted_answer_idx": 0,
+            "predicted_answer": predicted_answer.strip(), 
         }
     ])
     return score_df(model_response)
