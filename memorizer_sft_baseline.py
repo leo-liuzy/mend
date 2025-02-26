@@ -11,6 +11,7 @@ from knowledge_propagation.utils import vars, io
 import torch
 import gc
 import utils
+from utils_leo import get_eval_result
 from utils import StrEnum
 from knowledge_propagation.modules.evaluators import (
     ExactMatchEvaluator,
@@ -247,44 +248,17 @@ for question_type in question_types:
     logging.info(f"Question type: {question_type}")
     
     for question in questions:
-        test_queries_q_str = [question["question"]]
-        test_queries_a_str = [question["answer"]]
-        test_queries_str = [test_queries_q_str[0] + (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]]
-
-        acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=custom_cfg.add_bos), eos_token_id, ignore=not custom_cfg.add_eos_accuracy)
-        acc_toks = utils.dict_to(acc_toks, custom_cfg.device)
-        sft_labels = get_edit_labels(
-            add_eos(
-                tokenizer(
-                    [
-                        (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
-                    ], padding=True, return_tensors="pt", add_special_tokens=False), 
-                eos_token_id, ignore=not custom_cfg.add_eos_accuracy
-            )["input_ids"], tokenizer
-        ).to(custom_cfg.device)
-
-        clm_labels = get_edit_labels(acc_toks["input_ids"], tokenizer).to(custom_cfg.device)
         
-        logging.info("Input for [Q][A] Accuracy: ")
-        logging.info("["+tokenizer.decode(acc_toks["input_ids"][0])+"]")
-        logging.info("SFT label: " + "["+tokenizer.decode(sft_labels[0])+"]")
-        logging.info("CLM label(before ShiftLeft): " + "["+tokenizer.decode(clm_labels[0])+"]")
-        logging.info("")
-                
-        with torch.no_grad():
-            
-            post_edit_output = model(
-                input_ids=acc_toks["input_ids"],
-                attention_mask=acc_toks["attention_mask"]
-            )
-            post_edit_logits = post_edit_output.logits
-            post_edit_sft_em_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=True)
-            post_edit_sft_pm_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=False)
-            post_edit_clm_em_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=True)
-            post_edit_clm_pm_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=False)
-            
-        post_result_df = generate(test_queries_q_str[0], test_queries_a_str[0], custom_cfg, model, tokenizer, generation_config)
-        post_result_df.insert(0, "sft_input", "\n\n".join(
+        sft_eval_result = get_eval_result(
+            question=question["question"], 
+            answer=question["answer"],
+            model=model,
+            tokenizer=tokenizer, 
+            config=custom_cfg,
+            generation_config=generation_config
+        )
+        sft_eval_result.insert(0, "stage", "post-edit")
+        sft_eval_result.insert(0, "sft_input", "\n\n".join(
                 f"[[{tokenizer.decode(s)}]]"
                 for s in tokenizer(
                     train_dataset["text"], 
@@ -292,15 +266,10 @@ for question_type in question_types:
                 )["input_ids"]
             )
         )
-        post_result_df.insert(1, "stage", "post-edit")
-        post_result_df.insert(0, "question_type", question_type)
-        post_result_df.insert(0, "id", instance["id"])
-        post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc EM", post_edit_sft_em_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc PM", post_edit_sft_pm_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc EM", post_edit_clm_em_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc PM", post_edit_clm_pm_dict["acc"].item())
+        sft_eval_result.insert(0, "question_type", question_type)
+        sft_eval_result.insert(0, "id", instance["id"])
         
-        all_result_df.append(post_result_df)
+        all_result_df.append(sft_eval_result)
 all_result_df = pd.concat(all_result_df)
 
 exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_sft-baseline_input={custom_cfg.input_format}_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
