@@ -101,10 +101,10 @@ epoch=4
 
 lr=1e-5
 
-for input_format in 2hop # two-1hop # first-1hop second-1hop
+for input_format in two-1hop # first-1hop second-1hop
 do 
 
-for example_idx in 562 563 601 630 647 731 740 741 742 754 880
+for example_idx in 7 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 379 380 417 509 510 518 520 521 532 545 658 853 866 889 890 893 894 896 897 900 901 963 975 984 986
 do
 
 echo "Example idx: ${example_idx}"
