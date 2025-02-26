@@ -9,8 +9,8 @@ export CUDA_VISIBLE_DEVICES=1
 
 # python -m run +alg=mend +experiment=zsre +model=llama3.2-1B # +train_size=14326
 
-python -m run +alg=mend +experiment=musique_propagator_q +model=llama3.2-1B-eos-sft edit_input=two-1hop
+python -m run +alg=mend +experiment=musique_propagator_q_rand +model=llama3.2-1B-eos-sft edit_input=two-1hop
 
-python -m run +alg=mend +experiment=musique_propagator_q +model=llama3.2-1B-eos-sft edit_input=first-1hop
+# python -m run +alg=mend +experiment=musique_propagator_q +model=llama3.2-1B-eos-sft edit_input=first-1hop
 
-python -m run +alg=mend +experiment=musique_propagator_q +model=llama3.2-1B-eos-sft edit_input=second-1hop
+# python -m run +alg=mend +experiment=musique_propagator_q +model=llama3.2-1B-eos-sft edit_input=second-1hop
