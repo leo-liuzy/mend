@@ -1,7 +1,7 @@
 # @package _global_
 
 task: musique_dropout
-dataset: musique
+dataset: musique_dropout
 cbase: 1.0
 two_doc_at_same_time: true
 doc_dropout: 0.5 # w. prob 0.5 randomly drop 1 doc

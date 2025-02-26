@@ -5,7 +5,8 @@ declare -A name2id=(
     [llama3.2-1B_on_zsre-14K]=2025-02-17_16-06-54_298004526
     [llama3.2-1B_on_musiqueQonly]=2025-02-11_23-27-06_6306217737
     [llama3.2-1B_on_musiqueQ_w-eos]=2025-02-20_21-05-21_5456934010
-    [musique_propagator_q]=2025-02-25_02-02-34_8302419747
+    [musique_propagator_q]=2025-02-25_11-23-08_2966052990
+    [musique_injector]=2025-02-25_02-02-08_2733371512
     # metatrain with 2 doc
     [musique_propagator_p0]=2025-02-22_06-58-48_2302322883
     # [musique_propagator_p0_w-newline]=2025-02-22_21-40-54_1897999909
@@ -31,7 +32,7 @@ prompt=no
 # task=zsre
 # archive=2025-02-10_08-19-14_2641409766
 
-for exp_dir_name in musique_propagator_p0 musique_propagator_p0_w-newline_icl
+for exp_dir_name in musique_propagator_q
 # for exp_dir_name in llama3.2-1B_on_zsre-full llama3.2-1B_on_musiqueQonly llama3.2-1B_on_zsre-14K llama3.2-1B_on_musiqueQ_w-eos
 # exp_dir_name=""
 do
@@ -43,9 +44,9 @@ task=musique
 # task=zsre
 # python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False
 
-python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=2doc generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False
+python run_mend_edit_propagator_q.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False
 
-python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=2doc generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=True
+# python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=2doc generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=True
 
 
 
