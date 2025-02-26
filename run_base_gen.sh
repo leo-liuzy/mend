@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=1
 
 declare -A name2id=(
     [llama3.2-1B_on_zsre-full]=2025-02-10_08-19-14_2641409766
@@ -25,7 +25,7 @@ declare -A name2id=(
 
 
 
-n_val=1000
+n_val=1
 task=musique
 prompt=no
 # task=zsre
@@ -33,11 +33,11 @@ prompt=no
 exp_dir_name="musique_propagator_p0"
 archive=${name2id[$exp_dir_name]}
 
-base_model_name=llama3.2-1B-eos-sft
+base_model_name=Llama-3.2-1B-wiki-eos-sft
 # sft(q_p, a_p)
-# python run_base_generate.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=exp_output/${base_model_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False
+python run_base_generate.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=exp_output/${base_model_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False
 
-python run_base_generate.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=exp_output/${base_model_name}-accEOS/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=True
+python run_base_generate.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=exp_output/${base_model_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=True
 
 # python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}-wICL/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=True
 

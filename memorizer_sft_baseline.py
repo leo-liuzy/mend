@@ -168,6 +168,24 @@ model_name_or_path = f"{os.getcwd()}/models/{custom_cfg.base_model_name}"
 
 logging.info(f"CustomConfig: {custom_cfg}")
 
+exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_sft-baseline_input={custom_cfg.input_format}_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
+
+os.makedirs(exp_save_dir, exist_ok=True)
+
+individual_result_save_dir = f"{exp_save_dir}/individual_results"
+os.makedirs(individual_result_save_dir, exist_ok=True)
+
+all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl")
+instance = all_dev_dataset[custom_cfg.example_idx]
+
+
+logging.info(f"Example ID: {instance['id']}")
+
+fpath = f"{individual_result_save_dir}/{instance['id']}_eval_results.xlsx"
+if os.path.exists(fpath):
+    logging.info("=" * 20 + "Already evaluated" + "=" * 20)
+    exit(0)
+
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False, device_map=custom_cfg.device)
 tokenizer = AutoTokenizer.from_pretrained(f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False)
 tokenizer.padding_side = 'right'
@@ -194,10 +212,6 @@ generation_config = GenerationConfig(
     bos_token_id=tokenizer.bos_token_id,
     eos_token_id=tokenizer.eos_token_id,
 )
-
-all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl")
-instance = all_dev_dataset[custom_cfg.example_idx]
-logging.info(f"Example ID: {instance['id']}")
 
 train_dataset = prepare_sft_text(args, custom_cfg, instance, tokenizer)
 
@@ -272,15 +286,11 @@ for question_type in question_types:
         all_result_df.append(sft_eval_result)
 all_result_df = pd.concat(all_result_df)
 
-exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_sft-baseline_input={custom_cfg.input_format}_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
-os.makedirs(exp_save_dir, exist_ok=True)
-
-individual_result_save_dir = f"{exp_save_dir}/individual_results"
-os.makedirs(individual_result_save_dir, exist_ok=True)
+# exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_sft-baseline_input={custom_cfg.input_format}_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
 
 logging.info(f"Saving individual results to {individual_result_save_dir}")
 
 all_result_df.to_excel(
-    f"{individual_result_save_dir}/{instance['id']}_eval_results.xlsx",
+    fpath,
     index=False,
 )
