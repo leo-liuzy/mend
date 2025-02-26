@@ -19,7 +19,7 @@ lr=1e-5
 epoch=4
 
 # second-1hop
-for input_format in two-1hop #  second-1hop
+for input_format in first-1hop # two-1hop #  second-1hop
 do 
 
 for example_idx in {0..999}
