@@ -7,6 +7,7 @@ declare -A name2id=(
     [llama3.2-1B_on_musiqueQ_w-eos]=2025-02-20_21-05-21_5456934010
     [musique_propagator_q]=2025-02-25_11-23-08_2966052990
     [musique_injector]=2025-02-25_02-02-08_2733371512
+    [eos-sft_musique_propagator_p0_w-atomq]=2025-02-27_00-02-10_6434375594
     [eos-sft_musique_propagator_p0]=2025-02-24_07-26-33_0114923306
     # metatrain with 2 doc
     [musique_propagator_p0]=2025-02-22_06-58-48_2302322883
@@ -32,7 +33,7 @@ prompt=no
 # task=zsre
 # archive=2025-02-10_08-19-14_2641409766
 
-for exp_dir_name in eos-sft_musique_propagator_p0
+for exp_dir_name in eos-sft_musique_propagator_p0_w-atomq
 # for exp_dir_name in llama3.2-1B_on_zsre-full llama3.2-1B_on_musiqueQonly llama3.2-1B_on_zsre-14K llama3.2-1B_on_musiqueQ_w-eos
 # exp_dir_name=""
 do

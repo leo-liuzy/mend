@@ -33,15 +33,15 @@ def score_df(df):
         references=df["answer"],
         use_aggregator=False,
     )
-    llm_acc_per_example = llm_evaluator.compute_metric(
-        questions=df["question"],
-        predictions=df["predicted_answer"],
-        references=df["answer"],
-        use_aggregator=False,
-        rescale_to_one=True,
-    )
+    # llm_acc_per_example = llm_evaluator.compute_metric(
+    #     questions=df["question"],
+    #     predictions=df["predicted_answer"],
+    #     references=df["answer"],
+    #     use_aggregator=False,
+    #     rescale_to_one=True,
+    # )
         
-    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example, **llm_acc_per_example}))
+    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example,}))
     return model_response_w_score
 
 
@@ -113,8 +113,6 @@ def get_edit_labels(labels, tokenizer):
 
 
 def get_eval_result(question, answer, model, tokenizer, config, generation_config):
-    test_queries_q_str = [question]
-    test_queries_a_str = [answer]
     test_queries_str = [question + (" " if answer[0] != " " else "") + answer]
 
     eos_token_id = tokenizer.eos_token_id
@@ -138,6 +136,8 @@ def get_eval_result(question, answer, model, tokenizer, config, generation_confi
     logging.info("SFT label: " + "["+tokenizer.decode(sft_labels[0])+"]")
     logging.info("CLM label(before ShiftLeft): " + "["+tokenizer.decode(clm_labels[0])+"]")
     logging.info("")
+    
+    model.eval()
             
     with torch.no_grad():
         
@@ -154,7 +154,8 @@ def get_eval_result(question, answer, model, tokenizer, config, generation_confi
         model_clm_em_dict = multiclass_log_probs(model_logits, clm_labels, exact_match=True)
         model_clm_pm_dict = multiclass_log_probs(model_logits, clm_labels, exact_match=False)
         
-    model_result_df = generate(question, answer, config, model, tokenizer, generation_config)
+        model_result_df = generate(question, answer, config, model, tokenizer, generation_config)
+        
     model_result_df.insert(model_result_df.shape[-1], "[A]|[Q] Acc EM", model_sft_em_dict["acc"].item())
     model_result_df.insert(model_result_df.shape[-1], "[A]|[Q] Acc PM", model_sft_pm_dict["acc"].item())
     model_result_df.insert(model_result_df.shape[-1], "[Q][A] Acc EM", model_clm_em_dict["acc"].item())

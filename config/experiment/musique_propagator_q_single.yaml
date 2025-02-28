@@ -1,0 +1,6 @@
+# @package _global_
+
+task: musique_propagator_q_single
+dataset: musique_propagator_q_single
+cbase: 1.0
+use_nq: true

@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=5
+export CUDA_VISIBLE_DEVICES=1
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -22,7 +22,7 @@ epoch=4
 for input_format in first-1hop # two-1hop #  second-1hop
 do 
 
-for example_idx in {0..999}
+for example_idx in {96..999}
 do
 
 echo "Example idx: ${example_idx}"

@@ -42,15 +42,15 @@ def score_df(df):
         references=df["answer"],
         use_aggregator=False,
     )
-    llm_acc_per_example = llm_evaluator.compute_metric(
-        questions=df["question"],
-        predictions=df["predicted_answer"],
-        references=df["answer"],
-        use_aggregator=False,
-        rescale_to_one=True,
-    )
+    # llm_acc_per_example = llm_evaluator.compute_metric(
+    #     questions=df["question"],
+    #     predictions=df["predicted_answer"],
+    #     references=df["answer"],
+    #     use_aggregator=False,
+    #     rescale_to_one=True,
+    # )
         
-    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example, **llm_acc_per_example}))
+    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example, }))
     return model_response_w_score
 
 

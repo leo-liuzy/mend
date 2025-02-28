@@ -126,7 +126,7 @@ class CustomConfig:
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
-    base_model_name: Optional[str] = "Llama-3.2-1B-wiki-eos-sft"
+    base_model_name: Optional[str] = "Llama-3.2-1B"
     save_dir_suffix: Optional[str] = None
 
 parser = HfArgumentParser((SFTConfig, CustomConfig))
@@ -165,8 +165,9 @@ generation_config = GenerationConfig(
 
 all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl")
 
-for instance in all_dev_dataset:
 
+for instance in all_dev_dataset:
+    model.eval()
     logging.info(f"Example ID: {instance['id']}")
 
     eos_token_id = tokenizer.eos_token_id
@@ -206,6 +207,7 @@ for instance in all_dev_dataset:
             logging.info("SFT label: " + "["+tokenizer.decode(sft_labels[0])+"]")
             logging.info("CLM label(before ShiftLeft): " + "["+tokenizer.decode(clm_labels[0])+"]")
             logging.info("")
+            
                     
             with torch.no_grad():
                 
