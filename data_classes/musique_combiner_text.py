@@ -16,9 +16,9 @@ from copy import deepcopy
 LOG = logging.getLogger(__name__)
 
 class EditInput(StrEnum):
-    two_single_hop = "two-1hop"
-    first_single_hop = "first-1hop"
-    second_single_hop = "second-1hop"
+    seen_doc = "seen"
+    hidden_doc = "hidden"
+    all_doc = "all"
     
 
 class MusiqueDataset(Dataset):
@@ -59,13 +59,18 @@ class MusiqueDataset(Dataset):
 
     def __getitem__(self, item, seed=None):
         assert len(self.data[item]["multi_hop_efficacy"]) == 1, self.data[item]
-        assert len(self.data[item]["single_hop_efficacy"]) == 2, self.data[item]
         
-        texts = self.data[item]["texts"]
+        if self.config.edit_input != EditInput.all_doc:
+            assert len(self.data[item]["single_hop_efficacy"]) == 2, self.data[item]
+        else:
+            assert self.config.edit_input in [EditInput.seen_doc, EditInput.hidden_doc]
+            assert len(self.data[item]["single_hop_efficacy"]) == 1, self.data[item]
+        
+        texts = deepcopy(self.data[item]["texts"])
         
         qas = deepcopy(self.data[item]["multi_hop_efficacy"])
-        
-        if hasattr(self.config, "outer_loop_add_atomq") and self.config.outer_loop_add_atomq:
+        assert hasattr(self.config, "outer_loop_add_atomq") and self.config.outer_loop_add_atomq is not None
+        if self.config.outer_loop_add_atomq:
             qas += deepcopy(self.data[item]["single_hop_efficacy"])
         
         # ! this is to avoid model exploiting potential heuristics in data order.

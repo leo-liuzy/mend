@@ -187,7 +187,7 @@ def run(config):
             logging.info(f"Question type: {question_type}")
             questions = datum[question_type]
             
-            for question in questions:
+            for q_i, question in enumerate(questions):
         
                 post_result_df = get_eval_result(
                     question=icl_prompt + "\nQ: " + question["question"] + "\nA:" 
@@ -205,6 +205,7 @@ def run(config):
                         for s in sentences_toks["input_ids"]
                     )
                 )
+                post_result_df.insert(0, "question_tag", f"{question_type}_q{q_i}")
                 post_result_df.insert(0, "question_type", question_type)
                 post_result_df.insert(0, "id", datum["id"])
                 all_datum_result_df.append(post_result_df)

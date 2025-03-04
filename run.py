@@ -99,12 +99,15 @@ def run(config):
         class EditInput(StrEnum):
             seen_doc = "seen"
             hidden_doc = "hidden"
+            all_doc = "all"
     
         if config.edit_input == EditInput.seen_doc:
             suffix = "-seen"
-        else:
-            assert config.edit_input == EditInput.hidden_doc
+        elif config.edit_input == EditInput.hidden_doc:
             suffix = "-hidden"
+        else:
+            assert config.edit_input == EditInput.all_doc
+            suffix = ""
             
         train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
         val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev{suffix}.jsonl", config, max_length=tokenizer.model_max_length)

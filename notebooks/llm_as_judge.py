@@ -1,6 +1,6 @@
 from datasets import load_dataset
 from tqdm import tqdm
-from knowledge_propagation.utils import vars, io
+from knowledge_propagation.utils import vars, io, extractor
 from scipy.stats import describe
 from typing import List, Dict
 import re
@@ -9,9 +9,11 @@ import pandas as pd
 
 from bespokelabs import curator
 from datasets import Dataset
-    
+
+score_tag_extractor = extractor.tag_content_extractor("score")
     
 class LlmAsJudge(curator.LLM):
+    MAX_VAL: float = 10.0
     PROMPT : str = """
 [Instruction]
 Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. For this evaluation, you should primarily consider the following criteria:
@@ -33,6 +35,8 @@ accuracy:
 [The Start of Assistant's Answer]
 {prediction}
 [The End of Assistant's Answer]
+
+Return the numerical score wrapped in <score>..</score> tag
     """.strip()
     def prompt(self, input: dict) -> str:
         """Generate a prompt for the subsubject generator."""
@@ -40,38 +44,28 @@ accuracy:
 
     def parse(self, input: dict, response: str) -> dict:
         """Parse the model response along with the input to the model into the desired output format.."""
+        score_ = score_tag_extractor(response)
+        assert len(score_) == 1
+        score = score_[0].strip()
+        assert score.isdigit()
+        assert 1 <= float(score) <= 10
+        score = float(score)
+        score /= self.MAX_VAL
+        if "llm_accuracy" in input:
+            existing_llm_acc = input["llm_accuracy"]
+            del input["llm_accuracy"]
+        input["llm_accuracy"] = score
         
-        return {**input, "nl_question": response}
+        return {**input}
 
 llm_judge = LlmAsJudge(model_name="gpt-4o-mini")
-fpath = "/u/zliu/datastor1/mend/exp_output/eos-sft_musique_propagator_p0_w-atomq/musique/mend_eval_loss=clm_input=2doc_n=1000_prompt=no_w-gen_wo-icl.xlsx"
+fpath = "/u/zliu/datastor1/mend/exp_output/Llama-3.2-1B-eos-sft_sh+mh/all_table.xlsx"
+scored_df = pd.read_excel(fpath)
+scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)
 
-nl_zsre_question_df = pd.read_excel(fpath)
 
-if "llm_accuracy" in nl_zsre_question_df.columns:
-    exit(0)
+scored_dataset = Dataset.from_pandas(scored_df[:])
+scored_dataset = llm_judge(scored_dataset)
 
-nl_zsre_question_dataset = Dataset.from_pandas(nl_zsre_question_df)
-
-nl_zsre_question_dataset = llm_judge(nl_zsre_question_dataset)
-MAX_VAL = 10
-llm_acc = []
-for score in nl_zsre_question_dataset['nl_question']:
-    try:
-        score: str
-        if score.isdigit():
-            score = float(score)
-        else:
-            assert "Score " in score, "Failing heuristic fix"
-            score = float(score[len("Score ") :])
-
-        assert 1 <= score <= 10, "Score needs to be in scale of [1, 10]"
-    except Exception as e:
-        print(e)
-        score = 0.0
-    score /= MAX_VAL
-    llm_acc.append(score)
-nl_zsre_question_df["llm_accuracy"] = llm_acc
-# nl_zsre_question_dataset.to_json(f"/data/users/zliu/KE-by-CP/data/musique_mend/2hop_musique_ans_v1.0_{split}_zsre-questions.jsonl")
-nl_zsre_question_df.to_excel(fpath, index=False)
+scored_dataset.to_pandas().to_excel(fpath, index=False)
 print()
