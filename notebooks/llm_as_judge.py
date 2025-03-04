@@ -1,0 +1,71 @@
+from datasets import load_dataset
+from tqdm import tqdm
+from knowledge_propagation.utils import vars, io, extractor
+from scipy.stats import describe
+from typing import List, Dict
+import re
+from copy import deepcopy
+import pandas as pd
+
+from bespokelabs import curator
+from datasets import Dataset
+
+score_tag_extractor = extractor.tag_content_extractor("score")
+    
+class LlmAsJudge(curator.LLM):
+    MAX_VAL: float = 10.0
+    PROMPT : str = """
+[Instruction]
+Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. For this evaluation, you should primarily consider the following criteria:
+accuracy: 
+                Score 1: The answer is completely unrelated to the reference.
+                Score 3: The answer has minor relevance but does not align with the reference.
+                Score 5: The answer has moderate relevance but contains inaccuracies.
+                Score 7: The answer aligns with the reference but has minor omissions.
+                Score 10: The answer is completely accurate and aligns perfectly with the reference.
+                Only respond with a numerical score.
+
+[Question]
+{question}
+
+[The Start of Ground truth]
+{reference}
+[The End of Ground truth]
+
+[The Start of Assistant's Answer]
+{prediction}
+[The End of Assistant's Answer]
+
+Return the numerical score wrapped in <score>..</score> tag
+    """.strip()
+    def prompt(self, input: dict) -> str:
+        """Generate a prompt for the subsubject generator."""
+        return self.PROMPT.format(question=input["question"], prediction=input["predicted_answer"], reference=input["answer"])
+
+    def parse(self, input: dict, response: str) -> dict:
+        """Parse the model response along with the input to the model into the desired output format.."""
+        score_ = score_tag_extractor(response)
+        assert len(score_) == 1
+        score = score_[0].strip()
+        assert score.isdigit()
+        assert 1 <= float(score) <= 10
+        score = float(score)
+        score /= self.MAX_VAL
+        if "llm_accuracy" in input:
+            existing_llm_acc = input["llm_accuracy"]
+            del input["llm_accuracy"]
+        input["llm_accuracy"] = score
+        
+        return {**input}
+
+llm_judge = LlmAsJudge(model_name="gpt-4o-mini")
+fpath = "/u/zliu/datastor1/mend/exp_output/musique_combiner_q/musique/mend_eval_loss=sft_input=question_n=1000_prompt=no_w-gen_wo-icl.xlsx"
+scored_df = pd.read_excel(fpath)
+scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)
+
+
+scored_dataset = Dataset.from_pandas(scored_df[:])
+scored_dataset = llm_judge(scored_dataset)
+
+scored_dataset.to_pandas().to_excel(fpath, index=False)
+print()

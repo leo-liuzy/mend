@@ -115,10 +115,8 @@ def run(config):
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
     assert config.eval_only
-    if hasattr(config, "add_icl") and config.add_icl:
-        eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
-    else:
-        eos_token_id = tokenizer.eos_token_id
+    
+    eos_token_id = tokenizer.eos_token_id
             
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
     # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
@@ -159,7 +157,9 @@ def run(config):
             for question in questions:
         
                 pre_result_df = get_eval_result(
-                    question=question["question"], 
+                    question=icl_prompt + "\nQ: " + question["question"] + "\nA:" 
+                    if config.add_icl else 
+                    question["question"], 
                     answer=question["answer"],
                     model=trainer.model.model,
                     tokenizer=tokenizer, 
@@ -187,10 +187,12 @@ def run(config):
             logging.info(f"Question type: {question_type}")
             questions = datum[question_type]
             
-            for question in questions:
+            for q_i, question in enumerate(questions):
         
                 post_result_df = get_eval_result(
-                    question=question["question"], 
+                    question=icl_prompt + "\nQ: " + question["question"] + "\nA:" 
+                    if config.add_icl else 
+                    question["question"], 
                     answer=question["answer"],
                     model=edited_model.model,
                     tokenizer=tokenizer, 
@@ -203,6 +205,7 @@ def run(config):
                         for s in sentences_toks["input_ids"]
                     )
                 )
+                post_result_df.insert(0, "question_tag", f"{question_type}_q{q_i}")
                 post_result_df.insert(0, "question_type", question_type)
                 post_result_df.insert(0, "id", datum["id"])
                 all_datum_result_df.append(post_result_df)

@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=1
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -18,17 +18,17 @@ lr=1e-5
 # input_format=2hop
 epoch=4
 
-
-for input_format in two-1hop first-1hop second-1hop
+# second-1hop
+for input_format in first-1hop # two-1hop #  second-1hop
 do 
 
-for example_idx in {0..999}
+for example_idx in {96..999}
 do
 
 echo "Example idx: ${example_idx}"
 
 accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29500 \
+    --main_process_port 29900 \
     clm_baseline.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \

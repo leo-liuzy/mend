@@ -8,6 +8,7 @@ from omegaconf import OmegaConf
 import numpy as np
 import torch
 import utils
+from utils import StrEnum
 
 from knowledge_propagation.utils import vars
 from trainer import EditTrainer
@@ -80,12 +81,36 @@ def run(config):
         train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
         val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
     
-    elif config.task == "qa" or config.task == "musique_propagator_q":
+    elif config.task == "qa" or config.task == "musique_combiner_q":
         add_padding(tokenizer, model)
-        from data_classes.musique_propagator_q import MusiqueDataset
+        from data_classes.musique_combiner_q import MusiqueDataset
 
         train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
         val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+    elif config.task == "qa" or config.task == "musique_combiner_text":
+        add_padding(tokenizer, model)
+        from data_classes.musique_combiner_text import MusiqueDataset
+
+        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
+        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+    elif config.task == "qa" or config.task == "musique_propagator_text":
+        add_padding(tokenizer, model)
+        from data_classes.musique_propagator_text import MusiqueDataset
+        class EditInput(StrEnum):
+            seen_doc = "seen"
+            hidden_doc = "hidden"
+            all_doc = "all"
+    
+        if config.edit_input == EditInput.seen_doc:
+            suffix = "-seen"
+        elif config.edit_input == EditInput.hidden_doc:
+            suffix = "-hidden"
+        else:
+            assert config.edit_input == EditInput.all_doc
+            suffix = ""
+            
+        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
+        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
     elif config.task == "qa" or config.task == "musique_injector":
         add_padding(tokenizer, model)
         from data_classes.musique_injector import MusiqueDataset
