@@ -7,8 +7,8 @@ declare -A name2id=(
     [llama3.2-1B_on_musiqueQ_w-eos]=2025-02-20_21-05-21_5456934010
     [musique_propagator_q]=2025-02-25_11-23-08_2966052990
     [musique_injector]=2025-02-25_02-02-08_2733371512
-    [eos-sft_musique_propagator_p0_w-atomq]=2025-02-27_00-02-10_6434375594
-    [eos-sft_musique_propagator_p0]=2025-02-24_07-26-33_0114923306
+    [eos-sft_musique_combiner_text_w-atomq]=2025-02-27_00-02-10_6434375594
+    [eos-sft_musique_combiner_text]=2025-02-24_07-26-33_0114923306
     # metatrain with 2 doc
     [musique_propagator_p0]=2025-02-22_06-58-48_2302322883
     # [musique_propagator_p0_w-newline]=2025-02-22_21-40-54_1897999909
@@ -45,7 +45,8 @@ task=musique
 # task=zsre
 # python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False
 
-python run_mend_edit_propagator_easy.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=2doc generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False
+python run_mend_edit_combiner
+_text.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=2doc generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False
 
 # python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=2doc generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=True
 
