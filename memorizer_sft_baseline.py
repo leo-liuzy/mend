@@ -41,15 +41,15 @@ def score_df(df):
         references=df["answer"],
         use_aggregator=False,
     )
-    llm_acc_per_example = llm_evaluator.compute_metric(
-        questions=df["question"],
-        predictions=df["predicted_answer"],
-        references=df["answer"],
-        use_aggregator=False,
-        rescale_to_one=True,
-    )
+    # llm_acc_per_example = llm_evaluator.compute_metric(
+    #     questions=df["question"],
+    #     predictions=df["predicted_answer"],
+    #     references=df["answer"],
+    #     use_aggregator=False,
+    #     rescale_to_one=True,
+    # )
         
-    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example, **llm_acc_per_example}))
+    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example,}))
     return model_response_w_score
 
 
@@ -161,6 +161,7 @@ class CustomConfig:
     add_bos: Optional[bool] = True
     base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
     save_dir_suffix: Optional[str] = None
+    spec_question: bool = False
 
 parser = HfArgumentParser((SFTConfig, CustomConfig))
 (args, custom_cfg) = parser.parse_args_into_dataclasses()
@@ -173,9 +174,11 @@ exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_sft-basel
 os.makedirs(exp_save_dir, exist_ok=True)
 
 individual_result_save_dir = f"{exp_save_dir}/individual_results"
+if custom_cfg.spec_question:
+        individual_result_save_dir += "_spec"
 os.makedirs(individual_result_save_dir, exist_ok=True)
 
-all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl")
+all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl")
 instance = all_dev_dataset[custom_cfg.example_idx]
 
 
@@ -250,10 +253,17 @@ if torch.cuda.is_available():
 
 eos_token_id = tokenizer.eos_token_id
 
-question_types = [
-    "single_hop_efficacy",
-    "multi_hop_efficacy",
-]
+if custom_cfg.spec_question:
+    question_types = [
+        "single_hop_specificity",
+        "multi_hop_specificity",
+    ]
+else:
+    question_types = [
+        "single_hop_efficacy",
+        "multi_hop_efficacy",
+    ]
+    
 logging.info("Start evaluating model: Generation, Accuracy")
 
 all_result_df = []

@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=2
 
 declare -A name2id=(
     [llama3.2-1B_on_zsre-full]=2025-02-10_08-19-14_2641409766
@@ -35,7 +35,7 @@ prompt=no
 # task=zsre
 # archive=2025-02-10_08-19-14_2641409766
 
-for exp_dir_name in musique_propagator_q_second
+for exp_dir_name in musique_combiner_q musique_propagator_q_first musique_propagator_q_second
 # for exp_dir_name in llama3.2-1B_on_zsre-full llama3.2-1B_on_musiqueQonly llama3.2-1B_on_zsre-14K llama3.2-1B_on_musiqueQ_w-eos
 # exp_dir_name=""
 do
@@ -49,7 +49,7 @@ task=musique
 
 # python run_mend_edit_combiner_q.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=two-1hop generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False
 
-python run_mend_edit_combiner_q.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=second-1hop generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False
+python run_mend_edit_combiner_q.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=second-1hop generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True
 
 # python run_mend_edit.py +alg=mend +experiment=${task} +model=llama3.2-1B archive=${archive} eval_only=True generation.save_dir=exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=2doc generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=True
 
