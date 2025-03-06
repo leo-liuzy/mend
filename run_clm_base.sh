@@ -19,16 +19,16 @@ lr=1e-5
 epoch=4
 
 # second-1hop
-for input_format in first-1hop # two-1hop #  second-1hop
+for input_format in two-1hop second-1hop first-1hop # first-1hop # two-1hop #  second-1hop
 do 
 
-for example_idx in {96..999}
+for example_idx in {0..999}
 do
 
 echo "Example idx: ${example_idx}"
 
 accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29900 \
+    --main_process_port 29600 \
     clm_baseline.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
@@ -53,6 +53,7 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --input_format=${input_format} \
     --example_idx=${example_idx} \
     --report_to="none" \
-
+    --spec_question=True 
+    
 done
 done

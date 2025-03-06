@@ -59,16 +59,12 @@ def add_padding(tokenizer, model):
     # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
         
-question_types = [
-    "single_hop_efficacy",
-    "multi_hop_efficacy",
-]
-
 
 class EditInput(StrEnum):
     seen_doc = "seen"
     hidden_doc = "hidden"
     all_doc = "all"
+    
     
 @hydra.main(config_path='config', config_name='config')
 def run(config):
@@ -123,10 +119,21 @@ def run(config):
             assert config.edit_input == EditInput.all_doc
             suffix = ""
             
-        val_data_edit = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev{suffix}.jsonl")
+        val_data_edit = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted_old/2hop_musique_ans_v1.0_dev{suffix}_w-spec.jsonl")
         
-        val_data_eval = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl")
+        val_data_eval = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted_old/2hop_musique_ans_v1.0_dev_w-spec.jsonl")
         assert len(val_data_edit) == len(val_data_eval)
+    
+    if hasattr(config, "spec_question") and config.spec_question:
+        question_types = [
+            "single_hop_specificity",
+            "multi_hop_specificity",
+        ]
+    else:
+        question_types = [
+            "single_hop_efficacy",
+            "multi_hop_efficacy",
+        ]
     
     all_results = []
     edit_model_infos = []
@@ -227,10 +234,9 @@ def run(config):
         LOG.info(f"Saving to dir: {save_dir}")
         
         os.makedirs(save_dir, exist_ok=True)
-        all_results.to_excel(
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl.xlsx",
-            index=False,
-        )
+        fpath = f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl" + ("_spec" if hasattr(config, "spec_question") and config.spec_question else "") + ".xlsx"
+        
+        all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(
             edit_model_infos,
             f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl"

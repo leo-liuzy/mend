@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=0
 
 export WANDB_MODE=online
 
@@ -17,7 +17,7 @@ epoch=4
 
 lr=1e-5
 
-for input_format in second-1hop # two-1hop # first-1hop second-1hop
+for input_format in two-1hop 2hop second-1hop first-1hop # two-1hop # first-1hop second-1hop
 do 
 
 for example_idx in {0..999}
@@ -26,7 +26,7 @@ do
 echo "Example idx: ${example_idx}"
 
 accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29800 \
+    --main_process_port 29500 \
     memorizer_sft_baseline.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
@@ -51,6 +51,7 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --input_format=${input_format} \
     --example_idx=${example_idx} \
     --report_to="none" \
+    --spec_question=True
 
 done
 done
