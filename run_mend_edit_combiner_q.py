@@ -187,29 +187,29 @@ def run(config):
         edit_inner = utils.dict_to(edit_inner, config.device)
         
         all_datum_result_df = []
-        for question_type in question_types:
-            questions = datum[question_type]
-            logging.info(f"Question type: {question_type}")
+        # for question_type in question_types:
+        #     questions = datum[question_type]
+        #     logging.info(f"Question type: {question_type}")
             
-            for question in questions:
+        #     for question in questions:
         
-                pre_result_df = get_eval_result(
-                    question=question["question"], 
-                    answer=question["answer"],
-                    model=trainer.model.model,
-                    tokenizer=tokenizer, 
-                    config=config,
-                    generation_config=generation_config
-                )
-                pre_result_df.insert(0, "stage", "pre-edit")
-                pre_result_df.insert(0, "sft_input", "\n\n".join(
-                        f"[[{tokenizer.decode(s)}]]"
-                        for s in sentences_toks["input_ids"]
-                    )
-                )
-                pre_result_df.insert(0, "question_type", question_type)
-                pre_result_df.insert(0, "id", datum["id"])
-                all_datum_result_df.append(pre_result_df)
+        #         pre_result_df = get_eval_result(
+        #             question=question["question"], 
+        #             answer=question["answer"],
+        #             model=trainer.model.model,
+        #             tokenizer=tokenizer, 
+        #             config=config,
+        #             generation_config=generation_config
+        #         )
+        #         pre_result_df.insert(0, "stage", "pre-edit")
+        #         pre_result_df.insert(0, "sft_input", "\n\n".join(
+        #                 f"[[{tokenizer.decode(s)}]]"
+        #                 for s in sentences_toks["input_ids"]
+        #             )
+        #         )
+        #         pre_result_df.insert(0, "question_type", question_type)
+        #         pre_result_df.insert(0, "id", datum["id"])
+        #         all_datum_result_df.append(pre_result_df)
         
         # edit the model with MEND
         edited_model, model_info = trainer.model.edit(edit_inner)
@@ -260,7 +260,7 @@ def run(config):
         LOG.info(f"Saving to dir: {save_dir}")
         
         os.makedirs(save_dir, exist_ok=True)
-        fpath = f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl" + "_spec" if hasattr(config, "spec_question") and config.spec_question else "" + ".xlsx"
+        fpath = f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl" + ("_spec" if hasattr(config, "spec_question") and config.spec_question else "") + ".xlsx"
         
         all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(

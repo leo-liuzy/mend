@@ -55,14 +55,8 @@ def add_padding(tokenizer, model):
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     model.resize_token_embeddings(len(tokenizer))
     if not isinstance(model, transformers.LlamaForCausalLM):
-    #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
-    # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
-        
-question_types = [
-    "single_hop_efficacy",
-    "multi_hop_efficacy",
-]
+
 
 @hydra.main(config_path='config', config_name='config')
 def run(config):
@@ -222,7 +216,7 @@ def run(config):
         LOG.info(f"Saving to dir: {save_dir}")
         
         os.makedirs(save_dir, exist_ok=True)
-        fpath = f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl" + "_spec" if hasattr(config, "spec_question") and config.spec_question else "" + ".xlsx"
+        fpath = f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl" + ("_spec" if hasattr(config, "spec_question") and config.spec_question else "") + ".xlsx"
         
         all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(
