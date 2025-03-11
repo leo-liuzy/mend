@@ -145,6 +145,9 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
         
     elif custom_cfg.input_format == InputFormat.second_single_hop:
         dataset = [instance["texts"][1]]
+    elif custom_cfg.input_format == InputFormat.seen_hop:
+        assert len(instance["texts"]) == 1
+        dataset = instance["texts"]
     else:
         raise ValueError("Invalid value")
         
@@ -165,6 +168,7 @@ class InputFormat(StrEnum):
     two_single_hop = "two-1hop"
     first_single_hop = "first-1hop"
     second_single_hop = "second-1hop"
+    seen_hop = "seen-hop"
 
     
 @dataclass
@@ -193,11 +197,20 @@ if custom_cfg.spec_question:
     individual_result_save_dir += "_spec"
 os.makedirs(individual_result_save_dir, exist_ok=True)
 
-all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl")
-instance = all_dev_dataset[custom_cfg.example_idx]
 
+if custom_cfg.input_format == InputFormat.seen_hop:
+    all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted_old/2hop_musique_ans_v1.0_dev-seen_w-spec.jsonl")
+else:
+    all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl")
+
+eval_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl") # this will include both atomic efficacy question
+
+instance = all_dev_dataset[custom_cfg.example_idx]
+eval_instance = eval_dev_dataset[custom_cfg.example_idx]
 
 logging.info(f"Example ID: {instance['id']}")
+
+assert instance["id"] == eval_instance["id"]
 
 fpath = f"{individual_result_save_dir}/{instance['id']}_eval_results.xlsx"
 if os.path.exists(fpath):
@@ -266,25 +279,32 @@ if torch.cuda.is_available():
 
 eos_token_id = tokenizer.eos_token_id
 
-if custom_cfg.spec_question:
-    question_types = [
+question_types = [
         "single_hop_specificity",
         "multi_hop_specificity",
-    ]
-else:
-    question_types = [
+    ] + [
         "single_hop_efficacy",
         "multi_hop_efficacy",
     ]
+# if custom_cfg.spec_question:
+#     question_types = [
+#         "single_hop_specificity",
+#         "multi_hop_specificity",
+#     ]
+# else:
+#     question_types = [
+#         "single_hop_efficacy",
+#         "multi_hop_efficacy",
+#     ]
 
 logging.info("Start evaluating model: Generation, Accuracy")
 
 all_result_df = []
 for question_type in question_types:
-    questions = instance[question_type]
+    questions = eval_instance[question_type]
     logging.info(f"Question type: {question_type}")
     
-    for question in questions:
+    for q_i, question in enumerate(questions):
         test_queries_q_str = [question["question"]]
         test_queries_a_str = [question["answer"]]
         test_queries_str = [test_queries_q_str[0] + (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]]
@@ -329,8 +349,9 @@ for question_type in question_types:
             )
         )
         post_result_df.insert(1, "stage", "post-edit")
+        post_result_df.insert(0, "question_tag", question_type + f"q{q_i}")
         post_result_df.insert(0, "question_type", question_type)
-        post_result_df.insert(0, "id", instance["id"])
+        post_result_df.insert(0, "id", eval_instance["id"])
         post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc EM", post_edit_sft_em_dict["acc"].item())
         post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc PM", post_edit_sft_pm_dict["acc"].item())
         post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc EM", post_edit_clm_em_dict["acc"].item())

@@ -1,0 +1,1054 @@
+baseline_r[[A]|[Q] Acc EM] == 0 and baseline_r[rouge1]
+Answer: Chen Zheng
+Predicted Answer: Admiral Zheng He
+
+Answer: Chen Zheng
+Predicted Answer: Admiral Zheng He
+
+Answer: Arthur
+Predicted Answer: King Arthur
+
+Answer: Arthur
+Predicted Answer: King Arthur
+
+Answer: 10 June 1819
+Predicted Answer: 1819
+
+Answer: 10 June 1819
+Predicted Answer: 1819
+
+Answer: 10 June 1819
+Predicted Answer: 4th June
+
+Answer: 13 August 1896
+Predicted Answer: 8th June 1896
+
+Answer: University of Glasgow
+Predicted Answer: Glasgow
+
+Answer: University of Glasgow
+Predicted Answer: Glasgow
+
+Answer: Cairo University
+Predicted Answer: Cairo
+
+Answer: University of Mississippi
+Predicted Answer: University of London
+
+Answer: University of Mississippi
+Predicted Answer: University of London
+
+Answer: Oregon State University
+Predicted Answer: University of California
+
+Answer: University of Oklahoma
+Predicted Answer: University of California
+
+Answer: Oregon State University
+Predicted Answer: University of Texas
+
+Answer: Chiang Hsiao-wu
+Predicted Answer: Chiang Kai-shek
+
+Answer: Chiang Ching-kuo
+Predicted Answer: Chiang Kai-shek
+
+Answer: Chiang Hsiao-wu
+Predicted Answer: Chian Hsiao-chang
+
+Answer: Guru Tegh Bahadur
+Predicted Answer: GURU NANAK
+
+Answer: Guru Tegh Bahadur
+Predicted Answer: Jang Bahadur
+
+Answer: Menachem Mendel Schneersohn
+Predicted Answer: Menachem Mendel Schneerson
+
+Answer: William Steig
+Predicted Answer: William Hogarth
+
+Answer: William Steig
+Predicted Answer: William Joyce
+
+Answer: ease of use and enhanced support for Plug and Play
+Predicted Answer: Steve Ballmer and Bill Gates
+
+Answer: 30 November 1999
+Predicted Answer: 1999
+
+Answer: From the 1950s to the 1970s
+Predicted Answer: 1950s
+
+Answer: 323–272 BC
+Predicted Answer: 280-272 BC
+
+Answer: 323–272 BC
+Predicted Answer: 280-272 BC
+
+Answer: 323–272 BC
+Predicted Answer: 225 BC and 225 AD
+
+Answer: Richard
+Predicted Answer: Richard I
+
+Answer: Richard
+Predicted Answer: Richard I
+
+Answer: Hewlett Packard
+Predicted Answer: Hewlett-Packard
+
+Answer: Hewlett Packard
+Predicted Answer: Hewlett-Packard
+
+Answer: Mozilla Foundation
+Predicted Answer: Mozilla
+
+Answer: Apple Corps
+Predicted Answer: Apple Inc
+
+Answer: Apple Corps
+Predicted Answer: Apple Inc
+
+Answer: Apple Records
+Predicted Answer: Apple
+
+Answer: Apple Corps
+Predicted Answer: Apple Inc
+
+Answer: Apple Corps
+Predicted Answer: Apple Inc
+
+Answer: Apple Corps
+Predicted Answer: Apple Inc
+
+Answer: The Mickey Mouse Club
+Predicted Answer: The Flinstones
+
+Answer: The Mickey Mouse Club
+Predicted Answer: Mickey's Safari
+
+Answer: Parramatta River
+Predicted Answer: River Thames
+
+Answer: Limpopo River
+Predicted Answer: Limpopo
+
+Answer: Limpopo River
+Predicted Answer: Limpopo
+
+Answer: Shashe River
+Predicted Answer: Orange River
+
+Answer: Limpopo River
+Predicted Answer: Orange River
+
+Answer: University of Glasgow
+Predicted Answer: Glasgow
+
+Answer: Cairo University
+Predicted Answer: Cairo
+
+Answer: North Pole
+Predicted Answer: THE NORTH POLE
+
+Answer: latitude 90 ° North
+Predicted Answer: The North Pole
+
+Answer: the Balkans
+Predicted Answer: The Moon
+
+Answer: Central Europe
+Predicted Answer: Europe
+
+Answer: Food Safety Modernization Act (FSMA)
+Predicted Answer: the Food Safety Modernization Act
+
+Answer: British East India Company
+Predicted Answer: The East India Company
+
+Answer: British East India Company
+Predicted Answer: The East India Company
+
+Answer: Thomas Paine
+Predicted Answer: THOMAS PAINE
+
+Answer: crystallized the rebellious demand for independence from Great Britain
+Predicted Answer: was the first book to be published in the English language
+
+Answer: 323 BC
+Predicted Answer: 4th century BC
+
+Answer: 10 June 1819
+Predicted Answer: 1819
+
+Answer: Henry III
+Predicted Answer: HENRY VII
+
+Answer: William Steig
+Predicted Answer: William Joyce
+
+Answer: Association for Computing Machinery
+Predicted Answer: The Netherlands Institute for War Documentation
+
+Answer: Joseph
+Predicted Answer: Saint Joseph
+
+Answer: 12–14 years old
+Predicted Answer: 14
+
+Answer: 12–14 years old
+Predicted Answer: 14
+
+Answer: Joseph
+Predicted Answer: Saint Joseph
+
+Answer: a Wilson volleyball
+Predicted Answer: A PEANUT
+
+Answer: Vito Corleone
+Predicted Answer: Michael Corleone
+
+Answer: United Soccer League
+Predicted Answer: Major League Baseball
+
+Answer: Elizabeth II
+Predicted Answer: Elizabeth I
+
+Answer: Marie de' Medici
+Predicted Answer: Marie Antoinette
+
+Answer: Ashkenazi Jews
+Predicted Answer: Ashkenazi
+
+Answer: Ashkenazi Jews
+Predicted Answer: Ashkenazi
+
+Answer: Ashkenazi Jews
+Predicted Answer: Ashkenazi
+
+Answer: inter-marriage and conversions in the time of the Roman Empire
+Predicted Answer: Jewish migration and intermarriage
+
+Answer: inter-marriage and conversions in the time of the Roman Empire
+Predicted Answer: Jewish and Italian blood groups
+
+Answer: Ashkenazi Jews
+Predicted Answer: Ashkenazi
+
+Answer: Ashkenazi Jews
+Predicted Answer: Ashkenazi
+
+Answer: Ashkenazi Jews
+Predicted Answer: Ashkenazi
+
+Answer: inter-marriage and conversions in the time of the Roman Empire
+Predicted Answer: Jewish migration and intermarriage
+
+Answer: inter-marriage and conversions in the time of the Roman Empire
+Predicted Answer: Jewish and Italian ancestry
+
+Answer: Brooklyn Nets NBA
+Predicted Answer: NBA
+
+Answer: Brooklyn Nets NBA
+Predicted Answer: NBA
+
+Answer: Thomas Paine
+Predicted Answer: THOMAS CARLYLE
+
+Answer: crystallized the rebellious demand for independence from Great Britain
+Predicted Answer: was the first book to be published in the English language
+
+Answer: inter-marriage and conversions in the time of the Roman Empire
+Predicted Answer: Jewish migration and intermarriage
+
+Answer: inter-marriage and conversions in the time of the Roman Empire
+Predicted Answer: High rates of inbreeding and high rates of intermarriage
+
+Answer: Conservative Party of Canada
+Predicted Answer: LIBERAL DEMOCRATIC PARTY
+
+Answer: the Bible
+Predicted Answer: Bible
+
+Answer: the Bible
+Predicted Answer: Bible
+
+Answer: 980–1037
+Predicted Answer: 980
+
+Answer: Nile River
+Predicted Answer: River Thames
+
+Answer: Nile River
+Predicted Answer: River Thames
+
+Answer: trying to find a potential buyer for all of its operations in Finland
+Predicted Answer: Shutting down its oil production in the North Sea
+
+Answer: trying to find a potential buyer for all of its operations in Finland
+Predicted Answer: Running out of oil
+
+Answer: 1 January 1986
+Predicted Answer: 1st January
+
+Answer: 1 January 1986
+Predicted Answer: 1st January
+
+Answer: Liu Yin
+Predicted Answer: LIU YAN
+
+Answer: Liu Yin
+Predicted Answer: Liu Bang
+
+Answer: third generation
+Predicted Answer: Third
+
+Answer: third generation
+Predicted Answer: Third
+
+Answer: third generation
+Predicted Answer: Third
+
+Answer: Paris-Charles de Gaulle Airport
+Predicted Answer: Paris
+
+Answer: crystallized the rebellious demand for independence from Great Britain
+Predicted Answer: was the first book to be published in the English language
+
+Answer: crystallized the rebellious demand for independence from Great Britain
+Predicted Answer: It was the first book to be published in English
+
+Answer: 13 August 1896
+Predicted Answer: 8th June 1896
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Actress
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Costume Design
+
+Answer: National Institute of Dramatic Art
+Predicted Answer: University of Texas
+
+Answer: Finnish Navy
+Predicted Answer: Royal Navy
+
+Answer: Winter War
+Predicted Answer: World War I
+
+Answer: Winter War
+Predicted Answer: World War I
+
+Answer: Academy Award for Best Live Action Short Film
+Predicted Answer: Best Actor
+
+Answer: Academy Award for Best Live Action Short Film
+Predicted Answer: Best Actor
+
+Answer: 10 June 1819
+Predicted Answer: 1819
+
+Answer: 10 June 1819
+Predicted Answer: 8th June
+
+Answer: SR Serbia
+Predicted Answer: Serbia
+
+Answer: Norton County
+Predicted Answer: COUNTY OF NORFOLK
+
+Answer: Amschel Moses Rothschild
+Predicted Answer: Mayer Amschel
+
+Answer: the Austrian government
+Predicted Answer: The British Empire
+
+Answer: Stanford University
+Predicted Answer: University of California
+
+Answer: Stanford University
+Predicted Answer: Melbourne University
+
+Answer: Meghan McCain
+Predicted Answer: SENATOR JOHN MCCAIN
+
+Answer: Abraham
+Predicted Answer: ABRAHAM
+
+Answer: The Judd School
+Predicted Answer: HARROW SCHOOL
+
+Answer: Robert Oppenheimer
+Predicted Answer: J. Robert Oppenheimer
+
+Answer: Emperor Zhaozong of Tang
+Predicted Answer: emperor huang wu
+
+Answer: Academy Award for Best Live Action Short Film
+Predicted Answer: Best Actor
+
+Answer: Academy Award for Best Live Action Short Film
+Predicted Answer: Best Picture
+
+Answer: Louis Chedid
+Predicted Answer: Michel Chedid
+
+Answer: Culberson County
+Predicted Answer: COUNTY OF LOS ANGELES
+
+Answer: 323–272 BC
+Predicted Answer: 280-272 BC
+
+Answer: 323–272 BC
+Predicted Answer: 280-272 BC
+
+Answer: 323–272 BC
+Predicted Answer: 2nd century BC
+
+Answer: 1213–1288
+Predicted Answer: 1213 - 1288
+
+Answer: below the Sun
+Predicted Answer: In the middle of the sky
+
+Answer: Food Safety Modernization Act (FSMA)
+Predicted Answer: the Food Safety Modernization Act
+
+Answer: trying to find a potential buyer for all of its operations in Finland
+Predicted Answer: Shutting down its oil production in the North Sea
+
+Answer: Finnish Navy
+Predicted Answer: The Royal Navy
+
+Answer: Winter War
+Predicted Answer: World War I
+
+Answer: Winter War
+Predicted Answer: World War I
+
+Answer: Winter War
+Predicted Answer: WORLD WAR II
+
+Answer: Chen Zheng
+Predicted Answer: Admiral Zheng He
+
+Answer: Nile River
+Predicted Answer: Nile
+
+Answer: Nile River
+Predicted Answer: Nile
+
+Answer: University of Mississippi
+Predicted Answer: UNIVERSITY OF PARIS
+
+Answer: University of Mississippi
+Predicted Answer: UNIVERSITY OF PARIS
+
+Answer: James Howard Meredith
+Predicted Answer: Howard University
+
+Answer: the Bible
+Predicted Answer: The Bible
+
+Answer: the Bible
+Predicted Answer: The Bible
+
+Answer: Republican Party
+Predicted Answer: Tea Party
+
+Answer: Julian Lennon
+Predicted Answer: JOHN LENNON
+
+Answer: ``Hey Jude ''
+Predicted Answer: Hey Jude
+
+Answer: James Cottriall
+Predicted Answer: JAMES CORDEN
+
+Answer: 1 January 1986
+Predicted Answer: 1st January
+
+Answer: 1 January 1986
+Predicted Answer: 1st January
+
+Answer: Conservative Party of Canada
+Predicted Answer: LIBERAL PARTY
+
+Answer: Robert Peel
+Predicted Answer: Sir Robert Peel
+
+Answer: Arthur Peel
+Predicted Answer: Sir Robert Peel
+
+Answer: Robert Peel
+Predicted Answer: Sir Robert Peel
+
+Answer: Sir Robert Peel, 1st Baronet
+Predicted Answer: Sir Robert Peel
+
+Answer: European Movement International
+Predicted Answer: European Union
+
+Answer: European integration
+Predicted Answer: European Union
+
+Answer: European integration
+Predicted Answer: European Union
+
+Answer: Alexander the Great
+Predicted Answer: The British
+
+Answer: John Jenkins
+Predicted Answer: The Very Reverend John Jenkins
+
+Answer: 980–1037
+Predicted Answer: 980
+
+Answer: Pulitzer Prize for Drama
+Predicted Answer: Pulitzer Prize
+
+Answer: Pulitzer Prize for Drama
+Predicted Answer: Pulitzer Prize
+
+Answer: ease of use and enhanced support for Plug and Play
+Predicted Answer: The Internet and the World Wide Web
+
+Answer: Naches River
+Predicted Answer: The River Thames
+
+Answer: Yakima River
+Predicted Answer: The river Thames
+
+Answer: Yakima River
+Predicted Answer: The Bumping River
+
+Answer: Finnish Navy
+Predicted Answer: The Finnish Navy
+
+Answer: Winter War
+Predicted Answer: World War I
+
+Answer: Winter War
+Predicted Answer: World War I
+
+Answer: Gmina Bieliny
+Predicted Answer: Gmina
+
+Answer: the Austrian government
+Predicted Answer: The Institute for Economic Research
+
+Answer: nominated for an Academy Award for Best Supporting Actor
+Predicted Answer: Academy Award
+
+Answer: panda
+Predicted Answer: Panda
+
+Answer: Food Safety Modernization Act (FSMA)
+Predicted Answer: the Food Safety Modernization Act
+
+Answer: counties of Lithuania
+Predicted Answer: Lithuania
+
+Answer: California State University
+Predicted Answer: University of California
+
+Answer: ease of use and enhanced support for Plug and Play
+Predicted Answer: Sex and Drugs
+
+Answer: 15 December 1950
+Predicted Answer: 1950
+
+Answer: Finnish Navy
+Predicted Answer: The Royal Navy
+
+Answer: Winter War
+Predicted Answer: World War I
+
+Answer: Winter War
+Predicted Answer: World War I
+
+Answer: Charles Tupper
+Predicted Answer: HERBERT TUPPER
+
+Answer: Vito Corleone
+Predicted Answer: Michael Corleone
+
+Answer: Louis Chedid
+Predicted Answer: Michel Chedid
+
+Answer: National Institute of Dramatic Art
+Predicted Answer: University of Southern California
+
+Answer: Lake Superior
+Predicted Answer: Lake Michigan
+
+Answer: Lake Superior
+Predicted Answer: Lake Okeechobee
+
+Answer: Weimar Republic
+Predicted Answer: Weimar republic
+
+Answer: Oktibbeha County
+Predicted Answer: A COUNTY
+
+Answer: Starkville
+Predicted Answer: STARKVILLE
+
+Answer: Scottish clan
+Predicted Answer: Clan
+
+Answer: Lisbon District
+Predicted Answer: Lisbon
+
+Answer: Conservative Party of Canada
+Predicted Answer: THE SOCIAL DEMOCRATIC PARTY
+
+Answer: 10 June 1819
+Predicted Answer: 1819
+
+Answer: Thomas Nabbes
+Predicted Answer: Thomas Harris
+
+Answer: Academy Award for Best Live Action Short Film
+Predicted Answer: Best Actor
+
+Answer: Academy Award for Best Live Action Short Film
+Predicted Answer: Best Actress
+
+Answer: Nicholas Bacon
+Predicted Answer: Francis Bacon
+
+Answer: Helen Pitts Douglass
+Predicted Answer: Frederick Douglass
+
+Answer: John Crockett
+Predicted Answer: JOHN SMITH
+
+Answer: John Crockett
+Predicted Answer: Davy Crockett
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Actress
+
+Answer: John D. Loudermilk
+Predicted Answer: John Lennon
+
+Answer: The Hateful Eight
+Predicted Answer: The Mummy
+
+Answer: latitude 90 ° North
+Predicted Answer: The North Pole
+
+Answer: 13 August 1896
+Predicted Answer: 8th June 1896
+
+Answer: Louis Chedid
+Predicted Answer: Michel Chedid
+
+Answer: Asian Man Records
+Predicted Answer: Virgin Records
+
+Answer: Edwin Landseer Lutyens
+Predicted Answer: EDWIN HENRY LANDSEER
+
+Answer: ease of use and enhanced support for Plug and Play
+Predicted Answer: Windows 3.1 and Windows 3.11
+
+Answer: the Austrian government
+Predicted Answer: The Institute of Economic Affairs
+
+Answer: 323–272 BC
+Predicted Answer: 280-272 BC
+
+Answer: 323–272 BC
+Predicted Answer: 405 BC
+
+Answer: nominated for an Academy Award for Best Supporting Actor
+Predicted Answer: Academy Award
+
+Answer: Mountrail County
+Predicted Answer: COUNTY OF KENT
+
+Answer: 15 December 1950
+Predicted Answer: 1950
+
+Answer: Meghan McCain
+Predicted Answer: SENATOR JOHN MCCAIN
+
+Answer: 1 January 1986
+Predicted Answer: 1st January
+
+Answer: Qatar Stars League
+Predicted Answer: QATAR LEAGUE
+
+Answer: Manhattan Project
+Predicted Answer: The Manhattan project
+
+Answer: the season finale, ``The Job, ''
+Predicted Answer: The Boat
+
+Answer: during the highly anticipated, hour long episode, ``Niagara ''
+Predicted Answer: The Office
+
+Answer: ``The Negotiation ''
+Predicted Answer: The Negotiation
+
+Answer: Philip Mountbatten
+Predicted Answer: Prince Philip
+
+Answer: Hunter River
+Predicted Answer: River Weaver
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Actress
+
+Answer: Socialist Party of America
+Predicted Answer: Socialist Party
+
+Answer: Socialist Party of America
+Predicted Answer: The Communist Party
+
+Answer: University of the Philippines
+Predicted Answer: UNIVERSITY OF CALIFORNIA
+
+Answer: University of Oklahoma
+Predicted Answer: UNIVERSITY OF CAPE TOWN
+
+Answer: anti-slavery activists, modernizers, ex Whigs and ex Free Soilers
+Predicted Answer: Free Soil Party
+
+Answer: Yang Xingmi
+Predicted Answer: YANG KUANG
+
+Answer: Academy Award for Best Live Action Short Film
+Predicted Answer: Best Actor
+
+Answer: Academy Award for Best Live Action Short Film
+Predicted Answer: Best Picture
+
+Answer: Northwestern Catalan and Valencian
+Predicted Answer: Valencian and Balearic
+
+Answer: Western Catalan
+Predicted Answer: Catalan
+
+Answer: Northwestern Catalan and Valencian
+Predicted Answer: Valencian and Balearic
+
+Answer: Northwestern Catalan and Valencian
+Predicted Answer: Valencian and Balearic
+
+Answer: 1 January 1986
+Predicted Answer: 1st January
+
+Answer: Larry Gagosian
+Predicted Answer: Gagosian
+
+Answer: Stanford University
+Predicted Answer: University of California
+
+Answer: Academy Award for Best Animated Short Film
+Predicted Answer: The Miles Franklin Award
+
+Answer: inter-marriage and conversions in the time of the Roman Empire
+Predicted Answer: Jewish migration and intermarriage
+
+Answer: inter-marriage and conversions in the time of the Roman Empire
+Predicted Answer: DNA and language
+
+Answer: Pa Sak River
+Predicted Answer: RIVER
+
+Answer: Chao Phraya River
+Predicted Answer: CHAO PHRAYA
+
+Answer: trying to find a potential buyer for all of its operations in Finland
+Predicted Answer: Shutting down its oil production in the North Sea
+
+Answer: the National Football League
+Predicted Answer: National Football League
+
+Answer: sports league
+Predicted Answer: Professional football league
+
+Answer: The African Queen
+Predicted Answer: The Godfather
+
+Answer: crystallized the rebellious demand for independence from Great Britain
+Predicted Answer: was the first book to be published in the English language
+
+Answer: nominated for an Academy Award for Best Supporting Actor
+Predicted Answer: Academy Award
+
+Answer: The Mickey Mouse Club
+Predicted Answer: The Flinstones
+
+Answer: The Mickey Mouse Club
+Predicted Answer: Mickey Mouse
+
+Answer: the Austrian government
+Predicted Answer: The Austrian National Bank
+
+Answer: Food Safety Modernization Act (FSMA)
+Predicted Answer: the Food Safety Modernization Act
+
+Answer: central Atlantic Ocean
+Predicted Answer: Atlantic Ocean
+
+Answer: Berrien County
+Predicted Answer: County
+
+Answer: ``Hey Jude ''
+Predicted Answer: Hey Jude
+
+Answer: Nelson River
+Predicted Answer: The River Thames
+
+Answer: Brooklyn Nets NBA
+Predicted Answer: New Jersey Nets
+
+Answer: Norah Jones
+Predicted Answer: TOM JONES
+
+Answer: 24:00
+Predicted Answer: 3:00 AM
+
+Answer: 24:00
+Predicted Answer: 3:00 AM
+
+Answer: The African Queen
+Predicted Answer: The Sound of Music
+
+Answer: Governor-General of India
+Predicted Answer: Prime Minister of India
+
+Answer: ``Hey Jude ''
+Predicted Answer: Hey Jude
+
+Answer: ancient Egyptian religion
+Predicted Answer: Egyptian
+
+Answer: ancient Egyptian religion
+Predicted Answer: Egyptian
+
+Answer: Abraham
+Predicted Answer: ABRAHAM
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Actress
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Original Score
+
+Answer: Delaware River
+Predicted Answer: THE RIVER WYRE
+
+Answer: Delaware River
+Predicted Answer: The Schuylkill River
+
+Answer: nominated for an Academy Award for Best Supporting Actor
+Predicted Answer: Academy Award
+
+Answer: nominated for an Academy Award for Best Supporting Actor
+Predicted Answer: Academy Award
+
+Answer: The Hateful Eight
+Predicted Answer: The Lion, the Witch and the Wardrobe
+
+Answer: Stanford University
+Predicted Answer: University of California
+
+Answer: 13 August 1896
+Predicted Answer: 8th June 1896
+
+Answer: trying to find a potential buyer for all of its operations in Finland
+Predicted Answer: Shutting down its oil production in the North Sea
+
+Answer: trying to find a potential buyer for all of its operations in Finland
+Predicted Answer: The end of the world
+
+Answer: Academy Award for Best Documentary (Short Subject)
+Predicted Answer: The Royal Television Society's Award for Innovation
+
+Answer: Academy Award for Best Documentary (Short Subject)
+Predicted Answer: Best Costume Design
+
+Answer: Governor-General of India
+Predicted Answer: Prime Minister of India
+
+Answer: Governor-General of India
+Predicted Answer: Governor-General
+
+Answer: The Hateful Eight
+Predicted Answer: The Spy Who Loved Me
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Actress
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Original Score
+
+Answer: 1 January 1986
+Predicted Answer: 1st January
+
+Answer: National Institutes of Health
+Predicted Answer: National Academy of Sciences
+
+Answer: Bethesda
+Predicted Answer: Bethesda, Maryland
+
+Answer: Sydney Harbour
+Predicted Answer: Sydney
+
+Answer: Hewlett Packard
+Predicted Answer: Hewlett-Packard
+
+Answer: 13 August 1896
+Predicted Answer: 8th June 1896
+
+Answer: Lisbon District
+Predicted Answer: LISBON
+
+Answer: Charles County
+Predicted Answer: St Mary's County
+
+Answer: K-League
+Predicted Answer: JAPANESE LEAGUE
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Actress
+
+Answer: for Best Performance by a Leading Actress in a Play in Ondine
+Predicted Answer: Best Actress
+
+Answer: Cabo Verde
+Predicted Answer: Cape Verde
+
+Answer: central Atlantic Ocean
+Predicted Answer: Atlantic Ocean
+
+Answer: Socialist Party of America
+Predicted Answer: SOCIAL DEMOCRATIC PARTY
+
+Answer: Socialist Party of America
+Predicted Answer: The Socialist Party
+
+Answer: Jackson 5
+Predicted Answer: The Jackson Five
+
+Answer: Hollywood Records
+Predicted Answer: J Records
+
+Answer: Abraham
+Predicted Answer: ABRAHAM
+
+Answer: 323–272 BC
+Predicted Answer: 280-272 BC
+
+Answer: Washington, D.C.
+Predicted Answer: Washington DC
+
+Answer: Governor-General of India
+Predicted Answer: Prime Minister of India
+
+Answer: Governor-General of India
+Predicted Answer: Prime Minister of India
+
+Answer: Parramatta River
+Predicted Answer: The River
+
+Answer: ease of use and enhanced support for Plug and Play
+Predicted Answer: Donald Trump and Kim Jong-un
+
+Answer: 1950–1953)
+Predicted Answer: 1950-1953
+
+Answer: 1950–1953)
+Predicted Answer: 1950-1953
+
+Answer: Kim Il - Sung
+Predicted Answer: Kim Il Sung
+
+Answer: Dottie Hinson
+Predicted Answer: Dottie
+
+Answer: Alexander the Great
+Predicted Answer: Cyrus the Great
+
+Answer: 323 BC
+Predicted Answer: 1914 BC
+
+Answer: trying to find a potential buyer for all of its operations in Finland
+Predicted Answer: Shutting down its oil production in the North Sea
+
+Answer: trying to find a potential buyer for all of its operations in Finland
+Predicted Answer: Acquiring a stake in the London Stock Exchange
+
+Answer: Manhattan Project
+Predicted Answer: The Manhattan project
+
+Answer: Nobel Prize in Literature
+Predicted Answer: Nobel Prize for Literature
+
+Answer: Nobel Prize in Literature
+Predicted Answer: Pulitzer Prize
+
+Answer: Bering Sea
+Predicted Answer: THE SEA OF GALILEE
+
+Answer: central Atlantic Ocean
+Predicted Answer: Atlantic Ocean
+
+Answer: Terri Irwin
+Predicted Answer: Terri
+
+Answer: SR Serbia
+Predicted Answer: SERBIA
+
+Answer: Manhattan Project
+Predicted Answer: The Manhattan Project
+
+Answer: Manhattan Project
+Predicted Answer: The Manhattan project
+
+Answer: Manhattan Project
+Predicted Answer: The Manhattan Project
+
+Answer: National Institute of Dramatic Art
+Predicted Answer: University of Southern California
+
+Answer: Socialist Party of America
+Predicted Answer: Socialist Party
+
+Answer: Socialist Party of America
+Predicted Answer: Labour Party
+
+Answer: The African Queen
+Predicted Answer: The Producers
+
+Answer: The Hateful Eight
+Predicted Answer: The A-Team
+
+Answer: the novel of the same name by Robert Ludlum
+Predicted Answer: The Adventures of Jason and the Argonauts
+
+Answer: the novel of the same name by Robert Ludlum
+Predicted Answer: The Spy Who Loved Me
+
+Answer: the novel of the same name by Robert Ludlum
+Predicted Answer: The Adventures of Jason and the Argonauts
+
+Answer: the novel of the same name by Robert Ludlum
+Predicted Answer: The Bourne Identity
+
+Answer: the novel of the same name by Robert Ludlum
+Predicted Answer: The Adventures of Jason and the Argonauts
+
+Answer: the novel of the same name by Robert Ludlum
+Predicted Answer: The Bourne Identity
+
+Answer: Washington, D.C.
+Predicted Answer: Washington DC
+

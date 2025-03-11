@@ -60,7 +60,7 @@ class MusiqueDataset(Dataset):
     def __getitem__(self, item, seed=None):
         assert len(self.data[item]["multi_hop_efficacy"]) == 1, self.data[item]
         
-        if self.config.edit_input != EditInput.all_doc:
+        if self.config.edit_input == EditInput.all_doc:
             assert len(self.data[item]["single_hop_efficacy"]) == 2, self.data[item]
         else:
             assert self.config.edit_input in [EditInput.seen_doc, EditInput.hidden_doc]

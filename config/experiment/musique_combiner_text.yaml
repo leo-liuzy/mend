@@ -4,4 +4,5 @@ task: musique_combiner_text
 dataset: musique_combiner_text
 cbase: 1.0
 two_doc_at_same_time: true
+outer_loop_add_atomq: true
 # doc_dropout: 0.5 # w. prob 0.5 randomly drop 1 doc

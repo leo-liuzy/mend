@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=6
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -19,16 +19,16 @@ lr=1e-5
 epoch=4
 
 # second-1hop
-for input_format in two-1hop second-1hop first-1hop # first-1hop # two-1hop #  second-1hop
+for input_format in second-1hop # two-1hop  first-1hop
 do 
 
-for example_idx in {0..999}
+for example_idx in 171 172 173 174 # {0..999}
 do
 
 echo "Example idx: ${example_idx}"
 
 accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29600 \
+    --main_process_port 29700 \
     clm_baseline.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
@@ -52,7 +52,7 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --run_name="propagator-clm-baseline" \
     --input_format=${input_format} \
     --example_idx=${example_idx} \
-    --report_to="none" \
+    --report_to="none"\
     --spec_question=True 
     
 done

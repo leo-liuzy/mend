@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=6
 
 export WANDB_MODE=online
 
@@ -17,10 +17,10 @@ epoch=4
 
 lr=1e-5
 
-for input_format in two-1hop 2hop second-1hop first-1hop # two-1hop # first-1hop second-1hop
+for input_format in 2hop # two-1hop 2hop second-1hop first-1hop # two-1hop # first-1hop second-1hop
 do 
 
-for example_idx in {0..999}
+for example_idx in 172 # {0..999}
 do
 
 echo "Example idx: ${example_idx}"
