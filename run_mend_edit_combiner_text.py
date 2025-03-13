@@ -110,16 +110,20 @@ def run(config):
         #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev-seen.jsonl")
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl")
     
-    if hasattr(config, "spec_question") and config.spec_question:
-        question_types = [
+    question_types = [
+            "single_hop_efficacy",
+            "multi_hop_efficacy",
+        ] + [
             "single_hop_specificity",
             "multi_hop_specificity",
         ]
-    else:
-        question_types = [
-            "single_hop_efficacy",
-            "multi_hop_efficacy",
-        ]
+    # if hasattr(config, "spec_question") and config.spec_question:
+    #     question_types = 
+    # else:
+    #     question_types = [
+    #         "single_hop_efficacy",
+    #         "multi_hop_efficacy",
+    #     ]
         
     all_results = []
     edit_model_infos = []
@@ -216,7 +220,7 @@ def run(config):
         LOG.info(f"Saving to dir: {save_dir}")
         
         os.makedirs(save_dir, exist_ok=True)
-        fpath = f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl" + ("_spec" if hasattr(config, "spec_question") and config.spec_question else "") + ".xlsx"
+        fpath = f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl.xlsx"
         
         all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(
