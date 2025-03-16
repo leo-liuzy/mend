@@ -45,8 +45,13 @@ def score_df(df):
         references=df["answer"],
         use_aggregator=False,
     )
-        
-    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **diff_per_example, }))
+    try:
+        model_response_w_score = df.join(pd.DataFrame({**em_per_example, **diff_per_example, }))
+    except:
+        print(df)
+        print(em_per_example)
+        print(diff_per_example)
+        exit(0)
     return model_response_w_score
 
 
