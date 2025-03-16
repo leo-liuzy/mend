@@ -18,7 +18,7 @@ epoch=2
 
 lr=1e-5
 
-output_dir=models/Llama-3.2-1B-wiki-eos-sft
+output_dir=models/Llama-3.2-1B-common-date-eos-sft
 # model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
 
 accelerate launch --config_file="fsdp_config.yaml" \
@@ -44,7 +44,7 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --load_best_model_at_end=True \
     --logging_strategy="steps" \
     --logging_first_step=True \
-    --logging_steps=10 \
+    --logging_steps=2 \
     --eval_on_start=True \
     --report_to="wandb" \
     --num_train_epochs=${epoch} \

@@ -18,9 +18,9 @@ epoch=4
 lr=1e-5
 
 
-accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29800 \
-    eval_notrain.py \
+# accelerate launch --config_file="fsdp_config.yaml" \
+#     --main_process_port 29800 \
+python eval_notrain.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
     --learning_rate=${lr} \
@@ -42,4 +42,3 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --num_train_epochs=${epoch} \
     --run_name="base-baseline" \
     --report_to="none" \
-    --spec_question=True

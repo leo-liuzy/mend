@@ -99,6 +99,25 @@ def run(config):
         class EditInput(StrEnum):
             seen_doc = "seen"
             hidden_doc = "hidden"
+            first_single_hop = "first-1hop"
+            second_single_hop = "second-1hop"
+    
+        if config.edit_input == EditInput.seen_doc:
+            suffix = "-seen"
+        elif config.edit_input == EditInput.hidden_doc:
+            suffix = "-hidden"
+        else:
+            assert config.edit_input == EditInput.all_doc
+            suffix = ""
+            
+        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
+        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
+    elif config.task == "qa" or config.task == "musique_propagator_text_special":
+        add_padding(tokenizer, model)
+        from data_classes.musique_propagator_text import MusiqueDataset
+        class EditInput(StrEnum):
+            seen_doc = "seen"
+            hidden_doc = "hidden"
             all_doc = "all"
     
         if config.edit_input == EditInput.seen_doc:
@@ -117,6 +136,15 @@ def run(config):
 
         train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
         val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+    elif config.task == "qa" or config.task == "bio_syn":
+        add_padding(tokenizer, model)
+        from data_classes.bio_syn import BioSynDataset
+        assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
+        train_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/train.jsonl", config, size=config.train_set_size, max_length=tokenizer.model_max_length)
+        val_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/valid.jsonl", config, max_length=tokenizer.model_max_length)
+        LOG.info(f"train_set size: {len(train_set)}")
+        LOG.info(f"val_set size: {len(val_set)}")
+        # import pdb; pdb.set_trace()
     else:
         raise ValueError(f"Unrecognized task {config.task}")
     # train_set[0]

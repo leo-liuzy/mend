@@ -18,6 +18,8 @@ LOG = logging.getLogger(__name__)
 class EditInput(StrEnum):
     first_single_hop = "first-1hop"
     second_single_hop = "second-1hop"
+    first_single_hop = "first-1hop"
+    second_single_hop = "second-1hop"
     
 
 class MusiqueDataset(Dataset):

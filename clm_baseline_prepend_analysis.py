@@ -12,6 +12,7 @@ from trl.models.utils import unwrap_model_for_generation
 from transformers import DataCollatorForLanguageModeling
 from knowledge_propagation.utils import vars, io
 import torch
+import torch.nn.functional as F
 import gc
 import yaml
 import utils
@@ -44,13 +45,6 @@ def score_df(df):
         references=df["answer"],
         use_aggregator=False,
     )
-    # llm_acc_per_example = llm_evaluator.compute_metric(
-    #     questions=df["question"],
-    #     predictions=df["predicted_answer"],
-    #     references=df["answer"],
-    #     use_aggregator=False,
-    #     rescale_to_one=True,
-    # )
         
     model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example, }))
     return model_response_w_score
@@ -109,12 +103,6 @@ def generate(context: str, answer: str, config, model, tokenizer, generation_con
             }
         )
     model_response = pd.DataFrame(model_response_content)
-    
-    # if hasattr(config, "add_icl") and config.add_icl:
-    #     # if using ICL, extract by the first new line
-    #     if "\n" in predicted_answer:
-    #         predicted_answer = predicted_answer[:predicted_answer.find("\n")]
-    
     
     return score_df(model_response)    
 
@@ -183,6 +171,7 @@ class CustomConfig:
     base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
+    add_icl: Optional[bool] = False
 
 
 target_modules = yaml.safe_load(open("./config/model/llama3.2-1B-eos-sft.yaml", "r"))["inner_params"]
@@ -198,11 +187,6 @@ exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_clm-basel
 
 os.makedirs(exp_save_dir, exist_ok=True)
 
-individual_result_save_dir = f"{exp_save_dir}/grad_analysis"
-if custom_cfg.spec_question:
-    individual_result_save_dir += "_spec"
-os.makedirs(individual_result_save_dir, exist_ok=True)
-
 
 if custom_cfg.input_format == InputFormat.seen_hop:
     all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted_old/2hop_musique_ans_v1.0_dev-seen_w-spec.jsonl")
@@ -217,11 +201,6 @@ eval_instance = eval_dev_dataset[custom_cfg.example_idx]
 logging.info(f"Example ID: {instance['id']}")
 
 assert instance["id"] == eval_instance["id"]
-
-fpath = f"{individual_result_save_dir}/{instance['id']}_grad_info.json"
-if os.path.exists(fpath):
-    logging.info("=" * 20 + "Already evaluated" + "=" * 20)
-    exit(0)
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False, device_map=custom_cfg.device)
 tokenizer = AutoTokenizer.from_pretrained(f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False)
@@ -275,6 +254,7 @@ trainer.accelerator.wait_for_everyone()
 
 
 model = trainer.model
+optimizer = trainer.optimizer
 # clear internal pointer in trainer/accelerator
 trainer.accelerator.free_memory(trainer.model, trainer.optimizer, trainer.lr_scheduler)
 del trainer.model, trainer.optimizer, trainer.lr_scheduler
@@ -286,107 +266,105 @@ if torch.cuda.is_available():
 
 eos_token_id = tokenizer.eos_token_id
 
-logging.info("Start measuring diff in parameter")
-with unwrap_model_for_generation(model, accelerator) as unwrapped_model:
-    post_named_params = {n.replace("_fsdp_wrapped_module._checkpoint_wrapped_module.", ""): p.clone().cpu() for n, p in unwrapped_model.named_parameters()}
-
-    assert all(k in initial_named_params for k in post_named_params.keys())
-
-    grad_info = {}
-    with torch.no_grad():
-        total_param_changes = {k: torch.norm(initial_named_params[k] - p).item() for k, p in post_named_params.items()}
-        grad_info["total_norm"] = torch.tensor(list(total_param_changes.values())).sum().item()
-        grad_info["target_norm"] = torch.tensor([total_param_changes[k] for k in target_modules]).sum().item()
-        grad_info["param2norm_diff"] = total_param_changes
-
-io.dump_json(grad_info, fpath)
-
 question_types = [
-    "single_hop_specificity",
-    "multi_hop_specificity",
-] + [
     "single_hop_efficacy",
     "multi_hop_efficacy",
 ]
-# if custom_cfg.spec_question:
-#     question_types = [
-#         "single_hop_specificity",
-#         "multi_hop_specificity",
-#     ]
-# else:
-#     question_types = [
-#         "single_hop_efficacy",
-#         "multi_hop_efficacy",
-#     ]
+ctx = "\n\n".join([
+    # f"<doc{i}>\n{t}\n</doc{i}>"
+    f"{t}"
+    for i, t in enumerate(eval_instance["texts"])
+])
 
-
-
-# all_result_df = []
-# for question_type in question_types:
-#     questions = eval_instance[question_type]
-#     logging.info(f"Question type: {question_type}")
+for add_icl in [True, False]:
     
-#     for q_i, question in enumerate(questions):
-#         test_queries_q_str = [question["question"]]
-#         test_queries_a_str = [question["answer"]]
-#         test_queries_str = [test_queries_q_str[0] + (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]]
-
-#         acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=custom_cfg.add_bos), eos_token_id, ignore=not custom_cfg.add_eos_accuracy)
-#         acc_toks = utils.dict_to(acc_toks, custom_cfg.device)
-#         sft_labels = get_edit_labels(
-#             add_eos(
-#                 tokenizer(
-#                     [
-#                         (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
-#                     ], padding=True, return_tensors="pt", add_special_tokens=False), 
-#                 eos_token_id, ignore=not custom_cfg.add_eos_accuracy
-#             )["input_ids"], tokenizer
-#         ).to(custom_cfg.device)
-
-#         clm_labels = get_edit_labels(acc_toks["input_ids"], tokenizer).to(custom_cfg.device)
+    grad_info = {}
+    question_tag2grads = {}
+    
+    if add_icl:
+        individual_result_save_dir = f"{exp_save_dir}/prepend_grad_analysis"
+    else:
+        individual_result_save_dir = f"{exp_save_dir}/grad_analysis"
+    os.makedirs(individual_result_save_dir, exist_ok=True)
+    
+    fpath = f"{individual_result_save_dir}/{eval_instance['id']}_grad_info.json"
+    
+    has_shown_example = False
+    
+    for question_type in question_types:
+        questions = eval_instance[question_type]
+        logging.info(f"Question type: {question_type}")
         
-#         logging.info("Input for [Q][A] Accuracy: ")
-#         logging.info("["+tokenizer.decode(acc_toks["input_ids"][0])+"]")
-#         logging.info("SFT label: " + "["+tokenizer.decode(sft_labels[0])+"]")
-#         logging.info("CLM label(before ShiftLeft): " + "["+tokenizer.decode(clm_labels[0])+"]")
-#         logging.info("")
+        for q_i, question in enumerate(questions):
+        
+            if add_icl:
+                test_queries_q_str = ctx + "\n\n" + question["question"]
+            else:
+                test_queries_q_str = question["question"]
+            test_queries_a_str = question["answer"]
+            test_queries_str = [test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str]
+
+            acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=custom_cfg.add_bos), eos_token_id, ignore=not custom_cfg.add_eos_accuracy)
+            acc_toks = utils.dict_to(acc_toks, custom_cfg.device)
+            sft_labels = get_edit_labels(
+                add_eos(
+                    tokenizer(
+                        [
+                            (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str
+                        ], padding=True, return_tensors="pt", add_special_tokens=False), 
+                    eos_token_id, ignore=not custom_cfg.add_eos_accuracy
+                )["input_ids"], tokenizer
+            ).to(custom_cfg.device)
+            
+            clm_labels = get_edit_labels(acc_toks["input_ids"], tokenizer).to(custom_cfg.device)
+            if not has_shown_example:
+                logging.info("Input for [Q][A] Accuracy: ")
+                logging.info("["+tokenizer.decode(acc_toks["input_ids"][0])+"]")
+                logging.info("SFT label: " + "["+tokenizer.decode(sft_labels[0])+"]")
+                logging.info("CLM label(before ShiftLeft): " + "["+tokenizer.decode(clm_labels[0])+"]")
+                has_shown_example = True
+            # with unwrap_model_for_generation(model, accelerator) as unwrapped_model:
+            post_edit_output = model(
+                input_ids=acc_toks["input_ids"],
+                attention_mask=acc_toks["attention_mask"]
+            )
+            logits = post_edit_output.logits
+            answer_logits = logits[:, :-1]
+            answer_logits = answer_logits[:, -sft_labels.size(1):]
+            # Flatten the tokens
+            answer_logits = answer_logits.view(-1, len(tokenizer))
+            answer_labels = sft_labels.view(-1)
+            loss = F.cross_entropy(answer_logits, answer_labels)
+            assert all(p.grad is None for _, p in model.named_parameters())
+            
+            loss.backward()
+            question_tag2grads[question_type + f"q{q_i}"] = {n: p.grad.clone().cpu() for n, p in model.named_parameters()}
+            grad_info[question_type + f"q{q_i}" + "_grad_norms"] = {
+                n: torch.norm(g).cpu().item()
+                for n, g in question_tag2grads[question_type + f"q{q_i}"].items()
+            }
+            
+            optimizer.zero_grad()
                 
-#         with torch.no_grad():
-            
-#             post_edit_output = model(
-#                 input_ids=acc_toks["input_ids"],
-#                 attention_mask=acc_toks["attention_mask"]
-#             )
-#             post_edit_logits = post_edit_output.logits
-#             post_edit_sft_em_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=True)
-#             post_edit_sft_pm_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=False)
-#             post_edit_clm_em_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=True)
-#             post_edit_clm_pm_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=False)
-            
-#         post_result_df = generate(test_queries_q_str[0], test_queries_a_str[0], custom_cfg, model, tokenizer, generation_config)
-#         # import pdb; pdb.set_trace()
-#         post_result_df.insert(0, "clm_input", "\n\n".join(
-#                 f"[[{s}]]"
-#                 for s in tokenizer.batch_decode(train_dataset["input_ids"], skip_special_tokens=True)
-#             )
-#         )
-#         post_result_df.insert(1, "stage", "post-edit")
-#         post_result_df.insert(0, "question_tag", question_type + f"q{q_i}")
-#         post_result_df.insert(0, "question_type", question_type)
-#         post_result_df.insert(0, "id", eval_instance["id"])
-#         post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc EM", post_edit_sft_em_dict["acc"].item())
-#         post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc PM", post_edit_sft_pm_dict["acc"].item())
-#         post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc EM", post_edit_clm_em_dict["acc"].item())
-#         post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc PM", post_edit_clm_pm_dict["acc"].item())
-        
-#         all_result_df.append(post_result_df)
-# all_result_df = pd.concat(all_result_df)
-
-# exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_sft-baseline_input={custom_cfg.input_format}_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
-
-# logging.info(f"Saving individual results to {individual_result_save_dir}")
-
-# all_result_df.to_excel(
-#     fpath,
-#     index=False,
-# )
+    A_s = question_tag2grads["single_hop_efficacyq0"]
+    B_s = question_tag2grads["single_hop_efficacyq1"]
+    C_s = question_tag2grads["multi_hop_efficacyq0"]
+    ts = {
+        k: (
+            (C_s[k] - a).flatten().dot((B_s[k] - a).flatten()) 
+            / torch.norm((B_s[k] - a).flatten()).pow(2)
+        ).item() 
+        for k, a in A_s.items()
+    }
+    grad_info["interpolation_t"] = ts
+    P_s = {
+        k: a + ts[k] * (B_s[k] - a)
+        for k, a in A_s.items()
+    }
+    distance_from_C_to_P = {
+        k: torch.norm(C_s[k] - p).item()
+        for k, p in P_s.items()
+    }
+    grad_info["distance_from_C_to_P"] = distance_from_C_to_P
+    # import pdb; pdb.set_trace()
+    io.dump_json(grad_info, fpath)

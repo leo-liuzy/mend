@@ -13,12 +13,16 @@ def prepare_sft_text(args, dataset: list, tokenizer):
     # assert len(tokenizer.additional_special_tokens) == 1
     
     new_dataset = []
+    has_show_example = False
     for datum in dataset:
         q = datum["question"]
-        a = datum["answer"]
+        a = str(datum["answer"])
         # t = f"{q}{tokenizer.additional_special_tokens[0]}{a}" if a[0] == " " else f"{q}{tokenizer.additional_special_tokens[0]} {a}"
         t = f"{q}{a}" if a[0] == " " else f"{q} {a}"
         t += tokenizer.eos_token
+        if not has_show_example:
+            print(f"Example: -> {t}")
+            has_show_example = True
         datum[args.dataset_text_field] = t
         new_dataset.append(datum)
     return new_dataset
@@ -45,8 +49,11 @@ model.config.pad_token_id = tokenizer.pad_token_id
 assert tokenizer.eos_token != tokenizer.pad_token
 assert tokenizer.eos_token_id != tokenizer.pad_token_id
 
-train_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/train.jsonl"), tokenizer)
-valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
+# train_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/train.jsonl"), tokenizer)
+# valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
+
+train_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/train.jsonl"), tokenizer)
+valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl"), tokenizer)
 
 train_dataset = Dataset.from_list(train_dataset)
 valid_dataset = Dataset.from_list(valid_dataset)
