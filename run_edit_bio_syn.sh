@@ -2,13 +2,13 @@ export CUDA_VISIBLE_DEVICES=0
 
 declare -A name2id=(
     # metatrain debug on date data
-    [common-dates_1K]=2025-03-15_18-54-39_5970343765
-    [common-dates_1K_noshare]=2025-03-15_18-59-31_7549442309
+    [common-date-year-after_1K]=2025-03-15_18-54-39_5970343765
+    [common-date-year-after_1K_noshare]=2025-03-15_18-59-31_7549442309
     
-    [common-dates_10K]=2025-03-15_18-55-51_1348523953
+    [common-date-year-after_10K]=2025-03-15_18-55-51_1348523953
 
-    [common-dates_100K]=2025-03-15_18-56-25_1434749561
-    [common-dates_100K_noshare]=2025-03-15_18-57-35_6230462214
+    [common-date-year-after_100K]=2025-03-15_18-56-25_1434749561
+    [common-date-year-after_100K_noshare]=2025-03-15_18-57-35_6230462214
 )
 
 

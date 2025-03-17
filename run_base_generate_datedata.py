@@ -219,11 +219,8 @@ def run(config):
 
         # pdb.set_trace()
         test_queries = [
-            # {
-            #     "question": datum["question"],
-            #     "answer": datum["answer"]
-            # }
-            {"question": datum["original_question"], "answer": datum["original_answer"]}
+            # {"question": datum["question"], "answer": datum["answer"]}
+            {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
         ]
 
         # prepare [Q][A] accuracy and generation inputs
