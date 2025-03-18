@@ -20,7 +20,7 @@ epoch=4
 
 # second-1hop
 
-for example_idx in {4..99} # {0..999}
+for example_idx in {0..99} # {0..999}
 do
 
 echo "Example idx: ${example_idx}"
@@ -49,6 +49,8 @@ python clm_baseline_datedata.py \
     --num_train_epochs=${epoch} \
     --run_name="propagator-clm-baseline" \
     --example_idx=${example_idx} \
-    --report_to="none"
+    --report_to="none" \
+    --spec_question=False \
+    --date_data=n
 
 done

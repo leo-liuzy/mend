@@ -196,9 +196,11 @@ def run(config):
     assert hasattr(config, "date_data")
     if config.date_data == "common":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
-    else:
-        config.date_data == "bio_syn"
+    elif config.date_data == "bio_syn":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
+    else:
+        config.date_data == "bio_syn_n_question"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test_n_question.jsonl")
 
     all_results = []
     edit_model_infos = []
@@ -219,8 +221,8 @@ def run(config):
 
         # pdb.set_trace()
         test_queries = [
-            # {"question": datum["question"], "answer": datum["answer"]}
-            {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
+            {"question": datum["question"], "answer": datum["answer"]}
+            # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
         ]
 
         # prepare [Q][A] accuracy and generation inputs

@@ -213,7 +213,7 @@ def run(config):
         os.makedirs(save_dir, exist_ok=True)
         fpath = (
             f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
-            + ("_e+s" if config.spec_question else "_s")
+            + ("_e+s" if config.spec_question else "_e")
             + f"_{config.date_data}-question"
             + ".xlsx"
         )
