@@ -103,8 +103,18 @@ def run(config):
     trainer = EditTrainer(alg, config, train_set, val_set)
     print("Task: ", config.task)
 
-    edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
-    spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
+    assert hasattr(config, "spec_question")
+    assert hasattr(config, "date_data")
+    # import pdb
+
+    # pdb.set_trace()
+    if config.date_data == "n+1":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
+    else:
+        assert config.date_data == "n"
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test_n_question.jsonl")
+    if config.spec_question:
+        spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
 
     all_results = []
     edit_model_infos = []
@@ -156,8 +166,10 @@ def run(config):
 
         question_types = [
             ("efficacy", [{"question": datum["question"], "answer": datum["answer"]}]),
-            ("specificity", spec_dev_dataset),
         ]
+
+        if config.spec_question:
+            question_types.append(("specificity", spec_dev_dataset))
 
         for question_type, questions in question_types:
             logging.info(f"Question type: {question_type}")
@@ -199,7 +211,12 @@ def run(config):
         LOG.info(f"Saving to dir: {save_dir}")
 
         os.makedirs(save_dir, exist_ok=True)
-        fpath = f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl.xlsx"
+        fpath = (
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
+            + ("_e+s" if config.spec_question else "_s")
+            + f"_{config.date_data}-question"
+            + ".xlsx"
+        )
 
         all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(

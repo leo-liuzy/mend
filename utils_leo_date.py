@@ -227,5 +227,9 @@ def get_analysis_result(question, answer, model, tokenizer, config, generation_c
         analysis_result = multiclass_log_probs(model_logits, sft_labels, exact_match=False)
         analysis_result = {k: v.item() for k, v in analysis_result.items()}
     analysis_result["answer_labels"] = sft_labels.tolist()[0]
-    analysis_result["answer_logits"] = model_logits[0][-sft_labels.shape[1] :].tolist()
+    analysis_result["answer_logits"] = model_logits[0][-sft_labels.shape[1] - 1 : -1].tolist()
+    assert (
+        torch.mean((sft_labels[0] == model_logits[0][-sft_labels.shape[1] - 1 : -1].argmax(-1)).float())
+        == analysis_result["acc"]
+    )
     return analysis_result

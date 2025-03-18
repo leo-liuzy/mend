@@ -23,12 +23,12 @@ import pandas as pd
 from losses import multiclass_log_probs
 
 import logging
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 em_evaluator = ExactMatchEvaluator()
 rouge_evaluator = RougeEvaluator()
 llm_evaluator = OpenAIEvaluator()
-
 
 
 def score_df(df):
@@ -49,43 +49,60 @@ def score_df(df):
     #     use_aggregator=False,
     #     rescale_to_one=True,
     # )
-        
-    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **rouge_per_example, }))
+
+    model_response_w_score = df.join(
+        pd.DataFrame(
+            {
+                **em_per_example,
+                **rouge_per_example,
+            }
+        )
+    )
     return model_response_w_score
 
 
 def add_eos(tokenizer_output, eos_token_id, ignore=False):
-    
     if ignore:
         return tokenizer_output
     return {
         k: torch.concat(
             [
-                v, 
+                v,
                 torch.full(
-                    (v.shape[0], 1), # shape of the constant tensor
+                    (v.shape[0], 1),  # shape of the constant tensor
                     (
-                        1 
-                        if k == "attention_mask" else
-                        eos_token_id # this is to teach the model to end after outputing the answer.
-                    )
-                )
-            ], 
-            dim=-1
+                        1
+                        if k == "attention_mask"
+                        else eos_token_id  # this is to teach the model to end after outputing the answer.
+                    ),
+                ),
+            ],
+            dim=-1,
         )
         for k, v in tokenizer_output.items()
     }
 
 
-def generate(context: str, answer: str, config, model, tokenizer, generation_config, ):
+def generate(
+    context: str,
+    answer: str,
+    config,
+    model,
+    tokenizer,
+    generation_config,
+):
     inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.add_bos)
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
-    
-    inputs = {k: v.to(config.device) for k, v in inputs.items()}
-    logging.info("Input for generation: " + "["+ "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"])) +"]")
-    logging.info("Label for generation: " + "["+ answer +"]")
 
-    
+    inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    logging.info(
+        "Input for generation: "
+        + "["
+        + "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"]))
+        + "]"
+    )
+    logging.info("Label for generation: " + "[" + answer + "]")
+
     generation_output = model.generate(
         **inputs,
         generation_config=generation_config,
@@ -101,20 +118,20 @@ def generate(context: str, answer: str, config, model, tokenizer, generation_con
         predicted_answer = generated_text.strip()
         model_response_content.append(
             {
-                "question": context, "answer": answer.strip(), 
+                "question": context,
+                "answer": answer.strip(),
                 "predicted_answer_idx": g_i,
-                "predicted_answer": predicted_answer, 
+                "predicted_answer": predicted_answer,
             }
         )
     model_response = pd.DataFrame(model_response_content)
-    
+
     # if hasattr(config, "add_icl") and config.add_icl:
     #     # if using ICL, extract by the first new line
     #     if "\n" in predicted_answer:
     #         predicted_answer = predicted_answer[:predicted_answer.find("\n")]
-    
-    
-    return score_df(model_response)    
+
+    return score_df(model_response)
 
 
 def get_edit_labels(labels, tokenizer):
@@ -122,7 +139,6 @@ def get_edit_labels(labels, tokenizer):
 
 
 def prepare_clm_text(args, custom_cfg, instance, tokenizer):
-    
     def tokenize(element):
         outputs = tokenizer(
             element[args.dataset_text_field],
@@ -142,7 +158,7 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
         dataset = instance["texts"]
     elif custom_cfg.input_format == InputFormat.first_single_hop:
         dataset = [instance["texts"][0]]
-        
+
     elif custom_cfg.input_format == InputFormat.second_single_hop:
         dataset = [instance["texts"][1]]
     elif custom_cfg.input_format == InputFormat.seen_hop:
@@ -150,17 +166,13 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
         dataset = instance["texts"]
     else:
         raise ValueError("Invalid value")
-        
+
     new_dataset = []
     for datum in dataset:
-        new_dataset.append({
-            args.dataset_text_field: datum + tokenizer.eos_token
-        })
+        new_dataset.append({args.dataset_text_field: datum + tokenizer.eos_token})
     dataset = Dataset.from_list(new_dataset)
 
-    tokenized_datasets = dataset.map(
-        tokenize, batched=True, remove_columns=[args.dataset_text_field]
-    )
+    tokenized_datasets = dataset.map(tokenize, batched=True, remove_columns=[args.dataset_text_field])
     return tokenized_datasets
 
 
@@ -170,17 +182,18 @@ class InputFormat(StrEnum):
     second_single_hop = "second-1hop"
     seen_hop = "seen-hop"
 
-    
+
 @dataclass
 class CustomConfig:
     example_idx: int
-    input_format: InputFormat 
+    input_format: InputFormat
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
     base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
+
 
 parser = HfArgumentParser((SFTConfig, CustomConfig))
 (args, custom_cfg) = parser.parse_args_into_dataclasses()
@@ -199,11 +212,17 @@ os.makedirs(individual_result_save_dir, exist_ok=True)
 
 
 if custom_cfg.input_format == InputFormat.seen_hop:
-    all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted_old/2hop_musique_ans_v1.0_dev-seen_w-spec.jsonl")
+    all_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/musique_mend_converted_old/2hop_musique_ans_v1.0_dev-seen_w-spec.jsonl"
+    )
 else:
-    all_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl")
+    all_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl"
+    )
 
-eval_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl") # this will include both atomic efficacy question
+eval_dev_dataset = io.load_jsonlines(
+    f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl"
+)  # this will include both atomic efficacy question
 
 instance = all_dev_dataset[custom_cfg.example_idx]
 eval_instance = eval_dev_dataset[custom_cfg.example_idx]
@@ -218,10 +237,12 @@ if os.path.exists(fpath):
     exit(0)
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False, device_map=custom_cfg.device)
-tokenizer = AutoTokenizer.from_pretrained(f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False)
-tokenizer.padding_side = 'right'
+tokenizer = AutoTokenizer.from_pretrained(
+    f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False
+)
+tokenizer.padding_side = "right"
 original_vocab_size = len(tokenizer)
-tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 # tokenizer.add_special_tokens({'additional_special_tokens': ['<sft_token_1>']}, replace_additional_special_tokens=False)
 model.resize_token_embeddings(len(tokenizer))
 
@@ -233,7 +254,7 @@ assert tokenizer.eos_token_id != tokenizer.pad_token_id
 
 
 generation_config = GenerationConfig(
-    do_sample=False, # Greedy
+    do_sample=False,  # Greedy
     top_k=None,
     top_p=None,
     temperature=None,
@@ -251,13 +272,12 @@ args.per_device_train_batch_size = len(train_dataset)
 # valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
 
-
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
 # valid_dataset = Dataset.from_list(valid_dataset)
 trainer = Trainer(
     model,
-    train_dataset=train_dataset, # type: ignore
+    train_dataset=train_dataset,  # type: ignore
     # eval_dataset=valid_dataset, # type: ignore
     args=args,
     data_collator=data_collator,
@@ -280,12 +300,12 @@ if torch.cuda.is_available():
 eos_token_id = tokenizer.eos_token_id
 
 question_types = [
-        "single_hop_specificity",
-        "multi_hop_specificity",
-    ] + [
-        "single_hop_efficacy",
-        "multi_hop_efficacy",
-    ]
+    "single_hop_specificity",
+    "multi_hop_specificity",
+] + [
+    "single_hop_efficacy",
+    "multi_hop_efficacy",
+]
 # if custom_cfg.spec_question:
 #     question_types = [
 #         "single_hop_specificity",
@@ -303,50 +323,60 @@ all_result_df = []
 for question_type in question_types:
     questions = eval_instance[question_type]
     logging.info(f"Question type: {question_type}")
-    
+
     for q_i, question in enumerate(questions):
         test_queries_q_str = [question["question"]]
         test_queries_a_str = [question["answer"]]
-        test_queries_str = [test_queries_q_str[0] + (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]]
+        test_queries_str = [
+            test_queries_q_str[0] + (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
+        ]
 
-        acc_toks = add_eos(tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=custom_cfg.add_bos), eos_token_id, ignore=not custom_cfg.add_eos_accuracy)
+        acc_toks = add_eos(
+            tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=custom_cfg.add_bos),
+            eos_token_id,
+            ignore=not custom_cfg.add_eos_accuracy,
+        )
         acc_toks = utils.dict_to(acc_toks, custom_cfg.device)
         sft_labels = get_edit_labels(
             add_eos(
                 tokenizer(
-                    [
-                        (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
-                    ], padding=True, return_tensors="pt", add_special_tokens=False), 
-                eos_token_id, ignore=not custom_cfg.add_eos_accuracy
-            )["input_ids"], tokenizer
+                    [(" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]],
+                    padding=True,
+                    return_tensors="pt",
+                    add_special_tokens=False,
+                ),
+                eos_token_id,
+                ignore=not custom_cfg.add_eos_accuracy,
+            )["input_ids"],
+            tokenizer,
         ).to(custom_cfg.device)
 
         clm_labels = get_edit_labels(acc_toks["input_ids"], tokenizer).to(custom_cfg.device)
-        
+
         logging.info("Input for [Q][A] Accuracy: ")
-        logging.info("["+tokenizer.decode(acc_toks["input_ids"][0])+"]")
-        logging.info("SFT label: " + "["+tokenizer.decode(sft_labels[0])+"]")
-        logging.info("CLM label(before ShiftLeft): " + "["+tokenizer.decode(clm_labels[0])+"]")
+        logging.info("[" + tokenizer.decode(acc_toks["input_ids"][0]) + "]")
+        logging.info("SFT label: " + "[" + tokenizer.decode(sft_labels[0]) + "]")
+        logging.info("CLM label(before ShiftLeft): " + "[" + tokenizer.decode(clm_labels[0]) + "]")
         logging.info("")
-                
+
         with torch.no_grad():
-            
-            post_edit_output = model(
-                input_ids=acc_toks["input_ids"],
-                attention_mask=acc_toks["attention_mask"]
-            )
+            post_edit_output = model(input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"])
             post_edit_logits = post_edit_output.logits
             post_edit_sft_em_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=True)
             post_edit_sft_pm_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=False)
             post_edit_clm_em_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=True)
             post_edit_clm_pm_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=False)
-            
-        post_result_df = generate(test_queries_q_str[0], test_queries_a_str[0], custom_cfg, model, tokenizer, generation_config)
+
+        post_result_df = generate(
+            test_queries_q_str[0], test_queries_a_str[0], custom_cfg, model, tokenizer, generation_config
+        )
         # import pdb; pdb.set_trace()
-        post_result_df.insert(0, "clm_input", "\n\n".join(
-                f"[[{s}]]"
-                for s in tokenizer.batch_decode(train_dataset["input_ids"], skip_special_tokens=True)
-            )
+        post_result_df.insert(
+            0,
+            "clm_input",
+            "\n\n".join(
+                f"[[{s}]]" for s in tokenizer.batch_decode(train_dataset["input_ids"], skip_special_tokens=True)
+            ),
         )
         post_result_df.insert(1, "stage", "post-edit")
         post_result_df.insert(0, "question_tag", question_type + f"q{q_i}")
@@ -356,7 +386,7 @@ for question_type in question_types:
         post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc PM", post_edit_sft_pm_dict["acc"].item())
         post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc EM", post_edit_clm_em_dict["acc"].item())
         post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc PM", post_edit_clm_pm_dict["acc"].item())
-        
+
         all_result_df.append(post_result_df)
 all_result_df = pd.concat(all_result_df)
 

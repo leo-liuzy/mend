@@ -103,7 +103,14 @@ def run(config):
     trainer = EditTrainer(alg, config, train_set, val_set)
     print("Task: ", config.task)
 
-    edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
+    assert hasattr(config, "date_data")
+
+    if config.date_data == "n+1":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
+    else:
+        assert config.date_data == "n"
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test_n_question.jsonl")
+
     # spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
 
     all_results = []
@@ -146,8 +153,6 @@ def run(config):
         # import pdb; pdb.set_trace()
         edit_inner = utils.dict_to(edit_inner, config.device)
 
-        all_datum_result_df = []
-
         # edit the model with MEND
         edited_model, model_info = trainer.model.edit(edit_inner)
         model_info["input"] = sentences[0]
@@ -188,7 +193,9 @@ def run(config):
 
         io.dump_jsonlines(
             edit_model_infos,
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
+            + f"_{config.date_data}-question"
+            + "_edit-model-infos.jsonl",
         )
 
 
