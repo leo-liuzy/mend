@@ -29,7 +29,7 @@ import models
 import utils
 from utils import EditLoss, StrEnum
 
-from utils_leo_date import get_eval_result, add_eos
+from utils_leo_date import get_analysis_result, add_eos
 
 
 OmegaConf.register_new_resolver("uuid", lambda: utils.uuid())
@@ -103,18 +103,15 @@ def run(config):
     trainer = EditTrainer(alg, config, train_set, val_set)
     print("Task: ", config.task)
 
-    assert hasattr(config, "spec_question")
     assert hasattr(config, "date_data")
-    # import pdb
 
-    # pdb.set_trace()
     if config.date_data == "n+1":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
     else:
         assert config.date_data == "n"
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test_n_question.jsonl")
-    if config.spec_question:
-        spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
+
+    # spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
 
     all_results = []
     edit_model_infos = []
@@ -156,51 +153,33 @@ def run(config):
         # import pdb; pdb.set_trace()
         edit_inner = utils.dict_to(edit_inner, config.device)
 
-        all_datum_result_df = []
-
         # edit the model with MEND
         edited_model, model_info = trainer.model.edit(edit_inner)
         model_info["input"] = sentences[0]
-        model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
+        model_info["decoded_input_ids"] = tokenizer.decode(targets_toks["input_ids"][0])
+
+        question_type = "efficacy"
+
+        analysis_result_dict = get_analysis_result(
+            question=datum["question"],
+            answer=datum["answer"],
+            model=edited_model.model,
+            tokenizer=tokenizer,
+            config=config,
+            generation_config=generation_config,
+        )
+        analysis_result_dict["question_type"] = question_type
+        analysis_result_dict["question"] = datum["question"]
+        analysis_result_dict["answer"] = datum["answer"]
+        analysis_result_dict["id"] = i
+        assert all(k not in model_info for k in analysis_result_dict.keys())
+        model_info.update(analysis_result_dict)
         edit_model_infos.append(model_info)
-
-        question_types = [
-            ("efficacy", [{"question": datum["question"], "answer": datum["answer"]}]),
-        ]
-
-        if config.spec_question:
-            question_types.append(("specificity", spec_dev_dataset))
-
-        for question_type, questions in question_types:
-            logging.info(f"Question type: {question_type}")
-
-            for q_i, question in enumerate(questions):
-                post_result_df = get_eval_result(
-                    question=question["question"],
-                    answer=question["answer"],
-                    model=edited_model.model,
-                    tokenizer=tokenizer,
-                    config=config,
-                    generation_config=generation_config,
-                )
-                post_result_df.insert(0, "stage", "post-edit")
-                post_result_df.insert(
-                    0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
-                )
-                post_result_df.insert(0, "question_tag", f"{question_type}_q{q_i}")
-                post_result_df.insert(0, "question_type", question_type)
-                post_result_df.insert(0, "id", str(i))
-                all_datum_result_df.append(post_result_df)
 
         del edited_model
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-
-        all_datum_result_df = pd.concat(all_datum_result_df)
-        all_results.append(all_datum_result_df)
-
-    all_results = pd.concat(all_results)
 
     if config.generation.save_dir:
         save_dir = config.generation.save_dir
@@ -211,17 +190,12 @@ def run(config):
         LOG.info(f"Saving to dir: {save_dir}")
 
         os.makedirs(save_dir, exist_ok=True)
-        fpath = (
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
-            + ("_e+s" if config.spec_question else "_s")
-            + f"_{config.date_data}-question"
-            + ".xlsx"
-        )
 
-        all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(
             edit_model_infos,
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
+            + f"_{config.date_data}-question"
+            + "_edit-model-infos.jsonl",
         )
 
 

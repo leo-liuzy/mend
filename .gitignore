@@ -180,3 +180,5 @@ outputs/
 .nfs*
 models/
 wandb/
+
+debug_exp_output/

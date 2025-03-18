@@ -28,6 +28,7 @@ import models
 import utils
 from utils import EditLoss, EditInput
 from typing import Iterable
+from utils_leo_date import get_analysis_result, add_eos
 
 OmegaConf.register_new_resolver("uuid", lambda: utils.uuid())
 
@@ -58,11 +59,6 @@ def score_df(df):
         references=df["answer"],
         use_aggregator=False,
     )
-    # rouge_per_example = rouge_evaluator.compute_metric(
-    #     predictions=df["predicted_answer"],
-    #     references=df["answer"],
-    #     use_aggregator=False,
-    # )
 
     diff_per_example = year_diff_evaluator.compute_metric(
         predictions=df["predicted_answer"],
@@ -165,6 +161,7 @@ def run(config):
     torch.manual_seed(config.seed)
 
     model = models.get_model(config)
+    model = model.to(config.device)
     tokenizer = models.get_tokenizer(config)
     add_padding(tokenizer, model)
 
@@ -192,7 +189,7 @@ def run(config):
         eos_token_id=tokenizer.eos_token_id,
     )
 
-    trainer = EditTrainer(alg, config, train_set, val_set)
+    # trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
     if config.date_data == "common":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
@@ -200,7 +197,6 @@ def run(config):
         config.date_data == "bio_syn"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
 
-    all_results = []
     edit_model_infos = []
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
@@ -219,8 +215,8 @@ def run(config):
 
         # pdb.set_trace()
         test_queries = [
-            # {"question": datum["question"], "answer": datum["answer"]}
-            {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
+            {"question": datum["question"], "answer": datum["answer"]}
+            # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
         ]
 
         # prepare [Q][A] accuracy and generation inputs
@@ -256,44 +252,35 @@ def run(config):
         print("SFT label:", "[" + tokenizer.decode(sft_labels[0]) + "]")
         print("CLM label(before ShiftLeft):", "[" + tokenizer.decode(clm_labels[0]) + "]")
         print()
-        with torch.no_grad():
-            pre_edit_logits = trainer.model(input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"])
+        question_type = "efficacy"
 
-            pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
-            pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
-            pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
-            pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
-
-        if config.do_generation:
-            pre_result_df = generate(
-                test_queries_q_str, test_queries_a_str, config, trainer.model.model, tokenizer, generation_config
-            )
-        else:
-            pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
-        assert len(pre_result_df) == 1
-
-        pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
-        pre_result_df.insert(1, "stage", "pre-edit")
-        pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc EM", pre_edit_sft_em_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc PM", pre_edit_sft_pm_dict["acc"].item())
-        all_results.append(pre_result_df)
-
-    all_results = pd.concat(all_results)
+        analysis_result_dict = get_analysis_result(
+            question=datum["question"],
+            answer=datum["answer"],
+            # model=trainer.model,
+            model=model,
+            tokenizer=tokenizer,
+            config=config,
+            generation_config=generation_config,
+        )
+        analysis_result_dict["question_type"] = question_type
+        analysis_result_dict["question"] = datum["question"]
+        analysis_result_dict["answer"] = datum["answer"]
+        analysis_result_dict["id"] = i
+        edit_model_infos.append(analysis_result_dict)
 
     if config.generation.save_dir:
         save_dir = config.generation.save_dir
         if os.path.abspath(config.generation.save_dir) != config.generation.save_dir:
             # using relative path
             save_dir = f"{base_dir}/{config.generation.save_dir}"
-        save_dir = os.path.join(save_dir, config.date_data)
+        save_dir = os.path.join(save_dir, config.date_data + "_analysis")
         LOG.info(f"Saving to dir: {save_dir}")
 
         os.makedirs(save_dir, exist_ok=True)
-        all_results.to_excel(
-            f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl.xlsx",
-            index=False,
+        io.dump_jsonlines(
+            edit_model_infos,
+            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
         )
 
 

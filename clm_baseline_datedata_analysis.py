@@ -18,17 +18,20 @@ from knowledge_propagation.modules.evaluators import (
     ExactMatchEvaluator,
     RougeEvaluator,
     OpenAIEvaluator,
+    NumDiffEvaluator,
 )
 import pandas as pd
 from losses import multiclass_log_probs
 
 import logging
+from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 em_evaluator = ExactMatchEvaluator()
 rouge_evaluator = RougeEvaluator()
 llm_evaluator = OpenAIEvaluator()
+year_diff_evaluator = NumDiffEvaluator()
 
 
 def score_df(df):
@@ -37,27 +40,25 @@ def score_df(df):
         references=df["answer"],
         use_aggregator=False,
     )
-    rouge_per_example = rouge_evaluator.compute_metric(
+    diff_per_example = year_diff_evaluator.compute_metric(
         predictions=df["predicted_answer"],
         references=df["answer"],
         use_aggregator=False,
     )
-    # llm_acc_per_example = llm_evaluator.compute_metric(
-    #     questions=df["question"],
-    #     predictions=df["predicted_answer"],
-    #     references=df["answer"],
-    #     use_aggregator=False,
-    #     rescale_to_one=True,
-    # )
-
-    model_response_w_score = df.join(
-        pd.DataFrame(
-            {
-                **em_per_example,
-                **rouge_per_example,
-            }
+    try:
+        model_response_w_score = df.join(
+            pd.DataFrame(
+                {
+                    **em_per_example,
+                    **diff_per_example,
+                }
+            )
         )
-    )
+    except:
+        print(df)
+        print(em_per_example)
+        print(diff_per_example)
+        exit(0)
     return model_response_w_score
 
 
@@ -154,18 +155,7 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
         return {"input_ids": input_batch}
 
     # assert len(tokenizer.additional_special_tokens) == 1
-    if custom_cfg.input_format == InputFormat.two_single_hop:
-        dataset = instance["texts"]
-    elif custom_cfg.input_format == InputFormat.first_single_hop:
-        dataset = [instance["texts"][0]]
-
-    elif custom_cfg.input_format == InputFormat.second_single_hop:
-        dataset = [instance["texts"][1]]
-    elif custom_cfg.input_format == InputFormat.seen_hop:
-        assert len(instance["texts"]) == 1
-        dataset = instance["texts"]
-    else:
-        raise ValueError("Invalid value")
+    dataset = [instance["text"]]
 
     new_dataset = []
     for datum in dataset:
@@ -186,11 +176,10 @@ class InputFormat(StrEnum):
 @dataclass
 class CustomConfig:
     example_idx: int
-    input_format: InputFormat
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
-    base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
+    base_model_name: Optional[str] = "Llama-3.2-1B-common-date-year-after-eos-sft"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
 
@@ -201,37 +190,24 @@ model_name_or_path = f"{os.getcwd()}/models/{custom_cfg.base_model_name}"
 
 logging.info(f"CustomConfig: {custom_cfg}")
 
-exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_clm-baseline_input={custom_cfg.input_format}_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
+exp_save_dir = f"{os.getcwd()}/debug_exp_output/{custom_cfg.base_model_name}_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
 
 os.makedirs(exp_save_dir, exist_ok=True)
 
-individual_result_save_dir = f"{exp_save_dir}/individual_results"
-if custom_cfg.spec_question:
-    individual_result_save_dir += "_spec"
+individual_result_save_dir = f"{exp_save_dir}/individual_results_analysis"
 os.makedirs(individual_result_save_dir, exist_ok=True)
 
 
-if custom_cfg.input_format == InputFormat.seen_hop:
-    all_dev_dataset = io.load_jsonlines(
-        f"{vars.DATA_DIR}/musique_mend_converted_old/2hop_musique_ans_v1.0_dev-seen_w-spec.jsonl"
-    )
-else:
-    all_dev_dataset = io.load_jsonlines(
-        f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl"
-    )
-
-eval_dev_dataset = io.load_jsonlines(
-    f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev_w-spec.jsonl"
+cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
+spec_dev_dataset = io.load_jsonlines(
+    f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl"
 )  # this will include both atomic efficacy question
 
-instance = all_dev_dataset[custom_cfg.example_idx]
-eval_instance = eval_dev_dataset[custom_cfg.example_idx]
+instance = cpt_dev_dataset[custom_cfg.example_idx]
 
-logging.info(f"Example ID: {instance['id']}")
+logging.info(f"Example: {instance}")
 
-assert instance["id"] == eval_instance["id"]
-
-fpath = f"{individual_result_save_dir}/{instance['id']}_eval_results.xlsx"
+fpath = f"{individual_result_save_dir}/{custom_cfg.example_idx}_model_info.json"
 if os.path.exists(fpath):
     logging.info("=" * 20 + "Already evaluated" + "=" * 20)
     exit(0)
@@ -300,101 +276,70 @@ if torch.cuda.is_available():
 eos_token_id = tokenizer.eos_token_id
 
 question_types = [
-    "single_hop_specificity",
-    "multi_hop_specificity",
-] + [
-    "single_hop_efficacy",
-    "multi_hop_efficacy",
+    ("efficacy", [{"question": instance["question"], "answer": instance["answer"]}]),
+    # ("specificity", spec_dev_dataset),
 ]
-# if custom_cfg.spec_question:
-#     question_types = [
-#         "single_hop_specificity",
-#         "multi_hop_specificity",
-#     ]
-# else:
-#     question_types = [
-#         "single_hop_efficacy",
-#         "multi_hop_efficacy",
-#     ]
+question_type = "efficacy"
 
 logging.info("Start evaluating model: Generation, Accuracy")
 
-all_result_df = []
-for question_type in question_types:
-    questions = eval_instance[question_type]
-    logging.info(f"Question type: {question_type}")
 
-    for q_i, question in enumerate(questions):
-        test_queries_q_str = [question["question"]]
-        test_queries_a_str = [question["answer"]]
-        test_queries_str = [
-            test_queries_q_str[0] + (" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]
-        ]
+test_queries_q_str = instance["question"]
+test_queries_a_str = instance["answer"]
+test_queries_str = [test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str]
 
-        acc_toks = add_eos(
-            tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=custom_cfg.add_bos),
-            eos_token_id,
-            ignore=not custom_cfg.add_eos_accuracy,
-        )
-        acc_toks = utils.dict_to(acc_toks, custom_cfg.device)
-        sft_labels = get_edit_labels(
-            add_eos(
-                tokenizer(
-                    [(" " if test_queries_a_str[0][0] != " " else "") + test_queries_a_str[0]],
-                    padding=True,
-                    return_tensors="pt",
-                    add_special_tokens=False,
-                ),
-                eos_token_id,
-                ignore=not custom_cfg.add_eos_accuracy,
-            )["input_ids"],
-            tokenizer,
-        ).to(custom_cfg.device)
+acc_toks = add_eos(
+    tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=custom_cfg.add_bos),
+    eos_token_id,
+    ignore=not custom_cfg.add_eos_accuracy,
+)
+acc_toks = utils.dict_to(acc_toks, custom_cfg.device)
+sft_labels = get_edit_labels(
+    add_eos(
+        tokenizer(
+            [(" " if test_queries_a_str[0] != " " else "") + test_queries_a_str],
+            padding=True,
+            return_tensors="pt",
+            add_special_tokens=False,
+        ),
+        eos_token_id,
+        ignore=not custom_cfg.add_eos_accuracy,
+    )["input_ids"],
+    tokenizer,
+).to(custom_cfg.device)
 
-        clm_labels = get_edit_labels(acc_toks["input_ids"], tokenizer).to(custom_cfg.device)
+clm_labels = get_edit_labels(acc_toks["input_ids"], tokenizer).to(custom_cfg.device)
 
-        logging.info("Input for [Q][A] Accuracy: ")
-        logging.info("[" + tokenizer.decode(acc_toks["input_ids"][0]) + "]")
-        logging.info("SFT label: " + "[" + tokenizer.decode(sft_labels[0]) + "]")
-        logging.info("CLM label(before ShiftLeft): " + "[" + tokenizer.decode(clm_labels[0]) + "]")
-        logging.info("")
+logging.info("Input for [Q][A] Accuracy: ")
+logging.info("[" + tokenizer.decode(acc_toks["input_ids"][0]) + "]")
+logging.info("SFT label: " + "[" + tokenizer.decode(sft_labels[0]) + "]")
+logging.info("CLM label(before ShiftLeft): " + "[" + tokenizer.decode(clm_labels[0]) + "]")
+logging.info("")
 
-        with torch.no_grad():
-            post_edit_output = model(input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"])
-            post_edit_logits = post_edit_output.logits
-            post_edit_sft_em_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=True)
-            post_edit_sft_pm_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=False)
-            post_edit_clm_em_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=True)
-            post_edit_clm_pm_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=False)
+model.eval()
 
-        post_result_df = generate(
-            test_queries_q_str[0], test_queries_a_str[0], custom_cfg, model, tokenizer, generation_config
-        )
-        # import pdb; pdb.set_trace()
-        post_result_df.insert(
-            0,
-            "clm_input",
-            "\n\n".join(
-                f"[[{s}]]" for s in tokenizer.batch_decode(train_dataset["input_ids"], skip_special_tokens=True)
-            ),
-        )
-        post_result_df.insert(1, "stage", "post-edit")
-        post_result_df.insert(0, "question_tag", question_type + f"q{q_i}")
-        post_result_df.insert(0, "question_type", question_type)
-        post_result_df.insert(0, "id", eval_instance["id"])
-        post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc EM", post_edit_sft_em_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc PM", post_edit_sft_pm_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc EM", post_edit_clm_em_dict["acc"].item())
-        post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc PM", post_edit_clm_pm_dict["acc"].item())
+with torch.no_grad():
+    post_edit_output = model(input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"])
+    model_logits = post_edit_output.logits
+    post_edit_sft_pm_dict = multiclass_log_probs(model_logits, sft_labels, exact_match=False)
+    assert model_logits.shape[0] == 1
 
-        all_result_df.append(post_result_df)
-all_result_df = pd.concat(all_result_df)
+    analysis_result = multiclass_log_probs(model_logits, sft_labels, exact_match=False)
+    analysis_result = {k: v.item() for k, v in analysis_result.items()}
+    analysis_result["question_type"] = question_type
+    analysis_result["question"] = instance["question"]
+    analysis_result["answer"] = instance["answer"]
+    analysis_result["id"] = custom_cfg.example_idx
 
-# exp_save_dir = f"{os.getcwd()}/exp_output/{custom_cfg.base_model_name}_sft-baseline_input={custom_cfg.input_format}_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
+
+analysis_result["answer_labels"] = sft_labels.tolist()[0]
+analysis_result["answer_logits"] = model_logits[0][-sft_labels.shape[1] - 1 : -1].tolist()
+
+assert (
+    torch.mean((sft_labels[0] == model_logits[0][-sft_labels.shape[1] - 1 : -1].argmax(-1)).float())
+    == analysis_result["acc"]
+)
 
 logging.info(f"Saving individual results to {individual_result_save_dir}")
 
-all_result_df.to_excel(
-    fpath,
-    index=False,
-)
+io.dump_json(analysis_result, fpath)

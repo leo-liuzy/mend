@@ -37,7 +37,7 @@ def binary_log_probs(pred, targ):
         "log_prob": log_probs.mean(),
         "prob": log_probs.exp().mean(),
         "nll": -log_probs.mean(),
-        "n_tokens": log_probs.shape[0]
+        "n_tokens": log_probs.shape[0],
     }
 
 
@@ -46,14 +46,13 @@ def multiclass_log_probs(pred, targ, shift=True, exact_match=True):
 
     pred = pred.clone()
     targ = targ.clone()
-        
-        
+
     if shift and pred.dim() == 3:  # Dealing with sequences
         # ! Leo: the following if-condition is to deal with CLM on the input
         if pred.size(1) == targ.size(1):
             targ = targ[:, 1:]
         pred = pred[:, :-1]  # Remove last prediction in sequence
-        
+
         # ! Leo added
         pred = pred[:, -targ.size(1) :]
         # ! original line: `targ = targ[:, 1:]`  # Shift to align predictions and targets
@@ -74,17 +73,11 @@ def multiclass_log_probs(pred, targ, shift=True, exact_match=True):
         correct = correct & mask
         num_non_padding = mask.sum().float().item()
         acc = correct.sum() / num_non_padding
-        
+
     n_tokens = mask.float().sum()
     log_prob = (unmasked_log_probs * mask.float()).sum() / n_tokens
     prob = (unmasked_log_probs.exp() * mask.float()).sum() / n_tokens
-    return {
-        "acc": acc,
-        "log_prob": log_prob,
-        "prob": prob,
-        "n_tokens": n_tokens,
-        "nll": -log_prob
-    }
+    return {"acc": acc, "log_prob": log_prob, "prob": prob, "n_tokens": n_tokens, "nll": -log_prob}
 
 
 def masked_log_probs(pred, targ, shift=True, exact_match=True):

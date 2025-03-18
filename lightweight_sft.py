@@ -8,10 +8,11 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
 from knowledge_propagation.utils import vars, io
-    
+
+
 def prepare_sft_text(args, dataset: list, tokenizer):
     # assert len(tokenizer.additional_special_tokens) == 1
-    
+
     new_dataset = []
     has_show_example = False
     for datum in dataset:
@@ -26,20 +27,18 @@ def prepare_sft_text(args, dataset: list, tokenizer):
         datum[args.dataset_text_field] = t
         new_dataset.append(datum)
     return new_dataset
-    
-    
+
 
 parser = HfArgumentParser((SFTConfig,))
 (args,) = parser.parse_args_into_dataclasses()
 model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B"
 
 
-
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False)
 tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, add_eos_token=True, use_fast=False)
-tokenizer.padding_side = 'right'
+tokenizer.padding_side = "right"
 original_vocab_size = len(tokenizer)
-tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 # tokenizer.add_special_tokens({'additional_special_tokens': ['<sft_token_1>']}, replace_additional_special_tokens=False)
 model.resize_token_embeddings(len(tokenizer))
 
@@ -52,20 +51,24 @@ assert tokenizer.eos_token_id != tokenizer.pad_token_id
 # train_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/train.jsonl"), tokenizer)
 # valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
-train_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/train.jsonl"), tokenizer)
-valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl"), tokenizer)
+train_dataset = prepare_sft_text(
+    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/train.jsonl"), tokenizer
+)
+valid_dataset = prepare_sft_text(
+    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl"), tokenizer
+)
 
 train_dataset = Dataset.from_list(train_dataset)
 valid_dataset = Dataset.from_list(valid_dataset)
 
-response_template = "?" # tokenizer.additional_special_tokens[0] # "?" alternative "Ġ?"
+response_template = "?"  # tokenizer.additional_special_tokens[0] # "?" alternative "Ġ?"
 
 collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
 
 trainer = SFTTrainer(
     model,
-    train_dataset=train_dataset, # type: ignore
-    eval_dataset=valid_dataset, # type: ignore
+    train_dataset=train_dataset,  # type: ignore
+    eval_dataset=valid_dataset,  # type: ignore
     args=args,
     data_collator=collator,
 )
@@ -77,4 +80,3 @@ trainer.model.resize_token_embeddings(original_vocab_size)
 trainer.model.save_pretrained(save_directory=args.output_dir)
 
 trainer.accelerator.wait_for_everyone()
-
