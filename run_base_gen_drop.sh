@@ -33,6 +33,7 @@ prompt=no
 exp_dir_name="musique_propagator_p0"
 archive=${name2id[$exp_dir_name]}
 
+# base_model_name=llama3.2-1B-instruct
 base_model_name=llama3.2-1B-eos-sft
 # base_model_name=llama3.2-1B-eos-sft
 # sft(q_p, a_p)

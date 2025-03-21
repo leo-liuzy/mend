@@ -145,6 +145,23 @@ def run(config):
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
         # import pdb; pdb.set_trace()
+    elif config.task == "qa" or config.task == "bio_syn_v2":
+        add_padding(tokenizer, model)
+        from data_classes.bio_syn_v2 import BioSynDataset
+        assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
+        train_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/train.jsonl", config, size=config.train_set_size, max_length=tokenizer.model_max_length)
+        val_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/valid.jsonl", config, max_length=tokenizer.model_max_length, is_eval=True)
+        LOG.info(f"train_set size: {len(train_set)}")
+        LOG.info(f"val_set size: {len(val_set)}")
+        # import pdb; pdb.set_trace()
+    elif config.task == "qa" or config.task == "country_syn":
+        add_padding(tokenizer, model)
+        from data_classes.bio_syn_v2 import BioSynDataset
+        assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
+        train_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/train.jsonl", config, size=config.train_set_size, max_length=tokenizer.model_max_length)
+        val_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/valid.jsonl", config, max_length=tokenizer.model_max_length, is_eval=True)
+        LOG.info(f"train_set size: {len(train_set)}")
+        LOG.info(f"val_set size: {len(val_set)}")
     else:
         raise ValueError(f"Unrecognized task {config.task}")
     # train_set[0]

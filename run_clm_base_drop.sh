@@ -20,7 +20,7 @@ epoch=4
 
 # second-1hop
 
-for example_idx in {0..99} # {0..999}
+for example_idx in {100..581} # {0..99} # {0..999}
 do
 
 echo "Example idx: ${example_idx}"

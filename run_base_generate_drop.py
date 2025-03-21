@@ -261,6 +261,7 @@ def run(config):
             pre_result_df.insert(1, "stage", "pre-edit")
             pre_result_df.insert(0, "question_tag", question_type + f"q{q_i}")
             pre_result_df.insert(0, "question_type", question_type)
+            pre_result_df.insert(0, "id", datum["section_id"])
             pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
             pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
             pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc EM", pre_edit_sft_em_dict["acc"].item())

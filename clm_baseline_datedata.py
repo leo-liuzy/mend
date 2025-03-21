@@ -180,6 +180,7 @@ class CustomConfig:
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
     base_model_name: Optional[str] = "Llama-3.2-1B-common-date-year-after-eos-sft"
+    # base_model_name: Optional[str] = "Llama-3.2-1B-Instruct"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
     date_data: Optional[str] = "n+1"

@@ -12,3 +12,4 @@ inner_params:
 - model.layers.15.mlp.gate_proj.weight
 - model.layers.15.mlp.up_proj.weight
 - model.layers.15.mlp.down_proj.weight
+

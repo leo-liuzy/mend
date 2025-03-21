@@ -1,0 +1,7 @@
+# @package _global_
+
+task: bio_syn_v2
+dataset: bio_syn_v2
+cbase: 1.0
+heavy_outerloop: true
+# doc_dropout: 0.5 # w. prob 0.5 randomly drop 1 doc

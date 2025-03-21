@@ -1,9 +1,9 @@
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=0
 
 export WANDB_MODE=online
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
-bs=128
+bs=64
 per_device_train_batch_size=32
 grad_acc=$((bs / gpu_count / per_device_train_batch_size))
 
@@ -18,7 +18,7 @@ epoch=2
 
 lr=1e-5
 
-output_dir=models/Llama-3.2-1B-common-date-eos-sft
+output_dir=models/Llama-3.2-1B-common-country-eos-sft
 # model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
 
 accelerate launch --config_file="fsdp_config.yaml" \
