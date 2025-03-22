@@ -108,11 +108,11 @@ def run(config):
     # import pdb
 
     # pdb.set_trace()
-    if config.date_data == "n+1":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
-    else:
-        assert config.date_data == "n"
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test_n_question.jsonl")
+    if config.date_data == "all_propagation":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
+    # else:
+    #     assert config.date_data == "n"
+    #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
     if config.spec_question:
         spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
 
@@ -130,7 +130,6 @@ def run(config):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = edit_dev_dataset[i]
-        
 
         sentences = [datum["text"]]
 
@@ -165,9 +164,9 @@ def run(config):
         model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
         edit_model_infos.append(model_info)
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         question_types = [
-            ("efficacy", [{"question": datum["question"], "answer": datum["answer"]}]),
+            ("efficacy", datum["questions"]),
         ]
 
         if config.spec_question:
@@ -189,7 +188,7 @@ def run(config):
                 post_result_df.insert(
                     0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
                 )
-                post_result_df.insert(0, "question_tag", f"{question_type}_q{q_i}")
+                post_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
                 post_result_df.insert(0, "question_type", question_type)
                 post_result_df.insert(0, "id", str(i))
                 all_datum_result_df.append(post_result_df)
