@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=3
 
 declare -A name2id=(
     # metatrain debug on date data
@@ -16,11 +16,11 @@ declare -A name2id=(
 )
 
 
-n_val=1
+n_val=100
 prompt=no
 task=bio_syn_v2
 
-exp_dir_name=common-date-year-after_3K_heavy_share_top3
+exp_dir_name=common-date-year-after_3K_light_share_top3
 archive=${name2id[$exp_dir_name]}
 
 for date_data in all_propagation

@@ -47,6 +47,7 @@ class BaseTrainer:
 
         if config.archive is not None:
             archive, config.archive = utils.load_archive(str(config.archive))
+            # import pdb; pdb.set_trace()
             self.model.load_state_dict(archive["model"])
             del archive["model"]
             if not self.config.eval_only:
