@@ -20,7 +20,10 @@ epoch=4
 
 # second-1hop
 
-for example_idx in 0 # {0..99} # {0..999}
+for example_idx in {0..99} # {0..999}
+do
+
+for text_data in "text" "text_w_qas" 
 do
 
 echo "Example idx: ${example_idx}"
@@ -52,6 +55,6 @@ python clm_baseline_country.py \
     --report_to="none" \
     --spec_question=True \
     --date_data="all_propagation" \
-    --text_data="text_w_qas"
-
+    --text_data=${text_data}
+done
 done

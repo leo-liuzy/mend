@@ -11,10 +11,11 @@ from bespokelabs import curator
 from datasets import Dataset
 
 score_tag_extractor = extractor.tag_content_extractor("score")
-    
+
+
 class LlmAsJudge(curator.LLM):
     MAX_VAL: float = 10.0
-    PROMPT : str = """
+    PROMPT: str = """
 [Instruction]
 Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. For this evaluation, you should primarily consider the following criteria:
 accuracy: 
@@ -38,9 +39,12 @@ accuracy:
 
 Return the numerical score wrapped in <score>..</score> tag
     """.strip()
+
     def prompt(self, input: dict) -> str:
         """Generate a prompt for the subsubject generator."""
-        return self.PROMPT.format(question=input["question"], prediction=input["predicted_answer"], reference=input["answer"])
+        return self.PROMPT.format(
+            question=input["question"], prediction=input["predicted_answer"], reference=input["answer"]
+        )
 
     def parse(self, input: dict, response: str) -> dict:
         """Parse the model response along with the input to the model into the desired output format.."""
@@ -55,11 +59,12 @@ Return the numerical score wrapped in <score>..</score> tag
             existing_llm_acc = input["llm_accuracy"]
             del input["llm_accuracy"]
         input["llm_accuracy"] = score
-        
+
         return {**input}
 
+
 llm_judge = LlmAsJudge(model_name="gpt-4o-mini")
-fpath = "/u/zliu/datastor1/mend/drop_exp_output/Llama-3.2-1B-eos-sft_clm-baseline_lr=1e-05_epoch=4.0/all_results_e.xlsx"
+fpath = "/data/users/zliu/mend/debug_exp_output/llama3.2-1B-common-country-eos-sft/country_syn/base_n=100_prompt=no_w-gen_wo-icl.xlsx"
 # fpath = "/u/zliu/datastor1/mend/exp_output/eos-sft_musique_propagator_text_hidden_w-atomq/musique/mend_eval_loss=clm_input=hidden_n=1000_prompt=no_w-gen_wo-icl_spec.xlsx"
 scored_df = pd.read_excel(fpath)
 scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)

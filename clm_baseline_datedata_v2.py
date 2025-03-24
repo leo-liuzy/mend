@@ -199,7 +199,7 @@ os.makedirs(exp_save_dir, exist_ok=True)
 
 
 if custom_cfg.date_data == "all_propagation":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}"
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_bio_syn_data_v2_{custom_cfg.text_data}"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")

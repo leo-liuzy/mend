@@ -23,6 +23,8 @@ epoch=4
 for example_idx in {0..99} # {0..999}
 do
 
+for text_data in "text_w_qas" 
+do
 echo "Example idx: ${example_idx}"
 
 # accelerate launch --config_file="fsdp_config.yaml" \
@@ -52,6 +54,6 @@ python clm_baseline_datedata_v2.py \
     --report_to="none" \
     --spec_question=True \
     --date_data="all_propagation" \
-    --text_data="text"
-
+    --text_data=${text_data}
+done
 done
