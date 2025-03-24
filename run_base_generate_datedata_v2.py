@@ -196,11 +196,10 @@ def run(config):
     assert hasattr(config, "date_data")
     if config.date_data == "common":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
-    elif config.date_data == "bio_syn":
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test.jsonl")
+    elif config.date_data == "bio_syn_v2":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
     else:
-        config.date_data == "bio_syn_n_question"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/test_n_question.jsonl")
+        raise ValueError(f"Unknown date_data: {config.date_data}")
 
     all_results = []
     edit_model_infos = []
@@ -220,67 +219,80 @@ def run(config):
         # import pdb
 
         # pdb.set_trace()
-        test_queries = [
-            # {"question": datum["question"], "answer": datum["answer"]}
-            {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
-        ]
+        if config.date_data == "common":
+            test_queries = [
+                {"question": datum["question"], "answer": datum["answer"]}
+                # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
+            ]
+        else:
+            test_queries = datum["questions"]
 
         # prepare [Q][A] accuracy and generation inputs
 
-        assert len(test_queries) == 1, "# TODO: make this support multiple input"
-        test_queries_q_str = test_queries[0]["question"]
-        test_queries_a_str = test_queries[0]["answer"]
-        test_queries_str = test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str
+        # import pdb
 
-        acc_toks = add_eos(
-            tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True),
-            eos_token_id,
-            ignore=not config.add_eos,
-        )
-        acc_toks = utils.dict_to(acc_toks, config.device)
-        sft_labels = val_set.get_edit_labels(
-            add_eos(
-                tokenizer(
-                    [(" " if test_queries_a_str[0] != " " else "") + test_queries_a_str],
-                    padding=True,
-                    return_tensors="pt",
-                    add_special_tokens=False,
-                ),
+        # pdb.set_trace()
+        # assert len(test_queries) == 1, "# TODO: make this support multiple input"
+        for test_query in test_queries:
+            test_queries_q_str = test_query["question"].strip()
+            test_queries_a_str = test_query["answer"].strip()
+            # test_queries_q_str = test_queries[0]["question"]
+            # test_queries_a_str = test_queries[0]["answer"]
+            test_queries_str = test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str
+
+            acc_toks = add_eos(
+                tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True),
                 eos_token_id,
                 ignore=not config.add_eos,
-            )["input_ids"]
-        ).to(config.device)
-
-        clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
-
-        print("Input for [Q][A] Accuracy: ")
-        print("[" + tokenizer.decode(acc_toks["input_ids"][0]) + "]")
-        print("SFT label:", "[" + tokenizer.decode(sft_labels[0]) + "]")
-        print("CLM label(before ShiftLeft):", "[" + tokenizer.decode(clm_labels[0]) + "]")
-        print()
-        with torch.no_grad():
-            pre_edit_logits = trainer.model(input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"])
-
-            pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
-            pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
-            pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
-            pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
-
-        if config.do_generation:
-            pre_result_df = generate(
-                test_queries_q_str, test_queries_a_str, config, trainer.model.model, tokenizer, generation_config
             )
-        else:
-            pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
-        assert len(pre_result_df) == 1
+            acc_toks = utils.dict_to(acc_toks, config.device)
+            sft_labels = val_set.get_edit_labels(
+                add_eos(
+                    tokenizer(
+                        [(" " if test_queries_a_str[0] != " " else "") + test_queries_a_str],
+                        padding=True,
+                        return_tensors="pt",
+                        add_special_tokens=False,
+                    ),
+                    eos_token_id,
+                    ignore=not config.add_eos,
+                )["input_ids"]
+            ).to(config.device)
 
-        pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
-        pre_result_df.insert(1, "stage", "pre-edit")
-        pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc EM", pre_edit_sft_em_dict["acc"].item())
-        pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc PM", pre_edit_sft_pm_dict["acc"].item())
-        all_results.append(pre_result_df)
+            clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
+
+            print("Input for [Q][A] Accuracy: ")
+            print("[" + tokenizer.decode(acc_toks["input_ids"][0]) + "]")
+            print("SFT label:", "[" + tokenizer.decode(sft_labels[0]) + "]")
+            print("CLM label(before ShiftLeft):", "[" + tokenizer.decode(clm_labels[0]) + "]")
+            print()
+            with torch.no_grad():
+                pre_edit_logits = trainer.model(
+                    input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"]
+                )
+
+                pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
+                pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
+                pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
+                pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
+
+            if config.do_generation:
+                pre_result_df = generate(
+                    test_queries_q_str, test_queries_a_str, config, trainer.model.model, tokenizer, generation_config
+                )
+            else:
+                pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
+            assert len(pre_result_df) == 1
+
+            pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
+            pre_result_df.insert(1, "stage", "pre-edit")
+            pre_result_df.insert(0, "question_tag", test_query["question_type"])
+            pre_result_df.insert(0, "id", str(i))
+            pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
+            pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
+            pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc EM", pre_edit_sft_em_dict["acc"].item())
+            pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc PM", pre_edit_sft_pm_dict["acc"].item())
+            all_results.append(pre_result_df)
 
     all_results = pd.concat(all_results)
 

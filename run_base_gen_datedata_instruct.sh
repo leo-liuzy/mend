@@ -37,7 +37,7 @@ base_model_name=llama3.2-1B-instruct
 # base_model_name=llama3.2-1B-common-date-year-after-eos-sft
 # base_model_name=llama3.2-1B-eos-sft
 # sft(q_p, a_p)
-python run_base_generate_datedata_instruct.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=debug_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +date_data=bio_syn
+python run_base_generate_datedata_instruct.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=debug_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +date_data=bio_syn_v2
 
 # python run_base_generate.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=exp_output/${base_model_name}/${task} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=True
 
