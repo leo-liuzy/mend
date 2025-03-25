@@ -70,7 +70,14 @@ def score_df(df):
         use_aggregator=False,
     )
 
-    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **diff_per_example}))
+    model_response_w_score = df.join(
+        pd.DataFrame(
+            {
+                **em_per_example,
+                **diff_per_example,
+            }
+        )
+    )
     return model_response_w_score
 
 
@@ -194,10 +201,15 @@ def run(config):
 
     trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
-    if config.date_data == "common":
+    if config.date_data == "common_country":
+        question_type = "specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl")
+    elif config.date_data == "common_date":
+        question_type = "specificity"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
-    elif config.date_data == "bio_syn_v2":
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
+    elif config.date_data == "country_syn":
+        question_type = "efficacy"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
     else:
         raise ValueError(f"Unknown date_data: {config.date_data}")
 
@@ -206,9 +218,9 @@ def run(config):
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
     assert config.eval_only
-
-    assert hasattr(config, "ice")
     
+    assert hasattr(config, "ice") and config.ice
+
     if hasattr(config, "add_icl") and config.add_icl:
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
     else:
@@ -218,10 +230,8 @@ def run(config):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = val_data[i]
-        # import pdb
 
-        # pdb.set_trace()
-        if config.date_data == "common":
+        if any(config.date_data == k for k in ["common_country", "common_date"]):
             test_queries = [
                 {"question": datum["question"], "answer": datum["answer"]}
                 # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
@@ -231,13 +241,10 @@ def run(config):
 
         # prepare [Q][A] accuracy and generation inputs
 
-        # import pdb
-
-        # pdb.set_trace()
-        # assert len(test_queries) == 1, "# TODO: make this support multiple input"
-        for test_query in test_queries:
-            if config.ice:
-                test_queries_q_str = datum["text"] + "\n\n" + test_query["question"].strip()
+        for q_i, test_query in enumerate(test_queries):
+            # import pdb; pdb.set_trace()
+            if config.ice and not any(config.date_data == k for k in ["common_country", "common_date"]):
+                test_queries_q_str = datum["text"] + "\n@@@\n" + test_query["question"].strip()
             else:
                 test_queries_q_str = test_query["question"].strip()
             test_queries_a_str = test_query["answer"].strip()
@@ -291,7 +298,11 @@ def run(config):
 
             pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
             pre_result_df.insert(1, "stage", "pre-edit")
-            pre_result_df.insert(0, "question_tag", test_query["question_type"])
+            if question_type == "efficacy":
+                pre_result_df.insert(0, "question_tag", f"{question_type}_{test_query['question_type']}")
+            else:
+                pre_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
+            pre_result_df.insert(0, "question_type", f"{question_type}")
             pre_result_df.insert(0, "id", str(i))
             pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
             pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())

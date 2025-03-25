@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 
 declare -A name2id=(
     [llama3.2-1B_on_zsre-full]=2025-02-10_08-19-14_2641409766
@@ -25,7 +25,7 @@ declare -A name2id=(
 
 
 
-n_val=100
+n_val=50
 task=musique
 prompt=no
 # task=zsre
@@ -34,7 +34,18 @@ exp_dir_name="musique_propagator_p0"
 archive=${name2id[$exp_dir_name]}
 
 # base_model_name=llama3.2-1B-instruct
-base_model_name=llama3.2-1B-common-date-year-after-eos-sft
+# base_model_name=llama3.2-1B-eos-sft-country_syn-pretrain-all
+# base_model_name=llama3.2-1B-eos-sft-country_syn-pretrain-top3
+# base_model_name=llama3.2-1B-eos-sft-country_syn-pretrain-midupper3
+# base_model_name=llama3.2-1B-eos-sft-bio_syn_v2-pretrain-all
+base_model_name=llama3.2-1B-eos-sft-bio_syn_v2-pretrain-top3
+# base_model_name=llama3.2-1B-eos-sft-bio_syn_v2-pretrain-midupper3
+
 # base_model_name=llama3.2-1B-eos-sft
 # sft(q_p, a_p)
-python run_base_generate_datedata_v2.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=debug_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +ice=True +date_data=bio_syn_v2 
+for date_data in common_date country_syn bio_syn_v2 # common_country # common_date country_syn 
+do
+
+python run_base_pretrain_generate_country.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=debug_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +ice=True +date_data=${date_data}
+
+done

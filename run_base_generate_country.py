@@ -214,6 +214,8 @@ def run(config):
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
     assert config.eval_only
+    
+    assert hasattr(config, "ice")
 
     if hasattr(config, "add_icl") and config.add_icl:
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
@@ -235,12 +237,12 @@ def run(config):
 
         # prepare [Q][A] accuracy and generation inputs
 
-        # import pdb
-
-        # pdb.set_trace()
-        # assert len(test_queries) == 1, "# TODO: make this support multiple input"
         for q_i, test_query in enumerate(test_queries):
-            test_queries_q_str = test_query["question"].strip()
+            # import pdb; pdb.set_trace()
+            if config.ice:
+                test_queries_q_str = datum["text"] + "\n\n" + test_query["question"].strip()
+            else:
+                test_queries_q_str = test_query["question"].strip()
             test_queries_a_str = test_query["answer"].strip()
             # test_queries_q_str = test_queries[0]["question"]
             # test_queries_a_str = test_queries[0]["answer"]
@@ -316,7 +318,7 @@ def run(config):
 
         os.makedirs(save_dir, exist_ok=True)
         all_results.to_excel(
-            f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl.xlsx",
+            f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_ice={config.ice}.xlsx",
             index=False,
         )
 
