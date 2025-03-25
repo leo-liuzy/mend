@@ -54,12 +54,15 @@ def print_trainable_parameters(model):
 class CustomConfig:
     syn_data: str
     tunable_params: str
+    init_model_name_or_path: str
     train_size: Optional[int] = 3_000
+    
 
 parser = HfArgumentParser((SFTConfig, CustomConfig))
 (args, custom_cfg) = parser.parse_args_into_dataclasses()
-model_name_or_path = f"/u/zliu/datastor1/mend/models/Llama-3.2-1B-eos-sft"
-
+model_name_or_path = custom_cfg.init_model_name_or_path
+print(f"model_name_or_path: {model_name_or_path}")
+print(f"args.output_dir: {args.output_dir}")
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False)
 tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, add_eos_token=True, use_fast=False)

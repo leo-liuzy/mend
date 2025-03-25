@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=3
 
 export WANDB_MODE=online
 
@@ -18,16 +18,27 @@ epoch=2
 
 lr=1e-5
 
-syn_data="country_syn"
-# syn_data="bio_syn_v2"
+# syn_data="country_syn"
+syn_data="bio_syn_v2"
+tunable_params="all"
 # tunable_params="top3-mlp"
-tunable_params="midupper3-mlp"
+# tunable_params="midupper3-mlp"
 
-output_dir=models/Llama-3.2-1B-eos-sft-${syn_data}-pretrain-${tunable_params}
+
+if [ $syn_data == "bio_syn_v2" ]; then
+    init_model_name_or_path=models/Llama-3.2-1B-common-date-year-after-eos-sft
+elif [ $syn_data == "country_syn" ]; then
+    init_model_name_or_path=models/Llama-3.2-1B-common-country-eos-sft
+else
+    echo "Invalid syn_data: ${syn_data}"
+    exit 1
+fi
+
+output_dir=${init_model_name_or_path}-${syn_data}-pretrain-${tunable_params}
 # model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
 
 accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29900 \
+    --main_process_port 29400 \
     clm_pretrain_baseline.py \
     --output_dir="${output_dir}" \
     --seed=${seed} \
@@ -35,7 +46,7 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --lr_scheduler_type=linear \
     --weight_decay=${weight_decay} \
     --per_device_train_batch_size=${per_device_train_batch_size} \
-    --per_device_eval_batch_size=1 \
+    --per_device_eval_batch_size=${per_device_train_batch_size} \
     --gradient_accumulation_steps=${grad_acc} \
     --max_seq_length=${max_seq_length} \
     --max_grad_norm=${max_grad_norm} \
@@ -55,6 +66,7 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --num_train_epochs=${epoch} \
     --run_name="lightweight-eos-sft" \
     --syn_data=${syn_data} \
-    --tunable_params=${tunable_params}
+    --tunable_params=${tunable_params} \
+    --init_model_name_or_path=${init_model_name_or_path} \
     
     

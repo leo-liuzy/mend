@@ -64,7 +64,7 @@ Return the numerical score wrapped in <score>..</score> tag
 
 
 llm_judge = LlmAsJudge(model_name="gpt-4o-mini")
-fpath = "/datastor1/zliu/mend/debug_exp_output/llama3.2-1B-eos-sft-bio_syn_v2-pretrain/common_country/base_n=50_prompt=no_w-gen_wo-icl_ice=True.xlsx"
+fpath = "/u/zliu/datastor1/mend/debug_exp_output/llama3.2-1B-eos-sft-bio_syn_v2-pretrain-all/country_syn/base_n=100_prompt=no_w-gen_wo-icl_ice=True.xlsx"
 # fpath = "/u/zliu/datastor1/mend/exp_output/eos-sft_musique_propagator_text_hidden_w-atomq/musique/mend_eval_loss=clm_input=hidden_n=1000_prompt=no_w-gen_wo-icl_spec.xlsx"
 scored_df = pd.read_excel(fpath)
 scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)

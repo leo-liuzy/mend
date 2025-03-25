@@ -194,13 +194,16 @@ def run(config):
 
     trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
+    # import pdb; pdb.set_trace()
     if config.date_data == "common_date":
         question_type = "specificity"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
+    elif config.date_data == "common_date_year_after":
+        question_type = "specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data_year_after/valid.jsonl")
     elif config.date_data == "common_country":
         question_type = "specificity"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl")
-    
     elif config.date_data == "bio_syn_v2":
         question_type = "efficacy"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
@@ -230,7 +233,7 @@ def run(config):
         # import pdb
 
         # pdb.set_trace()
-        if any(config.date_data == k for k in ["common_country", "common_date"]):
+        if any(config.date_data == k for k in ["common_country", "common_date", "common_date_year_after"]):
             test_queries = [
                 {"question": datum["question"], "answer": datum["answer"]}
                 # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
@@ -244,7 +247,7 @@ def run(config):
         # assert len(test_queries) == 1, "# TODO: make this support multiple input"
         for q_i, test_query in enumerate(test_queries):
             # import pdb; pdb.set_trace()
-            if config.ice and not any(config.date_data == k for k in ["common_country", "common_date"]):
+            if config.ice and not any(config.date_data == k for k in ["common_country", "common_date", "common_date_year_after"]):
                 test_queries_q_str = datum["text"] + "\n@@@\n" + test_query["question"].strip()
             else:
                 test_queries_q_str = test_query["question"].strip()
