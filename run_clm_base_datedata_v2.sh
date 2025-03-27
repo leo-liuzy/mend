@@ -20,10 +20,12 @@ epoch=4
 
 # second-1hop
 
+tunable_params="midupper3-mlp"
+
 for example_idx in {0..99} # {0..999}
 do
 
-for text_data in "text_w_qas" 
+for text_data in "text" # "text_w_qas" 
 do
 echo "Example idx: ${example_idx}"
 
@@ -54,6 +56,8 @@ python clm_baseline_datedata_v2.py \
     --report_to="none" \
     --spec_question=True \
     --date_data="all_propagation" \
-    --text_data=${text_data}
+    --text_data=${text_data} \
+    --tunable_params=${tunable_params} 
+    
 done
 done

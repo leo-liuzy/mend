@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=7
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -19,6 +19,8 @@ lr=1e-5
 epoch=4
 
 # second-1hop
+
+tunable_params="midupper3-mlp"
 
 for example_idx in {0..199} # {0..999}
 do
@@ -52,6 +54,6 @@ python clm_baseline_ripple_edits.py \
     --report_to="none" \
     --spec_question=True \
     --date_data="all_propagation" \
-
+    --tunable_params=${tunable_params} \
 
 done

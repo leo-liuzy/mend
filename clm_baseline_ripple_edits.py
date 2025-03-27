@@ -160,6 +160,20 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
     return tokenized_datasets
 
 
+def print_trainable_parameters(model):
+    """
+    Prints the number of trainable parameters in the model.
+    """
+    trainable_params = 0
+    all_param = 0
+    for _, param in model.named_parameters():
+        all_param += param.numel()
+        if param.requires_grad:
+            trainable_params += param.numel()
+    print(
+        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
+    )
+
 class InputFormat(StrEnum):
     two_single_hop = "two-1hop"
     first_single_hop = "first-1hop"
@@ -170,15 +184,18 @@ class InputFormat(StrEnum):
 @dataclass
 class CustomConfig:
     example_idx: int
+    tunable_params: str
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
-    base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
+    base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft-ripple_edits-pretrain-midupper3-mlp"
+    # base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
     # base_model_name: Optional[str] = "Llama-3.2-1B-Instruct"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
     text_data: Optional[str] = "text"
     date_data: Optional[str] = "n+1"
+    
 
 
 parser = HfArgumentParser((SFTConfig, CustomConfig))
@@ -199,6 +216,7 @@ else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
 os.makedirs(individual_result_save_dir, exist_ok=True)
+
 
 
 instance = cpt_dev_dataset[custom_cfg.example_idx]
@@ -249,6 +267,42 @@ logging.info(f"Setting per_device_train_batch_size == {len(train_dataset)}")
 args.per_device_train_batch_size = len(train_dataset)
 # valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
+if custom_cfg.tunable_params != "all":
+    if custom_cfg.tunable_params == "top3-mlp":
+        params = [
+            "model.layers.13.mlp.gate_proj.weight",
+            "model.layers.13.mlp.up_proj.weight",
+            "model.layers.13.mlp.down_proj.weight",
+            "model.layers.14.mlp.gate_proj.weight",
+            "model.layers.14.mlp.up_proj.weight",
+            "model.layers.14.mlp.down_proj.weight",
+            "model.layers.15.mlp.gate_proj.weight",
+            "model.layers.15.mlp.up_proj.weight",
+            "model.layers.15.mlp.down_proj.weight",
+        ]
+    elif custom_cfg.tunable_params == "midupper3-mlp":
+        params = [
+            "model.layers.10.mlp.gate_proj.weight",
+            "model.layers.10.mlp.up_proj.weight",
+            "model.layers.10.mlp.down_proj.weight",
+            "model.layers.11.mlp.gate_proj.weight",
+            "model.layers.11.mlp.up_proj.weight",
+            "model.layers.11.mlp.down_proj.weight",
+            "model.layers.12.mlp.gate_proj.weight",
+            "model.layers.12.mlp.up_proj.weight",
+            "model.layers.12.mlp.down_proj.weight",
+        ]
+    else:
+        raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
+    
+    for n, param in model.named_parameters():
+        
+        if any(p in n for p in params):
+            param.requires_grad = True
+        else:
+            param.requires_grad = False
+
+print_trainable_parameters(model)
 
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 

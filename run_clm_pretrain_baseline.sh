@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=1
 
 export WANDB_MODE=online
 
@@ -18,27 +18,36 @@ epoch=2
 
 lr=1e-5
 
-# syn_data="country_syn"
-syn_data="bio_syn_v2"
+syn_data="country_syn"
+# syn_data="bio_syn_v2"
 tunable_params="all"
 # tunable_params="top3-mlp"
 # tunable_params="midupper3-mlp"
 
 
+# if [ $syn_data == "bio_syn_v2" ]; then
+#     init_model_name_or_path=models/Llama-3.2-1B-common-date-year-after-eos-sft
+# elif [ $syn_data == "country_syn" ]; then
+#     init_model_name_or_path=models/Llama-3.2-1B-common-country-eos-sft
+# else
+#     echo "Invalid syn_data: ${syn_data}"
+#     exit 1
+# fi
+# output_dir=${init_model_name_or_path}-${syn_data}-pretrain-${tunable_params}
+
 if [ $syn_data == "bio_syn_v2" ]; then
-    init_model_name_or_path=models/Llama-3.2-1B-common-date-year-after-eos-sft
-elif [ $syn_data == "country_syn" ]; then
     init_model_name_or_path=models/Llama-3.2-1B-common-country-eos-sft
+elif [ $syn_data == "country_syn" ]; then
+    init_model_name_or_path=models/Llama-3.2-1B-common-date-year-after-eos-sft
 else
     echo "Invalid syn_data: ${syn_data}"
     exit 1
 fi
-
 output_dir=${init_model_name_or_path}-${syn_data}-pretrain-${tunable_params}
-# model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
+
 
 accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29400 \
+    --main_process_port 29500 \
     clm_pretrain_baseline.py \
     --output_dir="${output_dir}" \
     --seed=${seed} \

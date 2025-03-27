@@ -211,7 +211,7 @@ def run(config):
     assert config.val_steps <= len(val_data)
     assert config.eval_only
     
-    assert hasattr(config, "ice") and config.ice
+    assert hasattr(config, "ice") # and config.ice
     
     if hasattr(config, "add_icl") and config.add_icl:
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]

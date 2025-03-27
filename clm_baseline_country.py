@@ -159,6 +159,20 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
     tokenized_datasets = dataset.map(tokenize, batched=True, remove_columns=[args.dataset_text_field])
     return tokenized_datasets
 
+def print_trainable_parameters(model):
+    """
+    Prints the number of trainable parameters in the model.
+    """
+    trainable_params = 0
+    all_param = 0
+    for _, param in model.named_parameters():
+        all_param += param.numel()
+        if param.requires_grad:
+            trainable_params += param.numel()
+    print(
+        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
+    )
+
 
 class InputFormat(StrEnum):
     two_single_hop = "two-1hop"
@@ -170,10 +184,12 @@ class InputFormat(StrEnum):
 @dataclass
 class CustomConfig:
     example_idx: int
+    tunable_params: str
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
-    base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft"
+    base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft-country_syn-pretrain-midupper3-mlp"
+    # base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft"
     # base_model_name: Optional[str] = "Llama-3.2-1B-Instruct"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
@@ -235,6 +251,42 @@ model.config.pad_token_id = tokenizer.pad_token_id
 assert tokenizer.eos_token != tokenizer.pad_token
 assert tokenizer.eos_token_id != tokenizer.pad_token_id
 
+if custom_cfg.tunable_params != "all":
+    if custom_cfg.tunable_params == "top3-mlp":
+        params = [
+            "model.layers.13.mlp.gate_proj.weight",
+            "model.layers.13.mlp.up_proj.weight",
+            "model.layers.13.mlp.down_proj.weight",
+            "model.layers.14.mlp.gate_proj.weight",
+            "model.layers.14.mlp.up_proj.weight",
+            "model.layers.14.mlp.down_proj.weight",
+            "model.layers.15.mlp.gate_proj.weight",
+            "model.layers.15.mlp.up_proj.weight",
+            "model.layers.15.mlp.down_proj.weight",
+        ]
+    elif custom_cfg.tunable_params == "midupper3-mlp":
+        params = [
+            "model.layers.10.mlp.gate_proj.weight",
+            "model.layers.10.mlp.up_proj.weight",
+            "model.layers.10.mlp.down_proj.weight",
+            "model.layers.11.mlp.gate_proj.weight",
+            "model.layers.11.mlp.up_proj.weight",
+            "model.layers.11.mlp.down_proj.weight",
+            "model.layers.12.mlp.gate_proj.weight",
+            "model.layers.12.mlp.up_proj.weight",
+            "model.layers.12.mlp.down_proj.weight",
+        ]
+    else:
+        raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
+    
+    for n, param in model.named_parameters():
+        
+        if any(p in n for p in params):
+            param.requires_grad = True
+        else:
+            param.requires_grad = False
+
+print_trainable_parameters(model)
 
 generation_config = GenerationConfig(
     do_sample=False,  # Greedy

@@ -34,16 +34,19 @@ exp_dir_name="musique_propagator_p0"
 archive=${name2id[$exp_dir_name]}
 
 # base_model_name=llama3.2-1B-instruct
-# base_model_name=llama3.2-1B-eos-sft-country_syn-pretrain-all
-# base_model_name=llama3.2-1B-eos-sft-country_syn-pretrain-top3
-# base_model_name=llama3.2-1B-eos-sft-country_syn-pretrain-midupper3
-# base_model_name=llama3.2-1B-eos-sft-bio_syn_v2-pretrain-all
-# base_model_name=llama3.2-1B-eos-sft-bio_syn_v2-pretrain-top3
-base_model_name=llama3.2-1B-eos-sft-bio_syn_v2-pretrain-midupper3
+
+# base_model_name=llama3.2-1B-common-country-eos-sft-country_syn-pretrain-all
+# base_model_name=llama3.2-1B-common-country-eos-sft-country_syn-pretrain-top3
+# base_model_name=llama3.2-1B-common-country-eos-sft-country_syn-pretrain-midupper3
+# base_model_name=llama3.2-1B-common-date-year-after-eos-sft-bio_syn_v2-pretrain-all
+# base_model_name=llama3.2-1B-common-date-year-after-eos-sft-bio_syn_v2-pretrain-top3
+# base_model_name=llama3.2-1B-common-date-year-after-eos-sft-bio_syn_v2-pretrain-midupper3
+base_model_name=llama3.2-1B-common-country-eos-sft-bio_syn_v2-pretrain-all
+# base_model_name=llama3.2-1B-common-date-year-after-eos-sft-country_syn-pretrain-all
 
 # base_model_name=llama3.2-1B-eos-sft
 # sft(q_p, a_p)
-for date_data in common_date # common_date common_country country_syn bio_syn_v2 
+for date_data in common_date country_syn bio_syn_v2 common_date common_country common_date_year_after
 do
 if [ $date_data == "common_country" ]; then
     n_val=50
