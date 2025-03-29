@@ -144,12 +144,12 @@ if custom_cfg.tunable_params != "all":
 print_trainable_parameters(model)
 
 
-if custom_cfg.syn_data == "ripple_edits":
+if custom_cfg.syn_data == "ripple_edits_recent":
     train_dataset = prepare_sft_text(
-        args, custom_cfg, io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/train.jsonl"), tokenizer
+        args, custom_cfg, io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/train.jsonl"), tokenizer
     )
     valid_dataset = prepare_sft_text(
-        args, custom_cfg, io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/valid.jsonl"), tokenizer
+        args, custom_cfg, io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid.jsonl"), tokenizer
     )
 else:
     raise ValueError(f"Unknown syn_data: {custom_cfg.syn_data}")

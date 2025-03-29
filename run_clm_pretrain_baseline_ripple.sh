@@ -18,7 +18,7 @@ epoch=2
 
 lr=1e-5
 
-syn_data="ripple_edits"
+syn_data="ripple_edits_recent"
 # syn_data="bio_syn_v2"
 # tunable_params="all"
 # tunable_params="top3-mlp"
