@@ -14,7 +14,8 @@ from tqdm import tqdm
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
 from knowledge_propagation.modules.inferencers import QAInferencer
-from experiments.musique.inference_only import eval_inferencer, macro_averaging
+
+# from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
 
 from knowledge_propagation.modules.evaluators import (
@@ -207,8 +208,11 @@ def run(config):
         question_type = "efficacy"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
     elif config.date_data == "country_syn_ood":
-        question_type = "ood_efficacy"
+        question_type = "efficacy"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
+    # elif config.date_data == "country_syn_ood_hard":
+    #     question_type = "ood_efficacy"
+    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_hard.jsonl")
     else:
         raise ValueError(f"Unknown date_data: {config.date_data}")
 
@@ -217,7 +221,7 @@ def run(config):
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
     assert config.eval_only
-    
+
     assert hasattr(config, "ice")
 
     if hasattr(config, "add_icl") and config.add_icl:
@@ -235,7 +239,7 @@ def run(config):
                 {"question": datum["question"], "answer": datum["answer"]}
                 # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
             ]
-        elif config.date_data == "country_syn_ood":
+        elif config.date_data == "country_syn_ood_hard":
             test_queries = datum["ood_questions"]
         else:
             test_queries = datum["questions"]

@@ -118,12 +118,13 @@ Only return continent name wrapped in <continent>..</continent> tag.
 # dataset.save_to_disk("/u/zliu/datastor1/KE-by-CP/data/debug_meta_train/country_data/common_cities_generation.hf",)
 
 continent_generator = ContinentGenerator(model_name="gpt-4o")
-country_train_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl")
+split = "valid"
+country_train_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/{split}.jsonl")
 city_country_pairs = [d["(city, country)"] for d in country_train_data]
 common_countries = list(set([cc[1] for cc in city_country_pairs]))
 df = pd.DataFrame(common_countries, columns=["country"])
 dataset = Dataset.from_pandas(df)
-continent_generator(dataset).save_to_disk("/u/zliu/datastor1/KE-by-CP/data/debug_meta_train/common_country_data/continent_generation.hf",)
+continent_generator(dataset).save_to_disk(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/continent_generation_{split}.hf",)
 
 
 print()

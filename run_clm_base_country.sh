@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=6
+export CUDA_VISIBLE_DEVICES=1
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -20,7 +20,12 @@ epoch=4
 
 # second-1hop
 
+
+# tunable_params="all"
+# base_model_name="Llama-3.2-1B-common-country-eos-sft"
+
 tunable_params="midupper3-mlp"
+base_model_name="Llama-3.2-1B-common-country-eos-sft-country_syn-pretrain-midupper3-mlp"
 
 for example_idx in {0..99} # {0..999}
 do
@@ -55,10 +60,11 @@ python clm_baseline_country.py \
     --run_name="propagator-clm-baseline" \
     --example_idx=${example_idx} \
     --report_to="none" \
-    --spec_question=True \
-    --date_data="all_propagation" \
+    --spec_question=False \
+    --date_data="all_propagation_ood" \
     --text_data=${text_data} \
-    --tunable_params=${tunable_params} 
+    --tunable_params=${tunable_params} \
+    --base_model_name=${base_model_name} 
 
 done
 done

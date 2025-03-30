@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=2
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -22,6 +22,8 @@ epoch=4
 
 # tunable_params="midupper3-mlp"
 tunable_params="all"
+base_model_name="Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-all"
+# base_model_name="Llama-3.2-1B-eos-sft"
 
 for example_idx in {0..150} # {0..999}
 do
@@ -56,5 +58,6 @@ python clm_baseline_ripple_edits.py \
     --spec_question=True \
     --date_data="recent" \
     --tunable_params=${tunable_params} \
+    --base_model_name=${base_model_name} \
 
 done

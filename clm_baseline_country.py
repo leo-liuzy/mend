@@ -159,6 +159,7 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
     tokenized_datasets = dataset.map(tokenize, batched=True, remove_columns=[args.dataset_text_field])
     return tokenized_datasets
 
+
 def print_trainable_parameters(model):
     """
     Prints the number of trainable parameters in the model.
@@ -188,8 +189,8 @@ class CustomConfig:
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
-    base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft-country_syn-pretrain-midupper3-mlp"
-    # base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft"
+    # base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft-country_syn-pretrain-midupper3-mlp"
+    base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft"
     # base_model_name: Optional[str] = "Llama-3.2-1B-Instruct"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
@@ -203,7 +204,7 @@ model_name_or_path = f"{os.getcwd()}/models/{custom_cfg.base_model_name}"
 
 logging.info(f"CustomConfig: {custom_cfg}")
 
-exp_save_dir = f"{os.getcwd()}/debug_exp_output/{custom_cfg.base_model_name}_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}"
+exp_save_dir = f"{os.getcwd()}/debug_exp_output/{custom_cfg.base_model_name}_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
 
 os.makedirs(exp_save_dir, exist_ok=True)
 
@@ -211,6 +212,9 @@ os.makedirs(exp_save_dir, exist_ok=True)
 if custom_cfg.date_data == "all_propagation":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
+if custom_cfg.date_data == "all_propagation_ood":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_ood_{custom_cfg.text_data}"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
@@ -278,9 +282,8 @@ if custom_cfg.tunable_params != "all":
         ]
     else:
         raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
-    
+
     for n, param in model.named_parameters():
-        
         if any(p in n for p in params):
             param.requires_grad = True
         else:
