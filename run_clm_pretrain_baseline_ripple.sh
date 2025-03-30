@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=0
 
 export WANDB_MODE=online
 
@@ -20,9 +20,9 @@ lr=1e-5
 
 syn_data="ripple_edits_recent"
 # syn_data="bio_syn_v2"
-# tunable_params="all"
+tunable_params="all"
 # tunable_params="top3-mlp"
-tunable_params="midupper3-mlp"
+# tunable_params="midupper3-mlp"
 
 output_dir=models/Llama-3.2-1B-eos-sft-${syn_data}-pretrain-${tunable_params}
 # model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
@@ -50,7 +50,7 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --load_best_model_at_end=True \
     --logging_strategy="steps" \
     --logging_first_step=True \
-    --logging_steps=2 \
+    --logging_steps=5 \
     --eval_on_start=True \
     --report_to="wandb" \
     --num_train_epochs=${epoch} \

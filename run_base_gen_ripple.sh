@@ -25,7 +25,7 @@ declare -A name2id=(
 
 
 
-n_val=200
+n_val=150
 task=musique
 prompt=no
 # task=zsre
@@ -34,7 +34,7 @@ exp_dir_name="musique_propagator_p0"
 archive=${name2id[$exp_dir_name]}
 
 # base_model_name=llama3.2-1B-instruct
-base_model_name=llama3.2-1B-eos-sft-ripple_edits-pretrain-top3
+base_model_name=llama3.2-1B-eos-sft-ripple_edits_recent-pretrain-all
 # base_model_name=llama3.2-1B-eos-sft
 # sft(q_p, a_p)
-python run_base_generate_ripple.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +ice=False +date_data=all_propagation
+python run_base_generate_ripple.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +ice=False +date_data=recent

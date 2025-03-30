@@ -19,21 +19,20 @@ import transformers
 OmegaConf.register_new_resolver("uuid", lambda: utils.uuid())
 
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s [%(filename)s:%(lineno)d] %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(format="%(asctime)s - %(levelname)s [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO)
 LOG = logging.getLogger(__name__)
 
 
 def add_padding(tokenizer, model):
-    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+    tokenizer.add_special_tokens({"pad_token": "[PAD]"})
     model.resize_token_embeddings(len(tokenizer))
     if not isinstance(model, transformers.LlamaForCausalLM):
-    #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
-    # else:
+        #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
+        # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
 
 
-@hydra.main(config_path='config', config_name='config')
+@hydra.main(config_path="config", config_name="config")
 def run(config):
     LOG.info(f"\n\n{OmegaConf.to_yaml(config)}\n")
     base_dir = hydra.utils.get_original_cwd()
@@ -59,49 +58,108 @@ def run(config):
         val_set = BinaryAugmentedKILT(tokenizer, f"{base_dir}/data/fever/fever-dev-kilt.jsonl", config)
     elif config.task == "qa" or config.task == "zsre":
         from data_classes.zsre import ZsreDataset
+
         add_padding(tokenizer, model)
-        
-        train_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config, size=getattr(config, "train_size", None))
-        val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config)
+
+        train_set = ZsreDataset(
+            tokenizer,
+            f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl",
+            config,
+            size=getattr(config, "train_size", None),
+        )
+        val_set = ZsreDataset(
+            tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config
+        )
     elif config.task == "qa" or config.task == "musique":
         from data_classes.musique import MusiqueDataset
 
-        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
-        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+        train_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
     elif config.task == "qa" or config.task == "musique_dropout":
         add_padding(tokenizer, model)
         from data_classes.musique_dropout import MusiqueDataset
 
-        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
-        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+        train_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
     elif config.task == "qa" or config.task == "musique_dropout_better":
         add_padding(tokenizer, model)
         from data_classes.musique_dropout_better import MusiqueDataset
 
-        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
-        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
-    
+        train_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_train.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend/2hop_musique_ans_v1.0_dev.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+
     elif config.task == "qa" or config.task == "musique_combiner_q":
         add_padding(tokenizer, model)
         from data_classes.musique_combiner_q import MusiqueDataset
 
-        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
-        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+        train_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
     elif config.task == "qa" or config.task == "musique_combiner_text":
         add_padding(tokenizer, model)
         from data_classes.musique_combiner_text import MusiqueDataset
 
-        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
-        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+        train_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
     elif config.task == "qa" or config.task == "musique_propagator_text":
         add_padding(tokenizer, model)
         from data_classes.musique_propagator_text import MusiqueDataset
+
         class EditInput(StrEnum):
             seen_doc = "seen"
             hidden_doc = "hidden"
             first_single_hop = "first-1hop"
             second_single_hop = "second-1hop"
-    
+
         if config.edit_input == EditInput.seen_doc:
             suffix = "-seen"
         elif config.edit_input == EditInput.hidden_doc:
@@ -109,17 +167,28 @@ def run(config):
         else:
             assert config.edit_input == EditInput.all_doc
             suffix = ""
-            
-        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
-        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
+
+        train_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train{suffix}.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev{suffix}.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
     elif config.task == "qa" or config.task == "musique_propagator_text_special":
         add_padding(tokenizer, model)
         from data_classes.musique_propagator_text import MusiqueDataset
+
         class EditInput(StrEnum):
             seen_doc = "seen"
             hidden_doc = "hidden"
             all_doc = "all"
-    
+
         if config.edit_input == EditInput.seen_doc:
             suffix = "-seen"
         elif config.edit_input == EditInput.hidden_doc:
@@ -127,47 +196,118 @@ def run(config):
         else:
             assert config.edit_input == EditInput.all_doc
             suffix = ""
-            
-        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
-        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev{suffix}.jsonl", config, max_length=tokenizer.model_max_length)
+
+        train_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train{suffix}.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev{suffix}.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
     elif config.task == "qa" or config.task == "musique_injector":
         add_padding(tokenizer, model)
         from data_classes.musique_injector import MusiqueDataset
 
-        train_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl", config, max_length=tokenizer.model_max_length)
-        val_set = MusiqueDataset(tokenizer, f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl", config, max_length=tokenizer.model_max_length)
+        train_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_train.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = MusiqueDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/musique_mend_converted/2hop_musique_ans_v1.0_dev.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
     elif config.task == "qa" or config.task == "bio_syn":
         add_padding(tokenizer, model)
         from data_classes.bio_syn import BioSynDataset
+
         assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
-        train_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/train.jsonl", config, size=config.train_set_size, max_length=tokenizer.model_max_length)
-        val_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/valid.jsonl", config, max_length=tokenizer.model_max_length)
+        train_set = BioSynDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/train.jsonl",
+            config,
+            size=config.train_set_size,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = BioSynDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data/valid.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
         # import pdb; pdb.set_trace()
     elif config.task == "qa" or config.task == "bio_syn_v2":
         add_padding(tokenizer, model)
         from data_classes.bio_syn_v2 import BioSynDataset
+
         assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
-        train_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/train.jsonl", config, size=config.train_set_size, max_length=tokenizer.model_max_length)
-        val_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/valid.jsonl", config, max_length=tokenizer.model_max_length, is_eval=True)
+        train_set = BioSynDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/train.jsonl",
+            config,
+            size=config.train_set_size,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = BioSynDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/valid.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+            is_eval=True,
+        )
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
         # import pdb; pdb.set_trace()
     elif config.task == "qa" or config.task == "country_syn":
         add_padding(tokenizer, model)
         from data_classes.bio_syn_v2 import BioSynDataset
+
         assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
-        train_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/train.jsonl", config, size=config.train_set_size, max_length=tokenizer.model_max_length)
-        val_set = BioSynDataset(tokenizer, f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/valid.jsonl", config, max_length=tokenizer.model_max_length, is_eval=True)
+        train_set = BioSynDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/train.jsonl",
+            config,
+            size=config.train_set_size,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = BioSynDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/valid.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+            is_eval=True,
+        )
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
     elif config.task == "qa" or config.task == "ripple_edits":
         add_padding(tokenizer, model)
         from data_classes.ripple_edits import RippleEditsDataset
+
         assert hasattr(config, "train_set_size"), "ripple_edits config must be provided"
-        train_set = RippleEditsDataset(tokenizer, f"{vars.DATA_DIR}/ripple_edits/meta_train/train.jsonl", config, size=config.train_set_size, max_length=tokenizer.model_max_length)
-        val_set = RippleEditsDataset(tokenizer, f"{vars.DATA_DIR}/ripple_edits/meta_train/valid.jsonl", config, max_length=tokenizer.model_max_length, is_eval=True)
+        train_set = RippleEditsDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/train.jsonl",
+            config,
+            size=config.train_set_size,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = RippleEditsDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+            is_eval=True,
+        )
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
     else:

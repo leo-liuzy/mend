@@ -14,7 +14,8 @@ from tqdm import tqdm
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
 from knowledge_propagation.modules.inferencers import QAInferencer
-from experiments.musique.inference_only import eval_inferencer, macro_averaging
+
+# from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
 
 from knowledge_propagation.modules.evaluators import (
@@ -200,8 +201,10 @@ def run(config):
 
     trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
-    if config.date_data == "all_propagation":
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/test.jsonl")
+    if config.date_data == "recent+popular":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test.jsonl")
+    elif config.date_data == "recent":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test.jsonl")
     else:
         raise ValueError(f"Unknown date_data: {config.date_data}")
 
@@ -210,9 +213,9 @@ def run(config):
     # trainer.validate(log=True)
     assert config.val_steps <= len(val_data)
     assert config.eval_only
-    
-    assert hasattr(config, "ice") # and config.ice
-    
+
+    assert hasattr(config, "ice")  # and config.ice
+
     if hasattr(config, "add_icl") and config.add_icl:
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
     else:
@@ -224,46 +227,55 @@ def run(config):
         datum = val_data[i]
 
         sentences = [datum["edit"]["prompt"].strip()]
-        
+
         outerloop_queries = []
         for k in ["Logical_Generalization", "Compositionality_I", "Compositionality_II", "Subject_Aliasing"]:
             for instance in datum[k]:
                 for q in instance["test_queries"]:
-                    if len(q["answers"]) > 0 and len([a["value"] for a in q["answers"] if len(a["value"].strip() ) > 0 ]) > 0:
+                    if (
+                        len(q["answers"]) > 0
+                        and len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0
+                    ):
                         q["question_type"] = k
                         outerloop_queries.append(q)
-                
+
         assert len(outerloop_queries) > 0
-        
+
         locality_queries = []
         for k in ["Relation_Specificity", "Forgetfulness"]:
             for instance in datum[k]:
                 for q in instance["test_queries"]:
-                    if len(q["answers"]) > 0 and len([a["value"] for a in q["answers"] if len(a["value"].strip() ) > 0 ]) > 0:
+                    if (
+                        len(q["answers"]) > 0
+                        and len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0
+                    ):
                         q["question_type"] = k
                         locality_queries.append(q)
         assert len(locality_queries) > 0
-        
+
         question_types = [
             ("efficacy", outerloop_queries),
             ("specificity", locality_queries),
         ]
-        
 
         for question_type, test_queries in question_types:
             for q_i, test_query in enumerate(test_queries):
                 answer_candidates = [a["value"] for a in test_query["answers"]]
                 answer = answer_candidates[0]
-                
+
                 # import pdb; pdb.set_trace()
                 if config.ice:
-                    test_queries_q_str = f"Imagine that {sentences[0][0].lower() + sentences[0][1:]} {test_query['prompt'].strip()}"
+                    test_queries_q_str = (
+                        f"Imagine that {sentences[0][0].lower() + sentences[0][1:]} {test_query['prompt'].strip()}"
+                    )
                 else:
                     test_queries_q_str = f"{test_query['prompt'].strip()}"
                 test_queries_a_str = answer.strip()
                 # test_queries_q_str = test_queries[0]["question"]
                 # test_queries_a_str = test_queries[0]["answer"]
-                test_queries_str = test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str
+                test_queries_str = (
+                    test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str
+                )
 
                 acc_toks = add_eos(
                     tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True),
@@ -303,7 +315,12 @@ def run(config):
 
                 if config.do_generation:
                     pre_result_df = generate(
-                        test_queries_q_str, test_queries_a_str, config, trainer.model.model, tokenizer, generation_config
+                        test_queries_q_str,
+                        test_queries_a_str,
+                        config,
+                        trainer.model.model,
+                        tokenizer,
+                        generation_config,
                     )
                 else:
                     pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])

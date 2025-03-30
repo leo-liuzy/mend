@@ -15,9 +15,10 @@ import gc
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
 from knowledge_propagation.modules.inferencers import QAInferencer
-
-# from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
+
+from easyeditor import MEMITHyperParams
+from easyeditor import BaseEditor
 
 from knowledge_propagation.modules.evaluators import (
     ExactMatchEvaluator,
@@ -72,22 +73,14 @@ def run(config):
     np.random.seed(config.seed)
     torch.manual_seed(config.seed)
 
-    model = models.get_model(config)
+    # model = models.get_model(config)
     tokenizer = models.get_tokenizer(config)
-    add_padding(tokenizer, model)
+    # add_padding(tokenizer, model)
+    tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 
     from data_classes.zsre import ZsreDataset
 
-    train_set = ZsreDataset(
-        tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config
-    )
     val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config)
-    tokenizer = val_set.tok
-
-    alg_module = importlib.import_module(f"algs.{config.alg}")
-    LOG.info(f"Loading class {config.alg.upper()} from module {alg_module}")
-    AlgClass = getattr(alg_module, config.alg.upper())
-    alg = AlgClass(model, config, lambda: copy.deepcopy(model))
 
     generation_config = GenerationConfig(
         do_sample=False,  # Greedy
@@ -101,18 +94,16 @@ def run(config):
         eos_token_id=tokenizer.eos_token_id,
     )
 
-    trainer = EditTrainer(alg, config, train_set, val_set)
+    hparams = MEMITHyperParams.from_hparams("/data/users/zliu/EasyEdit/hparams/MEMIT/llama3.2-1B-eos-sft")
+    hparams.mom2_dataset = "ripple_recent"
+
     print("Task: ", config.task)
 
     assert hasattr(config, "spec_question")
     assert hasattr(config, "date_data")
-    # import pdb
 
-    # pdb.set_trace()
-    if config.date_data == "recent+popular":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits_recent+popular/meta_train/test.jsonl")
-    elif config.date_data == "recent":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test.jsonl")
+    if config.date_data == "recent":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_aug.jsonl")
     else:
         raise NotImplementedError("Only all_propagation is supported for date_data")
     #     assert config.date_data == "n"
@@ -133,11 +124,17 @@ def run(config):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = edit_dev_dataset[i]
 
-        sentences = [datum["edit"]["prompt"]]
+        # import pdb
+        editor = BaseEditor.from_hparams(hparams)
+        # pdb.set_trace()
+        prompts = [datum["edit"]["prompt"]]
+        objects = [datum["edit"]["object"]]
+        assert datum["edit"]["subject"] is not None, "subject is None"
+        subjects = [datum["edit"]["subject"]]
 
         assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
         sentences_toks = targets_toks = add_eos(
-            tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=True),
+            tokenizer(prompts, padding=True, return_tensors="pt", add_special_tokens=True),
             eos_token_id,
             ignore=not config.add_eos,
         )
@@ -189,38 +186,15 @@ def run(config):
             ("specificity", locality_queries),
         ]
 
-        for question_type, questions in question_types:
-            logging.info(f"Question type: {question_type}")
-
-            for q_i, question in enumerate(questions):
-                answer_candidates = [a["value"] for a in question["answers"]]
-                answer = answer_candidates[0]
-
-                pre_result_df = get_eval_result(
-                    question=question["prompt"],
-                    answer=answer,
-                    model=trainer.model.model,
-                    tokenizer=tokenizer,
-                    config=config,
-                    generation_config=generation_config,
-                )
-                pre_result_df.insert(0, "stage", "pre-edit")
-                pre_result_df.insert(
-                    0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
-                )
-                pre_result_df.insert(0, "relation", f"{question['relation']}")
-                pre_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
-                pre_result_df.insert(0, "question_type", question_type)
-                pre_result_df.insert(0, "id", str(i))
-                # import pdb
-                # pdb.set_trace()
-                all_datum_result_df.append(pre_result_df)
-
         # edit the model with MEND
-        edited_model, model_info = trainer.model.edit(edit_inner)
-        model_info["input"] = sentences[0]
-        model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
-        edit_model_infos.append(model_info)
+        metrics, edited_model, _ = editor.edit(
+            prompts=prompts,
+            ground_truth=None,
+            target_new=objects,
+            subject=subjects,
+            keep_original_weight=True,
+        )
+        edit_model_infos.append(metrics)
 
         for question_type, questions in question_types:
             logging.info(f"Question type: {question_type}")
@@ -228,11 +202,13 @@ def run(config):
             for q_i, question in enumerate(questions):
                 answer_candidates = [a["value"] for a in question["answers"]]
                 answer = answer_candidates[0]
+                # import pdb
 
+                # pdb.set_trace()
                 post_result_df = get_eval_result(
                     question=question["prompt"],
                     answer=answer,
-                    model=edited_model.model,
+                    model=edited_model,
                     tokenizer=tokenizer,
                     config=config,
                     generation_config=generation_config,
@@ -246,6 +222,7 @@ def run(config):
                 post_result_df.insert(0, "question_type", question_type)
                 post_result_df.insert(0, "id", str(i))
                 # import pdb
+
                 # pdb.set_trace()
                 all_datum_result_df.append(post_result_df)
 
@@ -269,7 +246,7 @@ def run(config):
 
         os.makedirs(save_dir, exist_ok=True)
         fpath = (
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
+            f"{save_dir}/memit_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
             + ("_e+s" if config.spec_question else "_e")
             + f"_{config.date_data}-question"
             + ".xlsx"
@@ -278,7 +255,7 @@ def run(config):
         all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(
             edit_model_infos,
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
+            f"{save_dir}/memit_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
         )
 
 

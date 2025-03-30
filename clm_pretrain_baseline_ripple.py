@@ -12,60 +12,67 @@ from copy import deepcopy
 
 response_template = "@@@\n"  # tokenizer.additional_special_tokens[0] # "?" alternative "Ġ?"
 
+
 def prepare_sft_text(args, custom_cfg, dataset: list, tokenizer):
     # assert len(tokenizer.additional_special_tokens) == 1
 
     new_dataset = []
     has_show_example = False
-    for datum in dataset[:custom_cfg.train_size]:
-        
+    for datum in dataset[: custom_cfg.train_size]:
         ctx = deepcopy(datum["edit"]["prompt"])
         ctx = f"Imagine that {ctx[0].lower() + ctx[1:]}"
         assert ctx.endswith(".")
-        
+
         outerloop_instances = deepcopy(
-            datum["Logical_Generalization"] +
-            datum["Compositionality_I"] + 
-            datum["Compositionality_II"] + 
-            datum["Subject_Aliasing"]
+            datum["Logical_Generalization"]
+            + datum["Compositionality_I"]
+            + datum["Compositionality_II"]
+            + datum["Subject_Aliasing"]
         )
-        locality_instances = deepcopy(
-            datum["Relation_Specificity"] + 
-            datum["Forgetfulness"]
-        )
-        
+        locality_instances = deepcopy(datum["Relation_Specificity"] + datum["Forgetfulness"])
+
         outerloop_queries = [q for instance in outerloop_instances for q in instance["test_queries"]]
         locality_queries = [q for instance in locality_instances for q in instance["test_queries"]]
-        
+
         if len(outerloop_queries) > 0:
             outerloop_queries = [q for q in outerloop_queries if len(q["answers"]) > 0]
-            outerloop_queries = [q for q in outerloop_queries if len([a["value"] for a in q["answers"] if len(a["value"].strip() ) > 0 ]) > 0]
+            outerloop_queries = [
+                q
+                for q in outerloop_queries
+                if len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0
+            ]
             assert len(outerloop_queries) > 0
-            
+
         if len(locality_queries) > 0:
             locality_queries = [q for q in locality_queries if len(q["answers"]) > 0]
-            locality_queries = [q for q in locality_queries if len([a["value"] for a in q["answers"] if len(a["value"].strip() ) > 0 ]) > 0]
+            locality_queries = [
+                q
+                for q in locality_queries
+                if len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0
+            ]
             assert len(locality_queries) > 0
 
         queries = outerloop_queries + locality_queries
         for qa in queries:
-            
             q = qa["prompt"].strip()
-            
+
             answer_candidates = [a["value"] for a in qa["answers"]]
             answer = answer_candidates[0]
             a = answer.strip()
-            
+
             t = f"{ctx}\n{response_template}{q} {a}"
             t += tokenizer.eos_token
             if not has_show_example:
                 print(f"Example: -> {t}")
                 has_show_example = True
-            new_dataset.append({
-                args.dataset_text_field: t,
-            })
+            new_dataset.append(
+                {
+                    args.dataset_text_field: t,
+                }
+            )
             # import pdb; pdb.set_trace()
     return new_dataset
+
 
 def print_trainable_parameters(model):
     """
@@ -81,15 +88,17 @@ def print_trainable_parameters(model):
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
     )
 
+
 @dataclass
 class CustomConfig:
     syn_data: str
     tunable_params: str
     train_size: Optional[int] = 3_000
 
+
 parser = HfArgumentParser((SFTConfig, CustomConfig))
 (args, custom_cfg) = parser.parse_args_into_dataclasses()
-model_name_or_path = f"/u/zliu/datastor1/mend/models/Llama-3.2-1B-eos-sft"
+model_name_or_path = f"/data/users/zliu/mend/models/Llama-3.2-1B-eos-sft"
 
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False)
@@ -133,9 +142,8 @@ if custom_cfg.tunable_params != "all":
         ]
     else:
         raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
-    
+
     for n, param in model.named_parameters():
-        
         if any(p in n for p in params):
             param.requires_grad = True
         else:
@@ -153,10 +161,9 @@ if custom_cfg.syn_data == "ripple_edits_recent":
     )
 else:
     raise ValueError(f"Unknown syn_data: {custom_cfg.syn_data}")
-    
+
 train_dataset = Dataset.from_list(train_dataset)
 valid_dataset = Dataset.from_list(valid_dataset)
-
 
 
 collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)

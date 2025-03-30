@@ -174,6 +174,7 @@ def print_trainable_parameters(model):
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
     )
 
+
 class InputFormat(StrEnum):
     two_single_hop = "two-1hop"
     first_single_hop = "first-1hop"
@@ -188,14 +189,13 @@ class CustomConfig:
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
-    base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft-ripple_edits-pretrain-midupper3-mlp"
-    # base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
+    # base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-midupper3-mlp"
+    base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
     # base_model_name: Optional[str] = "Llama-3.2-1B-Instruct"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
     text_data: Optional[str] = "text"
     date_data: Optional[str] = "n+1"
-    
 
 
 parser = HfArgumentParser((SFTConfig, CustomConfig))
@@ -209,14 +209,16 @@ exp_save_dir = f"{os.getcwd()}/ripple_exp_output/{custom_cfg.base_model_name}_cl
 os.makedirs(exp_save_dir, exist_ok=True)
 
 
-if custom_cfg.date_data == "all_propagation":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/test.jsonl")
+if custom_cfg.date_data == "recent":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_recent"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test.jsonl")
+elif custom_cfg.date_data == "recent+popular":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_recent+popular"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test.jsonl")
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
 os.makedirs(individual_result_save_dir, exist_ok=True)
-
 
 
 instance = cpt_dev_dataset[custom_cfg.example_idx]
@@ -294,9 +296,8 @@ if custom_cfg.tunable_params != "all":
         ]
     else:
         raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
-    
+
     for n, param in model.named_parameters():
-        
         if any(p in n for p in params):
             param.requires_grad = True
         else:
@@ -335,17 +336,17 @@ outerloop_queries = []
 for k in ["Logical_Generalization", "Compositionality_I", "Compositionality_II", "Subject_Aliasing"]:
     for k_instance in instance[k]:
         for q in k_instance["test_queries"]:
-            if len(q["answers"]) > 0 and len([a["value"] for a in q["answers"] if len(a["value"].strip() ) > 0 ]) > 0:
+            if len(q["answers"]) > 0 and len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0:
                 q["question_type"] = k
                 outerloop_queries.append(q)
-        
+
 assert len(outerloop_queries) > 0
 
 locality_queries = []
 for k in ["Relation_Specificity", "Forgetfulness"]:
     for k_instance in instance[k]:
         for q in k_instance["test_queries"]:
-            if len(q["answers"]) > 0 and len([a["value"] for a in q["answers"] if len(a["value"].strip() ) > 0 ]) > 0:
+            if len(q["answers"]) > 0 and len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0:
                 q["question_type"] = k
                 locality_queries.append(q)
 assert len(locality_queries) > 0
@@ -364,7 +365,7 @@ for question_type, questions in question_types:
     for q_i, question in tqdm(enumerate(questions), total=len(questions)):
         answer_candidates = [a["value"] for a in question["answers"]]
         answer = answer_candidates[0]
-                
+
         test_queries_q_str = question["prompt"]
         test_queries_a_str = answer
         test_queries_str = [test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str]
