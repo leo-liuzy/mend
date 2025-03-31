@@ -310,6 +310,44 @@ def run(config):
         )
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
+    elif config.task == "qa" or config.task == "ripple_edits_mend":
+        add_padding(tokenizer, model)
+        from data_classes.ripple_edits_mend import RippleEditsMENDDataset
+
+        # assert hasattr(config, "train_set_size"), "ripple_edits config must be provided"
+        train_set = RippleEditsMENDDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/train_mend.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = RippleEditsMENDDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid_mend.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        LOG.info(f"train_set size: {len(train_set)}")
+        LOG.info(f"val_set size: {len(val_set)}")
+    elif config.task == "qa" or config.task == "drop":
+        add_padding(tokenizer, model)
+        from data_classes.drop import DropDataset
+
+        # assert hasattr(config, "train_set_size"), "ripple_edits config must be provided"
+        train_set = DropDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/drop_dataset_converted/drop_dataset_train.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = DropDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/drop_dataset_converted/drop_dataset_dev.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        LOG.info(f"train_set size: {len(train_set)}")
+        LOG.info(f"val_set size: {len(val_set)}")
     else:
         raise ValueError(f"Unrecognized task {config.task}")
     # train_set[0]

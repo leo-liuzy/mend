@@ -43,8 +43,52 @@ Only return the subject and the object wrapped in <subject>..</subject> and <obj
 
         input["subject"] = subject
         input["object"] = obj
-        assert obj in input["prompt"]
-        assert subject in input["prompt"]
+        
+        # assert obj in input["prompt"]
+        # assert subject in input["prompt"]
+
+        return {**input}
+
+context_extractor = extractor.tag_content_extractor("context")
+paraphrase_extractor = extractor.tag_content_extractor("paraphrase")
+
+class PrefixSplit(curator.LLM):
+    PROMPT: str = """
+Split the following sentence into a context that preceeds its object and the object:
+{sentence}
+
+Then, paraphrase the context so that the context concatenated with the object is semantically equivalent to the original sentence.
+
+Only return the context and the object wrapped in <context>..</context> and <object>..</object> tag. And return the paraphrased context in <paraphrase>..</paraphrase> tag.
+    """.strip()
+
+    def prompt(self, input: dict) -> str:
+        """Generate a prompt for the subsubject generator."""
+        return self.PROMPT.format(
+            sentence=input["prompt"],
+        )
+
+    def parse(self, input: dict, response: str) -> dict:
+        """Parse the model response along with the input to the model into the desired output format.."""
+        context_ = context_extractor(response)
+        assert len(context_) == 1
+        context = context_[0].strip()
+        
+        paraphrase_ = paraphrase_extractor(response)
+        assert len(paraphrase_) == 1
+        paraphrase = paraphrase_[0].strip()
+
+        object_ = object_extractor(response)
+        assert len(object_) == 1
+        obj = object_[0].strip()
+        assert "subject" not in input
+        assert "object" not in input
+
+        input["context"] = context
+        input["paraphrase"] = paraphrase
+        input["object"] = obj
+        # assert obj in input["prompt"]
+        # assert subject in input["prompt"]
 
         return {**input}
 
@@ -56,14 +100,15 @@ Only return the subject and the object wrapped in <subject>..</subject> and <obj
 # dataset = fact_generator(dataset)
 
 # dataset.save_to_disk("/u/zliu/datastor1/KE-by-CP/data/debug_meta_train/country_data/common_cities_generation.hf",)
-test_instances = list(io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test.jsonl"))
+split = "test"
+test_instances = list(io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/{split}.jsonl"))
 
-triplet_extractor = TripletExtractor(
+triplet_extractor = PrefixSplit(
     model_name="gpt-4o",
     backend_params={
         "max_requests_per_minute": 30_000,
         "max_tokens_per_minute": 150_000_000,
-        "require_all_responses": False,
+        "require_all_responses": True,
     },
 )
 
@@ -74,7 +119,7 @@ new_ds = triplet_extractor(
     dataset,
 )
 new_ds.save_to_disk(
-    f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_w_triplet.hf",
+    f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/{split}_w_prefix.hf",
 )
 
 
