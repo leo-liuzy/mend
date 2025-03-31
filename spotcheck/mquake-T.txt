@@ -1,0 +1,1870 @@
+**Edit**: The name of the current head of the South Korea government is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of the South Korea government? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What type of music does Kim Junsu play? K-pop
+
+Which country was K-pop created in? South Korea
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where the music style associated with Kim Junsu was developed? Yoon Suk-yeol
+
+What is the name of the current head of the government of the country where the type of music played by Kim Junsu was created? Yoon Suk-yeol
+
+Who is the head of the government in the country that created the genre of music played by Kim Junsu? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the Sweden government is Ulf Kristersson
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Sweden government? Ulf Kristersson
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Jussi Björling? Sweden
+**Multi-hop Queries**:
+Who is the current head of the government in the country of citizenship of Jussi Björling? Ulf Kristersson
+
+What is the name of the leader of the government in the country where Jussi Björling holds citizenship? Ulf Kristersson
+
+What is the name of the current leader of the country where Jussi Björling is a citizen? Ulf Kristersson
+==============================
+**Edit**: The headquarters of Google is located in the city of Googleplex
+**Single-hop Queries (changed)**:
+Which city is the headquarter of Google located in? Googleplex
+**Single-hop Queries (unchanged)**:
+Who is the developer of Chromecast? Google
+**Multi-hop Queries**:
+Which city is home to the headquarters of the developer of Chromecast? Googleplex
+
+In which city is the headquarters of the company that developed Chromecast located? Googleplex
+
+Where is the headquarters of the company that developed Chromecast situated? Googleplex
+==============================
+**Edit**: The name of the current head of the New York City government is Eric Adams
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New York City government? Eric Adams
+**Single-hop Queries (unchanged)**:
+Who is the original broadcaster of M*A*S*H? CBS
+
+Where was CBS founded? New York City
+**Multi-hop Queries**:
+Who is the current head of the government in the city where the original broadcaster of M*A*S*H was established? Eric Adams
+
+Who is the head of the government in the city where the original broadcaster of M*A*S*H is based? Eric Adams
+
+What is the name of the current leader of the government in the city that is home to the original broadcaster of M*A*S*H? Eric Adams
+==============================
+**Edit**: The headquarters of Google is located in the city of Googleplex
+**Single-hop Queries (changed)**:
+Which city is the headquarter of Google located in? Googleplex
+**Single-hop Queries (unchanged)**:
+Who is the employer of Larry Page? Google
+**Multi-hop Queries**:
+Where is the headquarters of the organization that employs Larry Page located? Googleplex
+
+What city is home to the headquarters of the employer of Larry Page? Googleplex
+
+What city houses the headquarters of the company that employs Larry Page? Googleplex
+==============================
+**Edit**: The name of the current head of the Los Angeles government is Karen Bass
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Los Angeles government? Karen Bass
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Directors Guild of America located in? Los Angeles
+**Multi-hop Queries**:
+What is the name of the current head of the government of the city where the headquarters of Directors Guild of America is located? Karen Bass
+
+What is the name of the current head of the government in the city that serves as the headquarters of Directors Guild of America? Karen Bass
+
+What is the name of the head of the government in the city that houses the headquarters of Directors Guild of America? Karen Bass
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Larry Nance? United States of America
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Larry Nance? Joe Biden
+
+Who is the head of state in the country where Larry Nance holds citizenship? Joe Biden
+
+What is the name of the current head of state in the country where Larry Nance is a citizen? Joe Biden
+==============================
+**Edit**: The name of the current head of the Prague government is Bohuslav Svoboda
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Prague government? Bohuslav Svoboda
+**Single-hop Queries (unchanged)**:
+Who is the employer of Jan Hus? Charles University
+
+Which city is the headquarter of Charles University located in? Prague
+**Multi-hop Queries**:
+What is the name of the head of the government of the city where Jan Hus's employer is headquartered? Bohuslav Svoboda
+
+What is the name of the current leader of the government of the city where the employer of Jan Hus is based? Bohuslav Svoboda
+
+Who is the head of the government of the city that is home to the headquarters of the organization that employs Jan Hus? Bohuslav Svoboda
+==============================
+**Edit**: The name of the current head of the Laos government is Phankham Viphavan
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Laos government? Phankham Viphavan
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Vang Pao? Laos
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Vang Pao holds citizenship? Phankham Viphavan
+
+Who is the head of the government in the country that Vang Pao is a citizen of? Phankham Viphavan
+
+What is the name of the current leader of the country where Vang Pao is a citizen? Phankham Viphavan
+==============================
+**Edit**: The name of the current head of the Baltimore government is Brandon Scott
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Baltimore government? Brandon Scott
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Johns Hopkins University located in? Baltimore
+**Multi-hop Queries**:
+What is the name of the current head of the government of the city where the headquarters of Johns Hopkins University is located? Brandon Scott
+
+Who is the current head of the government in the city where Johns Hopkins University is headquartered? Brandon Scott
+
+What is the name of the current head of the government in the city that serves as the headquarters of Johns Hopkins University? Brandon Scott
+==============================
+**Edit**: The name of the current head of the Los Angeles government is Karen Bass
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Los Angeles government? Karen Bass
+**Single-hop Queries (unchanged)**:
+Which university was Bridgit Mendler educated at? University of Southern California
+
+Which city is the headquarter of University of Southern California located in? Los Angeles
+**Multi-hop Queries**:
+What is the name of the current head of the government of the city where the headquarters of the university, where Bridgit Mendler was educated, is located? Karen Bass
+
+What is the name of the head of the government of the city that is home to the headquarters of the university that educated Bridgit Mendler? Karen Bass
+
+Who is the current head of the government of the city that houses the headquarters of the university that educated Bridgit Mendler? Karen Bass
+==============================
+**Edit**: The name of the current head of the Pakistan government is Mian Muhammad Shehbaz Sharif
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Pakistan government? Mian Muhammad Shehbaz Sharif
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Nawaz Sharif? Pakistan
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Nawaz Sharif holds citizenship? Mian Muhammad Shehbaz Sharif
+
+What is the name of the current head of the government of the country where Nawaz Sharif is a citizen? Mian Muhammad Shehbaz Sharif
+
+What is the name of the current leader of the country where Nawaz Sharif is a citizen? Mian Muhammad Shehbaz Sharif
+==============================
+**Edit**: The name of the current head of state in Greece is Aikaterini Sakellaropoulou
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Greece? Aikaterini Sakellaropoulou
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Demis Roussos? Greece
+**Multi-hop Queries**:
+Who is the head of state in the country where Demis Roussos holds citizenship? Aikaterini Sakellaropoulou
+
+Who is the current head of state in the country of citizenship of Demis Roussos? Aikaterini Sakellaropoulou
+
+What is the name of the current head of state in the country where Demis Roussos is a citizen? Aikaterini Sakellaropoulou
+==============================
+**Edit**: The name of the current head of the United States of America government is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United States of America government? Joe Biden
+**Single-hop Queries (unchanged)**:
+What type of music does Martin Denny play? jazz
+
+Which country was jazz created in? United States of America
+**Multi-hop Queries**:
+What is the name of the current head of the government of the country where the type of music played by Martin Denny was created? Joe Biden
+
+What is the name of the leader of the government in the country where the music style associated with Martin Denny was developed? Joe Biden
+
+Who is the head of the government in the country that created the genre of music played by Martin Denny? Joe Biden
+==============================
+**Edit**: The name of the current head of state in Israel is Isaac Herzog
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Israel? Isaac Herzog
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Abba Eban? Israel
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Abba Eban is a citizen of? Isaac Herzog
+
+Who is the current head of state in the country of citizenship of Abba Eban? Isaac Herzog
+
+Who is the head of state in the country where Abba Eban holds citizenship? Isaac Herzog
+==============================
+**Edit**: The name of the current head of the Italy government is Giorgia Meloni
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Italy government? Giorgia Meloni
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Claudio Gentile? Italy
+**Multi-hop Queries**:
+Who is the head of the government in the country that Claudio Gentile is a citizen of? Giorgia Meloni
+
+What is the name of the current head of the government of the country where Claudio Gentile is a citizen? Giorgia Meloni
+
+Who is the current head of the government in the country of citizenship of Claudio Gentile? Giorgia Meloni
+==============================
+**Edit**: The name of the current head of state in Croatia is Zoran Milanović
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Croatia? Zoran Milanović
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Ivan Perišić? Croatia
+**Multi-hop Queries**:
+What is the name of the current leader of the country that Ivan Perišić is a citizen of? Zoran Milanović
+
+Who is the current head of state in the country of citizenship of Ivan Perišić? Zoran Milanović
+
+Who is the head of state in the country where Ivan Perišić holds citizenship? Zoran Milanović
+==============================
+**Edit**: The name of the current head of the Germany government is Olaf Scholz
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Germany government? Olaf Scholz
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Michael Kiske? Germany
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Michael Kiske is a citizen? Olaf Scholz
+
+What is the name of the current head of the government of the country where Michael Kiske is a citizen? Olaf Scholz
+
+What is the name of the leader of the government in the country where Michael Kiske holds citizenship? Olaf Scholz
+==============================
+**Edit**: The name of the current head of the Bulgaria government is Gulub Donev
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Bulgaria government? Gulub Donev
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Georgi Dimitrov? Bulgaria
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Georgi Dimitrov is a citizen? Gulub Donev
+
+Who is the current head of the government in the country of citizenship of Georgi Dimitrov? Gulub Donev
+
+What is the name of the current head of the government of the country where Georgi Dimitrov is a citizen? Gulub Donev
+==============================
+**Edit**: The name of the current head of state in Zambia is Hakainde Hichilema
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Zambia? Hakainde Hichilema
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Michael Sata? Zambia
+**Multi-hop Queries**:
+Who is the head of state in the country where Michael Sata holds citizenship? Hakainde Hichilema
+
+What is the name of the head of state in the country that Michael Sata is a citizen of? Hakainde Hichilema
+
+Who is the current head of state in the country of citizenship of Michael Sata? Hakainde Hichilema
+==============================
+**Edit**: The name of the current head of state in Greece is Aikaterini Sakellaropoulou
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Greece? Aikaterini Sakellaropoulou
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Despina Vandi? Greece
+**Multi-hop Queries**:
+Who is the head of state in the country where Despina Vandi holds citizenship? Aikaterini Sakellaropoulou
+
+Who is the current head of state in the country of citizenship of Despina Vandi? Aikaterini Sakellaropoulou
+
+What is the name of the head of state in the country that Despina Vandi is a citizen of? Aikaterini Sakellaropoulou
+==============================
+**Edit**: The name of the current head of the Kenya government is William Ruto
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Kenya government? William Ruto
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Mwai Kibaki? Kenya
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Mwai Kibaki is a citizen? William Ruto
+
+What is the name of the current head of the government of the country where Mwai Kibaki is a citizen? William Ruto
+
+Who is the current head of the government in the country of citizenship of Mwai Kibaki? William Ruto
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Langston Hughes? United States of America
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Langston Hughes is a citizen of? Joe Biden
+
+Who is the head of state in the country where Langston Hughes holds citizenship? Joe Biden
+
+Who is the current head of state in the country of citizenship of Langston Hughes? Joe Biden
+==============================
+**Edit**: The name of the current head of state in Israel is Isaac Herzog
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Israel? Isaac Herzog
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Yigael Yadin? Israel
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Yigael Yadin? Isaac Herzog
+
+Who is the head of state in the country where Yigael Yadin holds citizenship? Isaac Herzog
+
+What is the name of the head of state in the country that Yigael Yadin is a citizen of? Isaac Herzog
+==============================
+**Edit**: The name of the current head of state in Croatia is Zoran Milanović
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Croatia? Zoran Milanović
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Dražen Budiša? Croatia
+**Multi-hop Queries**:
+Who is the head of state in the country where Dražen Budiša holds citizenship? Zoran Milanović
+
+Who is the current head of state in the country of citizenship of Dražen Budiša? Zoran Milanović
+
+What is the name of the current head of state in the country where Dražen Budiša is a citizen? Zoran Milanović
+==============================
+**Edit**: The name of the current head of the Iran government is Seyed Ebrahim Raisi
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Iran government? Seyed Ebrahim Raisi
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Mohammad Javad? Iran
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Mohammad Javad holds citizenship? Seyed Ebrahim Raisi
+
+Who is the current head of the government in the country of citizenship of Mohammad Javad? Seyed Ebrahim Raisi
+
+Who is the head of the government in the country that Mohammad Javad is a citizen of? Seyed Ebrahim Raisi
+==============================
+**Edit**: The name of the current head of the United States of America government is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United States of America government? Joe Biden
+**Single-hop Queries (unchanged)**:
+What type of music does Louis Banks play? jazz
+
+Which country was jazz created in? United States of America
+**Multi-hop Queries**:
+Who is the head of the government in the country that created the genre of music played by Louis Banks? Joe Biden
+
+Who is the current head of the government in the country that originated the music genre played by Louis Banks? Joe Biden
+
+What is the name of the current head of the government of the country where the type of music played by Louis Banks was created? Joe Biden
+==============================
+**Edit**: The name of the current head of the Seattle government is Bruce Harrell
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Seattle government? Bruce Harrell
+**Single-hop Queries (unchanged)**:
+Which company is EA-18G Growler produced by? Boeing
+
+Where was Boeing founded? Seattle
+**Multi-hop Queries**:
+Who is the current head of the government of the city where the producer of EA-18G Growler was founded? Bruce Harrell
+
+Who is the head of the government of the city where the company that produced EA-18G Growler was established? Bruce Harrell
+
+What is the name of the current head of the government of the city where the company that produced EA-18G Growler was founded? Bruce Harrell
+==============================
+**Edit**: The name of the current head of state in Israel is Isaac Herzog
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Israel? Isaac Herzog
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Dore Gold? Israel
+**Multi-hop Queries**:
+Who is the head of state in the country where Dore Gold holds citizenship? Isaac Herzog
+
+Who is the current head of state in the country of citizenship of Dore Gold? Isaac Herzog
+
+What is the name of the head of state in the country that Dore Gold is a citizen of? Isaac Herzog
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Paul McCandless? United States of America
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Paul McCandless? Joe Biden
+
+What is the name of the current head of state in the country where Paul McCandless is a citizen? Joe Biden
+
+What is the name of the head of state in the country that Paul McCandless is a citizen of? Joe Biden
+==============================
+**Edit**: The name of the current head of the Lebanon government is Hassan Diab
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Lebanon government? Hassan Diab
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Fuad Chehab? Lebanon
+**Multi-hop Queries**:
+Who is the current head of the government in the country of citizenship of Fuad Chehab? Hassan Diab
+
+What is the name of the current head of the government of the country where Fuad Chehab is a citizen? Hassan Diab
+
+What is the name of the leader of the government in the country where Fuad Chehab holds citizenship? Hassan Diab
+==============================
+**Edit**: The name of the current head of state in Israel is Isaac Herzog
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Israel? Isaac Herzog
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Meron Benvenisti? Israel
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Meron Benvenisti? Isaac Herzog
+
+What is the name of the current leader of the country that Meron Benvenisti is a citizen of? Isaac Herzog
+
+Who is the head of state in the country where Meron Benvenisti holds citizenship? Isaac Herzog
+==============================
+**Edit**: The name of the current head of the United States of America government is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United States of America government? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Ira Kaplan? United States of America
+**Multi-hop Queries**:
+What is the name of the current head of the government of the country where Ira Kaplan is a citizen? Joe Biden
+
+What is the name of the leader of the government in the country where Ira Kaplan holds citizenship? Joe Biden
+
+Who is the head of the government in the country that Ira Kaplan is a citizen of? Joe Biden
+==============================
+**Edit**: The name of the current head of state in Lebanon is Najib Mikati
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Lebanon? Najib Mikati
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kamal Jumblatt? Lebanon
+**Multi-hop Queries**:
+Who is the head of state in the country where Kamal Jumblatt holds citizenship? Najib Mikati
+
+What is the name of the current head of state in the country where Kamal Jumblatt is a citizen? Najib Mikati
+
+What is the name of the current leader of the country that Kamal Jumblatt is a citizen of? Najib Mikati
+==============================
+**Edit**: The name of the current head of state in United Kingdom is Charles, Prince of Wales
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United Kingdom? Charles, Prince of Wales
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Tim Hughes? United Kingdom
+**Multi-hop Queries**:
+Who is the head of state in the country where Tim Hughes holds citizenship? Charles, Prince of Wales
+
+What is the name of the current leader of the country that Tim Hughes is a citizen of? Charles, Prince of Wales
+
+Who is the current head of state in the country of citizenship of Tim Hughes? Charles, Prince of Wales
+==============================
+**Edit**: The name of the current head of state in Lebanon is Najib Mikati
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Lebanon? Najib Mikati
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Rafic Hariri? Lebanon
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Rafic Hariri? Najib Mikati
+
+What is the name of the head of state in the country that Rafic Hariri is a citizen of? Najib Mikati
+
+What is the name of the current leader of the country that Rafic Hariri is a citizen of? Najib Mikati
+==============================
+**Edit**: The name of the current head of the Seattle government is Bruce Harrell
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Seattle government? Bruce Harrell
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Discovery Institute located in? Seattle
+**Multi-hop Queries**:
+Who is the current head of the government in the city where Discovery Institute is headquartered? Bruce Harrell
+
+Who is the current leader of the government in the city where the headquarters of Discovery Institute is situated? Bruce Harrell
+
+What is the name of the head of the government in the city that houses the headquarters of Discovery Institute? Bruce Harrell
+==============================
+**Edit**: The name of the current head of state in England is Charles, Prince of Wales
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in England? Charles, Prince of Wales
+**Single-hop Queries (unchanged)**:
+Which sport is FC Lida associated with? association football
+
+Which country was association football created in? England
+**Multi-hop Queries**:
+What is the name of the head of state in the country of origin of the sport associated with FC Lida? Charles, Prince of Wales
+
+What is the name of the current leader of the country that created the sport associated with FC Lida? Charles, Prince of Wales
+
+Who is the current head of state in the country that created the sport associated with FC Lida? Charles, Prince of Wales
+==============================
+**Edit**: The name of the current head of state in Lebanon is Najib Mikati
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Lebanon? Najib Mikati
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Hassan Nasrallah? Lebanon
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Hassan Nasrallah is a citizen of? Najib Mikati
+
+What is the name of the current leader of the country that Hassan Nasrallah is a citizen of? Najib Mikati
+
+Who is the current head of state in the country of citizenship of Hassan Nasrallah? Najib Mikati
+==============================
+**Edit**: The name of the current head of the Chile government is Gabriel Boric
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Chile government? Gabriel Boric
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Michelle Bachelet? Chile
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Michelle Bachelet is a citizen? Gabriel Boric
+
+What is the name of the current head of the government of the country where Michelle Bachelet is a citizen? Gabriel Boric
+
+What is the name of the leader of the government in the country where Michelle Bachelet holds citizenship? Gabriel Boric
+==============================
+**Edit**: The name of the current head of the United Kingdom government is Rishi Sunak
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United Kingdom government? Rishi Sunak
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Chris Wood? United Kingdom
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Chris Wood is a citizen? Rishi Sunak
+
+Who is the head of the government in the country that Chris Wood is a citizen of? Rishi Sunak
+
+What is the name of the current head of the government of the country where Chris Wood is a citizen? Rishi Sunak
+==============================
+**Edit**: The name of the current head of the Iran government is Seyed Ebrahim Raisi
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Iran government? Seyed Ebrahim Raisi
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Ervand Abrahamian? Iran
+**Multi-hop Queries**:
+Who is the current head of the government in the country of citizenship of Ervand Abrahamian? Seyed Ebrahim Raisi
+
+What is the name of the current head of the government of the country where Ervand Abrahamian is a citizen? Seyed Ebrahim Raisi
+
+What is the name of the current leader of the country where Ervand Abrahamian is a citizen? Seyed Ebrahim Raisi
+==============================
+**Edit**: The name of the current head of the Australia government is Anthony Albanese
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Australia government? Anthony Albanese
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Jay Laga'aia? Australia
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Jay Laga'aia holds citizenship? Anthony Albanese
+
+What is the name of the current head of the government of the country where Jay Laga'aia is a citizen? Anthony Albanese
+
+Who is the current head of the government in the country of citizenship of Jay Laga'aia? Anthony Albanese
+==============================
+**Edit**: The name of the current head of the Seattle government is Bruce Harrell
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Seattle government? Bruce Harrell
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Green Ronin Publishing located in? Seattle
+**Multi-hop Queries**:
+Who is the current head of the government in the city where Green Ronin Publishing is headquartered? Bruce Harrell
+
+Who is the current leader of the government in the city where the headquarters of Green Ronin Publishing is situated? Bruce Harrell
+
+What is the name of the head of the government in the city that houses the headquarters of Green Ronin Publishing? Bruce Harrell
+==============================
+**Edit**: The name of the current head of the Philippines government is Bongbong Marcos
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Philippines government? Bongbong Marcos
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Alvin Patrimonio? Philippines
+**Multi-hop Queries**:
+Who is the current head of the government in the country of citizenship of Alvin Patrimonio? Bongbong Marcos
+
+What is the name of the leader of the government in the country where Alvin Patrimonio holds citizenship? Bongbong Marcos
+
+What is the name of the current leader of the country where Alvin Patrimonio is a citizen? Bongbong Marcos
+==============================
+**Edit**: The name of the current head of the South Korea government is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of the South Korea government? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kim Ki-young? South Korea
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Kim Ki-young is a citizen? Yoon Suk-yeol
+
+What is the name of the leader of the government in the country where Kim Ki-young holds citizenship? Yoon Suk-yeol
+
+Who is the current head of the government in the country of citizenship of Kim Ki-young? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of state in Mongolia is Khurelsukh Ukhnaa
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Mongolia? Khurelsukh Ukhnaa
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Nambaryn Enkhbayar? Mongolia
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Nambaryn Enkhbayar is a citizen of? Khurelsukh Ukhnaa
+
+Who is the current head of state in the country of citizenship of Nambaryn Enkhbayar? Khurelsukh Ukhnaa
+
+What is the name of the current head of state in the country where Nambaryn Enkhbayar is a citizen? Khurelsukh Ukhnaa
+==============================
+**Edit**: The name of the current head of the Pakistan government is Mian Muhammad Shehbaz Sharif
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Pakistan government? Mian Muhammad Shehbaz Sharif
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Hareem Farooq? Pakistan
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Hareem Farooq holds citizenship? Mian Muhammad Shehbaz Sharif
+
+Who is the current head of the government in the country of citizenship of Hareem Farooq? Mian Muhammad Shehbaz Sharif
+
+Who is the head of the government in the country that Hareem Farooq is a citizen of? Mian Muhammad Shehbaz Sharif
+==============================
+**Edit**: The name of the current head of the United Kingdom government is Rishi Sunak
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United Kingdom government? Rishi Sunak
+**Single-hop Queries (unchanged)**:
+Who performed Kid A? Radiohead
+
+Which country was Radiohead created in? United Kingdom
+**Multi-hop Queries**:
+What is the name of the current head of the government of the country where the performer of Kid A was created? Rishi Sunak
+
+Who is the current head of the government of the country where the creator of the performer of Kid A is from? Rishi Sunak
+
+What is the name of the current leader of the government of the country that created the performer of Kid A? Rishi Sunak
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+Which sport is Mat Latos associated with? baseball
+
+Which country was baseball created in? United States of America
+**Multi-hop Queries**:
+Who is the current head of state in the country that created the sport associated with Mat Latos? Joe Biden
+
+What is the name of the current leader of the country that created the sport associated with Mat Latos? Joe Biden
+
+What is the name of the current head of state in the country where the sport associated with Mat Latos was created? Joe Biden
+==============================
+**Edit**: The name of the current head of the United Kingdom government is Rishi Sunak
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United Kingdom government? Rishi Sunak
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Tony Warren? United Kingdom
+**Multi-hop Queries**:
+Who is the current head of the government in the country of citizenship of Tony Warren? Rishi Sunak
+
+What is the name of the leader of the government in the country where Tony Warren holds citizenship? Rishi Sunak
+
+Who is the head of the government in the country that Tony Warren is a citizen of? Rishi Sunak
+==============================
+**Edit**: The name of the current head of state in Sri Lanka is Ranil Wickremesinghe
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Sri Lanka? Ranil Wickremesinghe
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Premasiri Khemadasa? Sri Lanka
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Premasiri Khemadasa? Ranil Wickremesinghe
+
+What is the name of the head of state in the country that Premasiri Khemadasa is a citizen of? Ranil Wickremesinghe
+
+What is the name of the current leader of the country that Premasiri Khemadasa is a citizen of? Ranil Wickremesinghe
+==============================
+**Edit**: The name of the current head of state in United Kingdom is Charles, Prince of Wales
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United Kingdom? Charles, Prince of Wales
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Andy Priaulx? United Kingdom
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Andy Priaulx? Charles, Prince of Wales
+
+Who is the head of state in the country where Andy Priaulx holds citizenship? Charles, Prince of Wales
+
+What is the name of the current leader of the country that Andy Priaulx is a citizen of? Charles, Prince of Wales
+==============================
+**Edit**: The name of the current head of state in Dominican Republic is Luis Abinader
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Dominican Republic? Luis Abinader
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Francisco Liriano? Dominican Republic
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Francisco Liriano? Luis Abinader
+
+What is the name of the head of state in the country that Francisco Liriano is a citizen of? Luis Abinader
+
+What is the name of the current head of state in the country where Francisco Liriano is a citizen? Luis Abinader
+==============================
+**Edit**: The name of the current head of the Lebanon government is Hassan Diab
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Lebanon government? Hassan Diab
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Amine Gemayel? Lebanon
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Amine Gemayel is a citizen? Hassan Diab
+
+Who is the current head of the government in the country of citizenship of Amine Gemayel? Hassan Diab
+
+What is the name of the current head of the government of the country where Amine Gemayel is a citizen? Hassan Diab
+==============================
+**Edit**: The name of the current head of state in Kenya is William Ruto
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Kenya? William Ruto
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Raila Odinga? Kenya
+**Multi-hop Queries**:
+What is the name of the current head of state in the country where Raila Odinga is a citizen? William Ruto
+
+Who is the head of state in the country where Raila Odinga holds citizenship? William Ruto
+
+Who is the current head of state in the country of citizenship of Raila Odinga? William Ruto
+==============================
+**Edit**: The name of the current head of state in Czech Republic is Petr Pavel
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Czech Republic? Petr Pavel
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Miroslav Cikán? Czech Republic
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Miroslav Cikán is a citizen of? Petr Pavel
+
+Who is the head of state in the country where Miroslav Cikán holds citizenship? Petr Pavel
+
+What is the name of the current leader of the country that Miroslav Cikán is a citizen of? Petr Pavel
+==============================
+**Edit**: The name of the current head of state in England is Charles, Prince of Wales
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in England? Charles, Prince of Wales
+**Single-hop Queries (unchanged)**:
+Which country was rounders created in? England
+**Multi-hop Queries**:
+What is the name of the current leader of the country where rounders was developed? Charles, Prince of Wales
+
+Who is the current head of state in the country of origin of rounders? Charles, Prince of Wales
+
+Who is the head of state in the country that created rounders? Charles, Prince of Wales
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kim Hyung-jun? South Korea
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Kim Hyung-jun? Yoon Suk-yeol
+
+Who is the head of state in the country where Kim Hyung-jun holds citizenship? Yoon Suk-yeol
+
+What is the name of the current head of state in the country where Kim Hyung-jun is a citizen? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the New Zealand government is Chris Hipkins
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New Zealand government? Chris Hipkins
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Len Brown? New Zealand
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Len Brown is a citizen? Chris Hipkins
+
+What is the name of the leader of the government in the country where Len Brown holds citizenship? Chris Hipkins
+
+What is the name of the current head of the government of the country where Len Brown is a citizen? Chris Hipkins
+==============================
+**Edit**: The name of the current head of the Pakistan government is Mian Muhammad Shehbaz Sharif
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Pakistan government? Mian Muhammad Shehbaz Sharif
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Aleem Dar? Pakistan
+**Multi-hop Queries**:
+What is the name of the current head of the government of the country where Aleem Dar is a citizen? Mian Muhammad Shehbaz Sharif
+
+Who is the head of the government in the country that Aleem Dar is a citizen of? Mian Muhammad Shehbaz Sharif
+
+Who is the current head of the government in the country of citizenship of Aleem Dar? Mian Muhammad Shehbaz Sharif
+==============================
+**Edit**: The name of the current head of the Philippines government is Bongbong Marcos
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Philippines government? Bongbong Marcos
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Angeline Quinto? Philippines
+**Multi-hop Queries**:
+Who is the head of the government in the country that Angeline Quinto is a citizen of? Bongbong Marcos
+
+Who is the current head of the government in the country of citizenship of Angeline Quinto? Bongbong Marcos
+
+What is the name of the current head of the government of the country where Angeline Quinto is a citizen? Bongbong Marcos
+==============================
+**Edit**: The name of the current head of the New Zealand government is Chris Hipkins
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New Zealand government? Chris Hipkins
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Te Rauparaha? New Zealand
+**Multi-hop Queries**:
+What is the name of the current head of the government of the country where Te Rauparaha is a citizen? Chris Hipkins
+
+What is the name of the leader of the government in the country where Te Rauparaha holds citizenship? Chris Hipkins
+
+What is the name of the current leader of the country where Te Rauparaha is a citizen? Chris Hipkins
+==============================
+**Edit**: The chief executive officer of Nokia is Pekka Lundmark
+**Single-hop Queries (changed)**:
+Who is the chief executive officer of Nokia? Pekka Lundmark
+**Single-hop Queries (unchanged)**:
+Who is the developer of Maemo? Nokia
+**Multi-hop Queries**:
+Who is the chief executive officer of the company that developed Maemo? Pekka Lundmark
+
+What is the name of the CEO of the developer of Maemo? Pekka Lundmark
+
+Who is the CEO of the company responsible for developing Maemo? Pekka Lundmark
+==============================
+**Edit**: The name of the current head of the South Korea government is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of the South Korea government? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What type of music does Jessica Jung play? K-pop
+
+Which country was K-pop created in? South Korea
+**Multi-hop Queries**:
+Who is the current head of the government in the country that originated the music genre played by Jessica Jung? Yoon Suk-yeol
+
+What is the name of the current head of state in the country that gave birth to the type of music played by Jessica Jung? Yoon Suk-yeol
+
+What is the name of the current head of the government of the country where the type of music played by Jessica Jung was created? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the Lebanon government is Hassan Diab
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Lebanon government? Hassan Diab
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Hassan Nasrallah? Lebanon
+**Multi-hop Queries**:
+Who is the head of the government in the country that Hassan Nasrallah is a citizen of? Hassan Diab
+
+What is the name of the current leader of the country where Hassan Nasrallah is a citizen? Hassan Diab
+
+Who is the current head of the government in the country of citizenship of Hassan Nasrallah? Hassan Diab
+==============================
+**Edit**: The name of the current head of the Lebanon government is Hassan Diab
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Lebanon government? Hassan Diab
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Suleiman Frangieh? Lebanon
+**Multi-hop Queries**:
+Who is the head of the government in the country that Suleiman Frangieh is a citizen of? Hassan Diab
+
+What is the name of the current head of the government of the country where Suleiman Frangieh is a citizen? Hassan Diab
+
+Who is the current head of the government in the country of citizenship of Suleiman Frangieh? Hassan Diab
+==============================
+**Edit**: The name of the current head of the United States of America government is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United States of America government? Joe Biden
+**Single-hop Queries (unchanged)**:
+What type of music does Gary McFarland play? jazz
+
+Which country was jazz created in? United States of America
+**Multi-hop Queries**:
+Who is the current head of the government in the country that originated the music genre played by Gary McFarland? Joe Biden
+
+What is the name of the leader of the government in the country where the music style associated with Gary McFarland was developed? Joe Biden
+
+Who is the head of the government in the country that created the genre of music played by Gary McFarland? Joe Biden
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Metamorpho? United States of America
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Metamorpho? Joe Biden
+
+What is the name of the head of state in the country that Metamorpho is a citizen of? Joe Biden
+
+Who is the head of state in the country where Metamorpho holds citizenship? Joe Biden
+==============================
+**Edit**: The name of the current head of the Prague government is Bohuslav Svoboda
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Prague government? Bohuslav Svoboda
+**Single-hop Queries (unchanged)**:
+Which university was Wenceslaus IV of Bohemia educated at? Charles University
+
+Which city is the headquarter of Charles University located in? Prague
+**Multi-hop Queries**:
+What is the name of the head of the government of the city that is home to the headquarters of the university that educated Wenceslaus IV of Bohemia? Bohuslav Svoboda
+
+Who is the current head of the government of the city that houses the headquarters of the university that educated Wenceslaus IV of Bohemia? Bohuslav Svoboda
+
+What is the name of the current head of the government of the city where the university that educated Wenceslaus IV of Bohemia has its headquarters? Bohuslav Svoboda
+==============================
+**Edit**: The name of the current head of the Lebanon government is Hassan Diab
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Lebanon government? Hassan Diab
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Michel Suleiman? Lebanon
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Michel Suleiman is a citizen? Hassan Diab
+
+Who is the head of the government in the country that Michel Suleiman is a citizen of? Hassan Diab
+
+What is the name of the current head of the government of the country where Michel Suleiman is a citizen? Hassan Diab
+==============================
+**Edit**: The name of the current head of state in Israel is Isaac Herzog
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Israel? Isaac Herzog
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Ezer Weizman? Israel
+**Multi-hop Queries**:
+What is the name of the current head of state in the country where Ezer Weizman is a citizen? Isaac Herzog
+
+What is the name of the head of state in the country that Ezer Weizman is a citizen of? Isaac Herzog
+
+What is the name of the current leader of the country that Ezer Weizman is a citizen of? Isaac Herzog
+==============================
+**Edit**: The name of the current head of the Myanmar government is Min Aung Hlaing
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Myanmar government? Min Aung Hlaing
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Khin Nyunt? Myanmar
+**Multi-hop Queries**:
+What is the name of the current head of the government of the country where Khin Nyunt is a citizen? Min Aung Hlaing
+
+What is the name of the current leader of the country where Khin Nyunt is a citizen? Min Aung Hlaing
+
+Who is the head of the government in the country that Khin Nyunt is a citizen of? Min Aung Hlaing
+==============================
+**Edit**: The name of the current head of the Sweden government is Ulf Kristersson
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Sweden government? Ulf Kristersson
+**Single-hop Queries (unchanged)**:
+Which company is Volvo V70 produced by? Volvo Cars
+
+Which country was Volvo Cars created in? Sweden
+**Multi-hop Queries**:
+What is the name of the current leader of the government of the country where the producer of Volvo V70 is based? Ulf Kristersson
+
+Who leads the government of the country where the company that produced Volvo V70 originated? Ulf Kristersson
+
+What is the name of the head of the government of the country that is home to the company that produced Volvo V70? Ulf Kristersson
+==============================
+**Edit**: The name of the current head of the Philippines government is Bongbong Marcos
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Philippines government? Bongbong Marcos
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kristine Hermosa? Philippines
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Kristine Hermosa holds citizenship? Bongbong Marcos
+
+Who is the head of the government in the country that Kristine Hermosa is a citizen of? Bongbong Marcos
+
+Who is the current head of the government in the country of citizenship of Kristine Hermosa? Bongbong Marcos
+==============================
+**Edit**: The name of the current head of the Czech Republic government is Petr Fiala
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Czech Republic government? Petr Fiala
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Mirek Topolánek? Czech Republic
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Mirek Topolánek holds citizenship? Petr Fiala
+
+Who is the head of the government in the country that Mirek Topolánek is a citizen of? Petr Fiala
+
+What is the name of the current leader of the country where Mirek Topolánek is a citizen? Petr Fiala
+==============================
+**Edit**: The name of the current head of the Norway government is Jonas Gahr Støre
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Norway government? Jonas Gahr Støre
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Erling Skakke? Norway
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Erling Skakke is a citizen? Jonas Gahr Støre
+
+What is the name of the leader of the government in the country where Erling Skakke holds citizenship? Jonas Gahr Støre
+
+What is the name of the current head of the government of the country where Erling Skakke is a citizen? Jonas Gahr Støre
+==============================
+**Edit**: The name of the current head of the Italy government is Giorgia Meloni
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Italy government? Giorgia Meloni
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Giovanni Battista Re? Italy
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Giovanni Battista Re holds citizenship? Giorgia Meloni
+
+What is the name of the current leader of the country where Giovanni Battista Re is a citizen? Giorgia Meloni
+
+Who is the head of the government in the country that Giovanni Battista Re is a citizen of? Giorgia Meloni
+==============================
+**Edit**: The name of the current head of the Boston government is Michelle Wu
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Boston government? Michelle Wu
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Berklee College of Music located in? Boston
+**Multi-hop Queries**:
+What is the name of the current head of the government in the city that serves as the headquarters of Berklee College of Music? Michelle Wu
+
+What is the name of the current head of the government of the city where the headquarters of Berklee College of Music is located? Michelle Wu
+
+Who is the current leader of the government in the city where the headquarters of Berklee College of Music is situated? Michelle Wu
+==============================
+**Edit**: The name of the current head of the United States of America government is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United States of America government? Joe Biden
+**Single-hop Queries (unchanged)**:
+What type of music does Teddy Wilson play? jazz
+
+Which country was jazz created in? United States of America
+**Multi-hop Queries**:
+What is the name of the current head of state in the country that gave birth to the type of music played by Teddy Wilson? Joe Biden
+
+What is the name of the current head of the government of the country where the type of music played by Teddy Wilson was created? Joe Biden
+
+Who is the head of the government in the country that created the genre of music played by Teddy Wilson? Joe Biden
+==============================
+**Edit**: The name of the current head of the New York City government is Eric Adams
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New York City government? Eric Adams
+**Single-hop Queries (unchanged)**:
+Who is the original broadcaster of Bret Maverick? NBC
+
+Where was NBC founded? New York City
+**Multi-hop Queries**:
+Who is the current head of the government in the city where the original broadcaster of Bret Maverick was established? Eric Adams
+
+What is the name of the current head of the government of the city where the original broadcaster of Bret Maverick was founded? Eric Adams
+
+What is the name of the person currently in charge of the government in the city that founded the original broadcaster of Bret Maverick? Eric Adams
+==============================
+**Edit**: The name of the current head of state in Greece is Aikaterini Sakellaropoulou
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Greece? Aikaterini Sakellaropoulou
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of George Papandreou? Greece
+**Multi-hop Queries**:
+What is the name of the current head of state in the country where George Papandreou is a citizen? Aikaterini Sakellaropoulou
+
+Who is the head of state in the country where George Papandreou holds citizenship? Aikaterini Sakellaropoulou
+
+What is the name of the current leader of the country that George Papandreou is a citizen of? Aikaterini Sakellaropoulou
+==============================
+**Edit**: The name of the current head of the Australia government is Anthony Albanese
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Australia government? Anthony Albanese
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of George Brandis? Australia
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where George Brandis holds citizenship? Anthony Albanese
+
+What is the name of the current head of the government of the country where George Brandis is a citizen? Anthony Albanese
+
+What is the name of the current leader of the country where George Brandis is a citizen? Anthony Albanese
+==============================
+**Edit**: The name of the current head of state in Greece is Aikaterini Sakellaropoulou
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Greece? Aikaterini Sakellaropoulou
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Georgios Papandreou? Greece
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Georgios Papandreou? Aikaterini Sakellaropoulou
+
+Who is the head of state in the country where Georgios Papandreou holds citizenship? Aikaterini Sakellaropoulou
+
+What is the name of the current head of state in the country where Georgios Papandreou is a citizen? Aikaterini Sakellaropoulou
+==============================
+**Edit**: The name of the current head of the Los Angeles government is Karen Bass
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Los Angeles government? Karen Bass
+**Single-hop Queries (unchanged)**:
+Who performed Light My Fire? The Doors
+
+Where was The Doors founded? Los Angeles
+**Multi-hop Queries**:
+What is the name of the current head of the government of the city that is home to the group that performed Light My Fire? Karen Bass
+
+Who is the current head of the government of the city where the group that performed Light My Fire was formed? Karen Bass
+
+What is the name of the current leader of the government of the city where Light My Fire was performed by a group that was founded? Karen Bass
+==============================
+**Edit**: The name of the current head of the Cincinnati government is Aftab Pureval
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Cincinnati government? Aftab Pureval
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of E. W. Scripps Company located in? Cincinnati
+**Multi-hop Queries**:
+What is the name of the current head of the government of the city where the headquarters of E. W. Scripps Company is located? Aftab Pureval
+
+Who is the current head of the government in the city where E. W. Scripps Company is headquartered? Aftab Pureval
+
+Who is the current leader of the government in the city where the headquarters of E. W. Scripps Company is situated? Aftab Pureval
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What type of music does Kangta play? K-pop
+
+Which country was K-pop created in? South Korea
+**Multi-hop Queries**:
+What is the name of the current head of state in the country that gave birth to the music genre played by Kangta? Yoon Suk-yeol
+
+What is the name of the head of state in the country where the music style associated with Kangta was developed? Yoon Suk-yeol
+
+What is the name of the current head of state in the country where the type of music played by Kangta was created? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the Calgary government is Jyoti Gondek
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Calgary government? Jyoti Gondek
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Shell Canada located in? Calgary
+**Multi-hop Queries**:
+Who is the current leader of the government in the city where the headquarters of Shell Canada is situated? Jyoti Gondek
+
+What is the name of the current head of the government in the city that serves as the headquarters of Shell Canada? Jyoti Gondek
+
+Who is the current head of the government in the city where Shell Canada is headquartered? Jyoti Gondek
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kim Hee-sun? South Korea
+**Multi-hop Queries**:
+What is the name of the current head of state in the country where Kim Hee-sun is a citizen? Yoon Suk-yeol
+
+Who is the current head of state in the country of citizenship of Kim Hee-sun? Yoon Suk-yeol
+
+Who is the head of state in the country where Kim Hee-sun holds citizenship? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the New York City government is Eric Adams
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New York City government? Eric Adams
+**Single-hop Queries (unchanged)**:
+Where was Talking Heads founded? New York City
+**Multi-hop Queries**:
+Who leads the government in the city where Talking Heads was established? Eric Adams
+
+What is the name of the current head of the government of the city where Talking Heads was founded? Eric Adams
+
+Who is the current head of the government in the city where Talking Heads was founded? Eric Adams
+==============================
+**Edit**: The name of the current head of state in Greece is Aikaterini Sakellaropoulou
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Greece? Aikaterini Sakellaropoulou
+**Single-hop Queries (unchanged)**:
+Which country was Kathimerini created in? Greece
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Kathimerini was developed? Aikaterini Sakellaropoulou
+
+Who is the current head of state in the country of origin of Kathimerini? Aikaterini Sakellaropoulou
+
+What is the name of the head of state in the country where Kathimerini originated? Aikaterini Sakellaropoulou
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Soo Ae? South Korea
+**Multi-hop Queries**:
+Who is the head of state in the country where Soo Ae holds citizenship? Yoon Suk-yeol
+
+What is the name of the current leader of the country that Soo Ae is a citizen of? Yoon Suk-yeol
+
+What is the name of the current head of state in the country where Soo Ae is a citizen? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the Kenya government is William Ruto
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Kenya government? William Ruto
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Vivian Cheruiyot? Kenya
+**Multi-hop Queries**:
+Who is the current head of the government in the country of citizenship of Vivian Cheruiyot? William Ruto
+
+What is the name of the current leader of the country where Vivian Cheruiyot is a citizen? William Ruto
+
+What is the name of the current head of the government of the country where Vivian Cheruiyot is a citizen? William Ruto
+==============================
+**Edit**: The name of the current head of the Japan government is Fumio Kishida
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Japan government? Fumio Kishida
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Koji Kondo? Japan
+**Multi-hop Queries**:
+What is the name of the current head of the government of the country where Koji Kondo is a citizen? Fumio Kishida
+
+Who is the current head of the government in the country of citizenship of Koji Kondo? Fumio Kishida
+
+Who is the head of the government in the country that Koji Kondo is a citizen of? Fumio Kishida
+==============================
+**Edit**: The name of the current head of the Myanmar government is Min Aung Hlaing
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Myanmar government? Min Aung Hlaing
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Than Shwe? Myanmar
+**Multi-hop Queries**:
+Who is the head of the government in the country that Than Shwe is a citizen of? Min Aung Hlaing
+
+Who is the current head of the government in the country of citizenship of Than Shwe? Min Aung Hlaing
+
+What is the name of the current leader of the country where Than Shwe is a citizen? Min Aung Hlaing
+==============================
+**Edit**: The name of the current head of the Hong Kong government is John Lee
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Hong Kong government? John Lee
+**Single-hop Queries (unchanged)**:
+Which city was Donald Tsang born in? Hong Kong
+**Multi-hop Queries**:
+What is the name of the head of the government in the city where Donald Tsang was born? John Lee
+
+Who is the current head of the government in the city of birth of Donald Tsang? John Lee
+
+What is the name of the current head of the government of the city where Donald Tsang was born? John Lee
+==============================
+**Edit**: The name of the current head of the New Zealand government is Chris Hipkins
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New Zealand government? Chris Hipkins
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Brendon McCullum? New Zealand
+**Multi-hop Queries**:
+Who is the head of the government in the country that Brendon McCullum is a citizen of? Chris Hipkins
+
+What is the name of the current leader of the country where Brendon McCullum is a citizen? Chris Hipkins
+
+Who is the current head of the government in the country of citizenship of Brendon McCullum? Chris Hipkins
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What type of music does Wheesung play? K-pop
+
+Which country was K-pop created in? South Korea
+**Multi-hop Queries**:
+What is the name of the head of state in the country where the music style associated with Wheesung was developed? Yoon Suk-yeol
+
+What is the name of the current head of state in the country where the type of music played by Wheesung was created? Yoon Suk-yeol
+
+Who is the current head of state in the country that originated the music genre played by Wheesung? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the Norway government is Jonas Gahr Støre
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Norway government? Jonas Gahr Støre
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Varg Vikernes? Norway
+**Multi-hop Queries**:
+Who is the head of the government in the country that Varg Vikernes is a citizen of? Jonas Gahr Støre
+
+What is the name of the current leader of the country where Varg Vikernes is a citizen? Jonas Gahr Støre
+
+What is the name of the current head of the government of the country where Varg Vikernes is a citizen? Jonas Gahr Støre
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kang Ji-hwan? South Korea
+**Multi-hop Queries**:
+What is the name of the current leader of the country that Kang Ji-hwan is a citizen of? Yoon Suk-yeol
+
+What is the name of the current head of state in the country where Kang Ji-hwan is a citizen? Yoon Suk-yeol
+
+Who is the head of state in the country where Kang Ji-hwan holds citizenship? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the Los Angeles government is Karen Bass
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Los Angeles government? Karen Bass
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of California Science Center located in? Los Angeles
+**Multi-hop Queries**:
+What is the name of the current head of the government in the city that serves as the headquarters of California Science Center? Karen Bass
+
+Who is the current leader of the government in the city where the headquarters of California Science Center is situated? Karen Bass
+
+Who is the current head of the government in the city where California Science Center is headquartered? Karen Bass
+==============================
+**Edit**: The name of the current head of state in England is Charles, Prince of Wales
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in England? Charles, Prince of Wales
+**Single-hop Queries (unchanged)**:
+Which country was Nicholas Nickleby created in? England
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Nicholas Nickleby was developed? Charles, Prince of Wales
+
+Who is the current head of state in the country of origin of Nicholas Nickleby? Charles, Prince of Wales
+
+Who is the head of state in the country that created Nicholas Nickleby? Charles, Prince of Wales
+==============================
+**Edit**: The name of the current head of the United Kingdom government is Rishi Sunak
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United Kingdom government? Rishi Sunak
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Derek Thompson? United Kingdom
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Derek Thompson holds citizenship? Rishi Sunak
+
+What is the name of the current head of the government of the country where Derek Thompson is a citizen? Rishi Sunak
+
+Who is the current head of the government in the country of citizenship of Derek Thompson? Rishi Sunak
+==============================
+**Edit**: The name of the current head of state in United Kingdom is Charles, Prince of Wales
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United Kingdom? Charles, Prince of Wales
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Norma Winstone? United Kingdom
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Norma Winstone is a citizen of? Charles, Prince of Wales
+
+Who is the head of state in the country where Norma Winstone holds citizenship? Charles, Prince of Wales
+
+Who is the current head of state in the country of citizenship of Norma Winstone? Charles, Prince of Wales
+==============================
+**Edit**: The name of the current head of the Sierra Leone government is David J. Francis
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Sierra Leone government? David J. Francis
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Ernest Bai Koroma? Sierra Leone
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Ernest Bai Koroma is a citizen? David J. Francis
+
+Who is the current head of the government in the country of citizenship of Ernest Bai Koroma? David J. Francis
+
+Who is the head of the government in the country that Ernest Bai Koroma is a citizen of? David J. Francis
+==============================
+**Edit**: The name of the current head of the Norway government is Jonas Gahr Støre
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Norway government? Jonas Gahr Støre
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Thor Hushovd? Norway
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Thor Hushovd holds citizenship? Jonas Gahr Støre
+
+Who is the head of the government in the country that Thor Hushovd is a citizen of? Jonas Gahr Støre
+
+What is the name of the current head of the government of the country where Thor Hushovd is a citizen? Jonas Gahr Støre
+==============================
+**Edit**: The name of the current head of the Japan government is Fumio Kishida
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Japan government? Fumio Kishida
+**Single-hop Queries (unchanged)**:
+What type of music does JKT48 play? J-pop
+
+Which country was J-pop created in? Japan
+**Multi-hop Queries**:
+Who is the head of the government in the country that created the genre of music played by JKT48? Fumio Kishida
+
+What is the name of the current head of the government of the country where the type of music played by JKT48 was created? Fumio Kishida
+
+Who is the current head of the government in the country that originated the music genre played by JKT48? Fumio Kishida
+==============================
+**Edit**: The name of the current head of the South Korea government is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of the South Korea government? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What type of music does Gangnam Style play? K-pop
+
+Which country was K-pop created in? South Korea
+**Multi-hop Queries**:
+What is the name of the current head of state in the country that gave birth to the type of music played by Gangnam Style? Yoon Suk-yeol
+
+Who is the head of the government in the country that created the genre of music played by Gangnam Style? Yoon Suk-yeol
+
+What is the name of the current head of the government of the country where the type of music played by Gangnam Style was created? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of state in United Kingdom is Charles, Prince of Wales
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United Kingdom? Charles, Prince of Wales
+**Single-hop Queries (unchanged)**:
+Who performed Come Together? The Beatles
+
+Which country was The Beatles created in? United Kingdom
+**Multi-hop Queries**:
+What is the name of the current head of state in the country where the performer of Come Together was created? Charles, Prince of Wales
+
+What is the name of the current leader of the country that created the performer of Come Together? Charles, Prince of Wales
+
+What is the name of the head of state in the country that created the performer of Come Together? Charles, Prince of Wales
+==============================
+**Edit**: The name of the current head of the Nashville government is John Cooper
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Nashville government? John Cooper
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Thomas Nelson located in? Nashville
+**Multi-hop Queries**:
+What is the name of the head of the government in the city that houses the headquarters of Thomas Nelson? John Cooper
+
+What is the name of the current head of the government of the city where the headquarters of Thomas Nelson is located? John Cooper
+
+Who is the current head of the government in the city where Thomas Nelson is headquartered? John Cooper
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+Which sport is Alex Avila associated with? baseball
+
+Which country was baseball created in? United States of America
+**Multi-hop Queries**:
+What is the name of the current head of state in the country where the sport associated with Alex Avila was created? Joe Biden
+
+Who is the current head of state in the country that created the sport associated with Alex Avila? Joe Biden
+
+Who is the head of state in the country where the sport associated with Alex Avila originated? Joe Biden
+==============================
+**Edit**: The name of the current head of state in Zambia is Hakainde Hichilema
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Zambia? Hakainde Hichilema
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kenneth Kaunda? Zambia
+**Multi-hop Queries**:
+What is the name of the current leader of the country that Kenneth Kaunda is a citizen of? Hakainde Hichilema
+
+What is the name of the head of state in the country that Kenneth Kaunda is a citizen of? Hakainde Hichilema
+
+What is the name of the current head of state in the country where Kenneth Kaunda is a citizen? Hakainde Hichilema
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+Which country was Prince of Persia created in? United States of America
+**Multi-hop Queries**:
+What is the name of the head of state in the country where Prince of Persia originated? Joe Biden
+
+Who is the head of state in the country that created Prince of Persia? Joe Biden
+
+What is the name of the current head of state in the country where Prince of Persia was created? Joe Biden
+==============================
+**Edit**: The name of the current head of the Lebanon government is Hassan Diab
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Lebanon government? Hassan Diab
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Najib Mikati? Lebanon
+**Multi-hop Queries**:
+Who is the head of the government in the country that Najib Mikati is a citizen of? Hassan Diab
+
+Who is the current head of the government in the country of citizenship of Najib Mikati? Hassan Diab
+
+What is the name of the current leader of the country where Najib Mikati is a citizen? Hassan Diab
+==============================
+**Edit**: The name of the current head of the Calgary government is Jyoti Gondek
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Calgary government? Jyoti Gondek
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Enbridge located in? Calgary
+**Multi-hop Queries**:
+Who is the current leader of the government in the city where the headquarters of Enbridge is situated? Jyoti Gondek
+
+What is the name of the head of the government in the city that houses the headquarters of Enbridge? Jyoti Gondek
+
+What is the name of the current head of the government in the city that serves as the headquarters of Enbridge? Jyoti Gondek
+==============================
+**Edit**: The name of the current head of the Japan government is Fumio Kishida
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Japan government? Fumio Kishida
+**Single-hop Queries (unchanged)**:
+Which sport is Asashōryū Akinori associated with? sumo
+
+Which country was sumo created in? Japan
+**Multi-hop Queries**:
+What is the name of the head of the government in the country where the sport associated with Asashōryū Akinori originated? Fumio Kishida
+
+Who is the current head of the government in the country that created the sport associated with Asashōryū Akinori? Fumio Kishida
+
+Who leads the government of the country that created the sport associated with Asashōryū Akinori? Fumio Kishida
+==============================
+**Edit**: The name of the current head of the Cincinnati government is Aftab Pureval
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Cincinnati government? Aftab Pureval
+**Single-hop Queries (unchanged)**:
+Which city did Neil Armstrong die in? Cincinnati
+**Multi-hop Queries**:
+Who is the current head of the government in the city where Neil Armstrong passed away? Aftab Pureval
+
+What is the name of the person currently leading the government of the city where Neil Armstrong's death occurred? Aftab Pureval
+
+Who is the head of the government in the city where Neil Armstrong died? Aftab Pureval
+==============================
+**Edit**: The name of the current head of state in Lebanon is Najib Mikati
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Lebanon? Najib Mikati
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kahlil Gibran? Lebanon
+**Multi-hop Queries**:
+Who is the head of state in the country where Kahlil Gibran holds citizenship? Najib Mikati
+
+Who is the current head of state in the country of citizenship of Kahlil Gibran? Najib Mikati
+
+What is the name of the current head of state in the country where Kahlil Gibran is a citizen? Najib Mikati
+==============================
+**Edit**: The name of the current head of the Philippines government is Bongbong Marcos
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Philippines government? Bongbong Marcos
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Brillante Mendoza? Philippines
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Brillante Mendoza holds citizenship? Bongbong Marcos
+
+Who is the head of the government in the country that Brillante Mendoza is a citizen of? Bongbong Marcos
+
+Who is the current head of the government in the country of citizenship of Brillante Mendoza? Bongbong Marcos
+==============================
+**Edit**: The name of the current head of the United States of America government is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United States of America government? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kirk Whalum? United States of America
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Kirk Whalum holds citizenship? Joe Biden
+
+What is the name of the current leader of the country where Kirk Whalum is a citizen? Joe Biden
+
+Who is the current head of the government in the country of citizenship of Kirk Whalum? Joe Biden
+==============================
+**Edit**: The name of the current head of the Taipei government is Chiang Wan-an
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Taipei government? Chiang Wan-an
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Bank of Taiwan located in? Taipei
+**Multi-hop Queries**:
+Who is the current head of the government in the city where Bank of Taiwan is headquartered? Chiang Wan-an
+
+What is the name of the current head of the government in the city that serves as the headquarters of Bank of Taiwan? Chiang Wan-an
+
+What is the name of the head of the government in the city that houses the headquarters of Bank of Taiwan? Chiang Wan-an
+==============================
+**Edit**: The name of the current head of the Philippines government is Bongbong Marcos
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Philippines government? Bongbong Marcos
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Imelda Marcos? Philippines
+**Multi-hop Queries**:
+What is the name of the current leader of the country where Imelda Marcos is a citizen? Bongbong Marcos
+
+What is the name of the leader of the government in the country where Imelda Marcos holds citizenship? Bongbong Marcos
+
+What is the name of the current head of the government of the country where Imelda Marcos is a citizen? Bongbong Marcos
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What type of music does Hyun Bin play? K-pop
+
+Which country was K-pop created in? South Korea
+**Multi-hop Queries**:
+Who is the current leader of the country that created the type of music performed by Hyun Bin? Yoon Suk-yeol
+
+What is the name of the current head of state in the country where the type of music played by Hyun Bin was created? Yoon Suk-yeol
+
+What is the name of the head of state in the country where the music style associated with Hyun Bin was developed? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of state in United Kingdom is Charles, Prince of Wales
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United Kingdom? Charles, Prince of Wales
+**Single-hop Queries (unchanged)**:
+Which company is Jaguar Mark 2 produced by? Jaguar Cars
+
+Which country was Jaguar Cars created in? United Kingdom
+**Multi-hop Queries**:
+What is the name of the current head of state in the country where the company that produced Jaguar Mark 2 was created? Charles, Prince of Wales
+
+What is the name of the current leader of the country where the producer of Jaguar Mark 2 was created? Charles, Prince of Wales
+
+Who is the head of state in the country where the company that produced Jaguar Mark 2 was established? Charles, Prince of Wales
+==============================
+**Edit**: The name of the current head of the San Diego government is Todd Gloria
+**Single-hop Queries (changed)**:
+What is the name of the current head of the San Diego government? Todd Gloria
+**Single-hop Queries (unchanged)**:
+Which city is the headquarter of Qualcomm Inc. located in? San Diego
+**Multi-hop Queries**:
+Who is the current leader of the government in the city where the headquarters of Qualcomm Inc. is situated? Todd Gloria
+
+Who is the current head of the government in the city where Qualcomm Inc. is headquartered? Todd Gloria
+
+What is the name of the current head of the government of the city where the headquarters of Qualcomm Inc. is located? Todd Gloria
+==============================
+**Edit**: The name of the current head of state in Slovenia is Nataša Pirc Musar
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Slovenia? Nataša Pirc Musar
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Tina Maze? Slovenia
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Tina Maze is a citizen of? Nataša Pirc Musar
+
+What is the name of the current leader of the country that Tina Maze is a citizen of? Nataša Pirc Musar
+
+Who is the head of state in the country where Tina Maze holds citizenship? Nataša Pirc Musar
+==============================
+**Edit**: The name of the current head of state in Croatia is Zoran Milanović
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Croatia? Zoran Milanović
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Aloysius Stepinac? Croatia
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Aloysius Stepinac? Zoran Milanović
+
+What is the name of the head of state in the country that Aloysius Stepinac is a citizen of? Zoran Milanović
+
+What is the name of the current head of state in the country where Aloysius Stepinac is a citizen? Zoran Milanović
+==============================
+**Edit**: The name of the current head of state in Croatia is Zoran Milanović
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Croatia? Zoran Milanović
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Niko Kovač? Croatia
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Niko Kovač is a citizen of? Zoran Milanović
+
+Who is the current head of state in the country of citizenship of Niko Kovač? Zoran Milanović
+
+What is the name of the current leader of the country that Niko Kovač is a citizen of? Zoran Milanović
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What type of music does Shinhwa play? K-pop
+
+Which country was K-pop created in? South Korea
+**Multi-hop Queries**:
+What is the name of the current head of state in the country where the type of music played by Shinhwa was created? Yoon Suk-yeol
+
+Who is the current leader of the country that created the type of music performed by Shinhwa? Yoon Suk-yeol
+
+What is the name of the head of state in the country where the music style associated with Shinhwa was developed? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the New Zealand government is Chris Hipkins
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New Zealand government? Chris Hipkins
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Sosaia Feki? New Zealand
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Sosaia Feki holds citizenship? Chris Hipkins
+
+Who is the current head of the government in the country of citizenship of Sosaia Feki? Chris Hipkins
+
+What is the name of the current leader of the country where Sosaia Feki is a citizen? Chris Hipkins
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Jerry Stahl? United States of America
+**Multi-hop Queries**:
+Who is the head of state in the country where Jerry Stahl holds citizenship? Joe Biden
+
+What is the name of the current leader of the country that Jerry Stahl is a citizen of? Joe Biden
+
+Who is the current head of state in the country of citizenship of Jerry Stahl? Joe Biden
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Myung-whun Chung? South Korea
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Myung-whun Chung is a citizen of? Yoon Suk-yeol
+
+Who is the current head of state in the country of citizenship of Myung-whun Chung? Yoon Suk-yeol
+
+What is the name of the current head of state in the country where Myung-whun Chung is a citizen? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the United States of America government is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United States of America government? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Frank Buck? United States of America
+**Multi-hop Queries**:
+Who is the head of the government in the country that Frank Buck is a citizen of? Joe Biden
+
+What is the name of the leader of the government in the country where Frank Buck holds citizenship? Joe Biden
+
+What is the name of the current leader of the country where Frank Buck is a citizen? Joe Biden
+==============================
+**Edit**: The name of the current head of the Los Angeles government is Karen Bass
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Los Angeles government? Karen Bass
+**Single-hop Queries (unchanged)**:
+Which university was Tom Seaver educated at? University of Southern California
+
+Which city is the headquarter of University of Southern California located in? Los Angeles
+**Multi-hop Queries**:
+What is the name of the current head of the government of the city where the university that educated Tom Seaver has its headquarters? Karen Bass
+
+What is the name of the current head of the government of the city where the headquarters of the university, where Tom Seaver was educated, is located? Karen Bass
+
+Who is the head of the government of the city where the university that educated Tom Seaver is headquartered? Karen Bass
+==============================
+**Edit**: The name of the current head of the United Kingdom government is Rishi Sunak
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United Kingdom government? Rishi Sunak
+**Single-hop Queries (unchanged)**:
+Who performed Revolution 9? The Beatles
+
+Which country was The Beatles created in? United Kingdom
+**Multi-hop Queries**:
+What is the name of the current leader of the government of the country that created the performer of Revolution 9? Rishi Sunak
+
+Who is the head of the government of the country where the performer of Revolution 9 originated? Rishi Sunak
+
+Who is the current head of the government of the country where the creator of the performer of Revolution 9 is from? Rishi Sunak
+==============================
+**Edit**: The name of the current head of state in Croatia is Zoran Milanović
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in Croatia? Zoran Milanović
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Ivica Olić? Croatia
+**Multi-hop Queries**:
+What is the name of the head of state in the country that Ivica Olić is a citizen of? Zoran Milanović
+
+What is the name of the current head of state in the country where Ivica Olić is a citizen? Zoran Milanović
+
+Who is the current head of state in the country of citizenship of Ivica Olić? Zoran Milanović
+==============================
+**Edit**: The name of the current head of the Australia government is Anthony Albanese
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Australia government? Anthony Albanese
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Michael Slater? Australia
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Michael Slater holds citizenship? Anthony Albanese
+
+What is the name of the current head of the government of the country where Michael Slater is a citizen? Anthony Albanese
+
+Who is the current head of the government in the country of citizenship of Michael Slater? Anthony Albanese
+==============================
+**Edit**: The name of the current head of the Berlin government is Franziska Giffey
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Berlin government? Franziska Giffey
+**Single-hop Queries (unchanged)**:
+Which city did Alfred Hugenberg work in? Berlin
+**Multi-hop Queries**:
+Who is the current head of the government in the city where Alfred Hugenberg was employed? Franziska Giffey
+
+What is the name of the current head of the government of the city where Alfred Hugenberg worked? Franziska Giffey
+
+What is the name of the current leader of the government in the city where Alfred Hugenberg worked? Franziska Giffey
+==============================
+**Edit**: The name of the current head of state in United States of America is Joe Biden
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in United States of America? Joe Biden
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Forrest J Ackerman? United States of America
+**Multi-hop Queries**:
+Who is the current head of state in the country of citizenship of Forrest J Ackerman? Joe Biden
+
+What is the name of the current leader of the country that Forrest J Ackerman is a citizen of? Joe Biden
+
+Who is the head of state in the country where Forrest J Ackerman holds citizenship? Joe Biden
+==============================
+**Edit**: The name of the current head of the San Juan government is Miguel Romero
+**Single-hop Queries (changed)**:
+What is the name of the current head of the San Juan government? Miguel Romero
+**Single-hop Queries (unchanged)**:
+Which city was Alejandro García Padilla born in? San Juan
+**Multi-hop Queries**:
+Who is the current head of the government in the city of birth of Alejandro García Padilla? Miguel Romero
+
+What is the name of the current head of the government of the city where Alejandro García Padilla was born? Miguel Romero
+
+What is the name of the head of the government in the city where Alejandro García Padilla was born? Miguel Romero
+==============================
+**Edit**: The name of the current head of the Italy government is Giorgia Meloni
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Italy government? Giorgia Meloni
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Paolo Rossi? Italy
+**Multi-hop Queries**:
+What is the name of the leader of the government in the country where Paolo Rossi holds citizenship? Giorgia Meloni
+
+What is the name of the current leader of the country where Paolo Rossi is a citizen? Giorgia Meloni
+
+Who is the current head of the government in the country of citizenship of Paolo Rossi? Giorgia Meloni
+==============================
+**Edit**: The name of the current head of the Prague government is Bohuslav Svoboda
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Prague government? Bohuslav Svoboda
+**Single-hop Queries (unchanged)**:
+Which university was Jan Evangelista Purkyně educated at? Charles University
+
+Which city is the headquarter of Charles University located in? Prague
+**Multi-hop Queries**:
+What is the name of the head of the government of the city that is home to the headquarters of the university that educated Jan Evangelista Purkyně? Bohuslav Svoboda
+
+What is the name of the current head of the government of the city where the university that educated Jan Evangelista Purkyně has its headquarters? Bohuslav Svoboda
+
+Who is the head of the government of the city where the university that educated Jan Evangelista Purkyně is headquartered? Bohuslav Svoboda
+==============================
+**Edit**: The name of the current head of the Sweden government is Ulf Kristersson
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Sweden government? Ulf Kristersson
+**Single-hop Queries (unchanged)**:
+Which company is Volvo Amazon produced by? Volvo Cars
+
+Which country was Volvo Cars created in? Sweden
+**Multi-hop Queries**:
+What is the name of the current leader of the government of the country where the producer of Volvo Amazon is based? Ulf Kristersson
+
+What is the name of the head of the government of the country that is home to the company that produced Volvo Amazon? Ulf Kristersson
+
+Who leads the government of the country where the company that produced Volvo Amazon originated? Ulf Kristersson
+==============================
+**Edit**: The name of the current head of the Japan government is Fumio Kishida
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Japan government? Fumio Kishida
+**Single-hop Queries (unchanged)**:
+What is Naoko Takeuchi famous for? Sailor Moon
+
+Which country was Sailor Moon created in? Japan
+**Multi-hop Queries**:
+Who is the current leader of the government in the country where the creation associated with Naoko Takeuchi originated? Fumio Kishida
+
+Who is the current head of the government in the country where the thing that Naoko Takeuchi is known for was created? Fumio Kishida
+
+What is the name of the head of the government in the country that created the thing that makes Naoko Takeuchi famous? Fumio Kishida
+==============================
+**Edit**: The name of the current head of state in South Korea is Yoon Suk-yeol
+**Single-hop Queries (changed)**:
+What is the name of the current head of state in South Korea? Yoon Suk-yeol
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of Kim Ki-young? South Korea
+**Multi-hop Queries**:
+What is the name of the current leader of the country that Kim Ki-young is a citizen of? Yoon Suk-yeol
+
+Who is the current head of state in the country of citizenship of Kim Ki-young? Yoon Suk-yeol
+
+What is the name of the head of state in the country that Kim Ki-young is a citizen of? Yoon Suk-yeol
+==============================
+**Edit**: The name of the current head of the Boston government is Michelle Wu
+**Single-hop Queries (changed)**:
+What is the name of the current head of the Boston government? Michelle Wu
+**Single-hop Queries (unchanged)**:
+Which university was Joe Lovano educated at? Berklee College of Music
+
+Which city is the headquarter of Berklee College of Music located in? Boston
+**Multi-hop Queries**:
+What is the name of the current head of the government of the city where the headquarters of the university, where Joe Lovano was educated, is located? Michelle Wu
+
+What is the name of the head of the government of the city that is home to the headquarters of the university that educated Joe Lovano? Michelle Wu
+
+Who is the head of the government of the city where the university that educated Joe Lovano is headquartered? Michelle Wu
+==============================
+**Edit**: The director of Central Intelligence Agency is William Joseph Burns
+**Single-hop Queries (changed)**:
+Who is the director of Central Intelligence Agency? William Joseph Burns
+**Single-hop Queries (unchanged)**:
+Who is the employer of David Petraeus? Central Intelligence Agency
+**Multi-hop Queries**:
+What is the name of the person who directs the organization that employs David Petraeus? William Joseph Burns
+
+What is the name of the director of the organization where David Petraeus works? William Joseph Burns
+
+Who is the head of the company that David Petraeus is employed by? William Joseph Burns
+==============================
+**Edit**: The name of the current head of the United Kingdom government is Rishi Sunak
+**Single-hop Queries (changed)**:
+What is the name of the current head of the United Kingdom government? Rishi Sunak
+**Single-hop Queries (unchanged)**:
+Who performed Love You To? The Beatles
+
+Which country was The Beatles created in? United Kingdom
+**Multi-hop Queries**:
+Who is the head of the government of the country where the performer of Love You To originated? Rishi Sunak
+
+Who is the current head of the government of the country where the creator of the performer of Love You To is from? Rishi Sunak
+
+What is the name of the head of the government of the country that created the performer of Love You To? Rishi Sunak
+==============================
+**Edit**: The name of the current head of the New Zealand government is Chris Hipkins
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New Zealand government? Chris Hipkins
+**Single-hop Queries (unchanged)**:
+What is the country of citizenship of David Cunliffe? New Zealand
+**Multi-hop Queries**:
+What is the name of the current head of the government of the country where David Cunliffe is a citizen? Chris Hipkins
+
+What is the name of the leader of the government in the country where David Cunliffe holds citizenship? Chris Hipkins
+
+Who is the head of the government in the country that David Cunliffe is a citizen of? Chris Hipkins
+==============================
+**Edit**: The name of the current head of the New York City government is Eric Adams
+**Single-hop Queries (changed)**:
+What is the name of the current head of the New York City government? Eric Adams
+**Single-hop Queries (unchanged)**:
+Who is the original broadcaster of Criminal Minds? CBS
+
+Where was CBS founded? New York City
+**Multi-hop Queries**:
+Who is the current head of the government in the city where the original broadcaster of Criminal Minds was established? Eric Adams
+
+What is the name of the person currently in charge of the government in the city that founded the original broadcaster of Criminal Minds? Eric Adams
+
+What is the name of the current head of the government of the city where the original broadcaster of Criminal Minds was founded? Eric Adams
+==============================
