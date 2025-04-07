@@ -23,7 +23,6 @@ from knowledge_propagation.modules.evaluators import (
     RougeEvaluator,
     OpenAIEvaluator,
 )
-from typing import List, Dict
 
 from copy import deepcopy
 import models
@@ -50,51 +49,6 @@ icl_prompt = "\n".join(
     ]
 )
 
-def generate_multi_answers(
-    context: str,
-    answers: List[str],
-    config,
-    model,
-    tokenizer,
-    generation_config,
-):
-    inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
-    ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
-
-    inputs = {k: v.to(config.device) for k, v in inputs.items()}
-    print(
-        "Input for generation:",
-        "[" + "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"])) + "]",
-    )
-    print("Label for generation:", "[" + str(answers) + "]")
-    print("--------------------")
-
-    generation_output = model.generate(
-        **inputs,
-        generation_config=generation_config,
-        pad_token_id=tokenizer.pad_token_id,
-        return_dict_in_generate=True,
-    )
-    generated_texts = tokenizer.batch_decode(generation_output.sequences, skip_special_tokens=True)
-    # import pdb; pdb.set_trace()
-    generated_texts = [t.replace(ctx_decoded, "") for t in generated_texts]
-    predicted_answer = generated_texts[0]
-    if hasattr(config, "add_icl") and config.add_icl:
-        # if using ICL, extract by the first new line
-        if "\n" in predicted_answer:
-            predicted_answer = predicted_answer[: predicted_answer.find("\n")]
-
-    model_response = pd.DataFrame(
-        [
-            {
-                "question": context,
-                "answer": answers,
-                "predicted_answer_idx": 0,
-                "predicted_answer": predicted_answer.strip(),
-            }
-        ]
-    )
-    return model_response # score_df(model_response)
 
 def add_padding(tokenizer, model):
     import transformers
@@ -154,15 +108,13 @@ def run(config):
     # import pdb
 
     # pdb.set_trace()
-    if config.date_data == "all_propagation_ood":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
-    elif config.date_data == "all_propagation_ood_w_ood_country":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country.jsonl")
+    if config.date_data == "drop":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/drop_dataset_converted/drop_dataset_test.jsonl")
     # else:
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
     if config.spec_question:
-        spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl")
+        spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
 
     all_results = []
     edit_model_infos = []
@@ -179,7 +131,7 @@ def run(config):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = edit_dev_dataset[i]
 
-        sentences = [datum["text"]]
+        sentences = [datum["passage"]]
 
         assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
         sentences_toks = targets_toks = add_eos(
@@ -212,9 +164,9 @@ def run(config):
         model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
         edit_model_infos.append(model_info)
 
-        
+        # import pdb; pdb.set_trace()
         question_types = [
-            ("efficacy", datum["ood_questions"]),
+            ("efficacy", datum["qa_pairs"]),
         ]
 
         if config.spec_question:
@@ -222,37 +174,35 @@ def run(config):
 
         for question_type, questions in question_types:
             logging.info(f"Question type: {question_type}")
-            for question_key in ["question", "unaliased_question"]:
-                for q_i, question in enumerate(questions):
-                    
-                    post_result_df = generate_multi_answers(
-                        context=question[question_key],
-                        answers=question["answer"],
-                        config=config,
-                        model=edited_model.model,
-                        tokenizer=tokenizer,
-                        generation_config=generation_config,
-                    )
-                    post_result_df.insert(0, "question_key", question_key)
-                    post_result_df.insert(0, "stage", "post-edit")
-                    post_result_df.insert(
-                        0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
-                    )
-                    if question_type == "efficacy" or  question_type == "ood_efficacy":
-                        post_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
-                    else:
-                        post_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
-                    post_result_df.insert(0, "question_type", question_type)
-                    post_result_df.insert(0, "id", str(i))
-                    all_results.append(post_result_df)
+
+            for q_i, question in enumerate(questions):
+                post_result_df = get_eval_result(
+                    question=question["question"],
+                    answer=question["answer"],
+                    model=edited_model.model,
+                    tokenizer=tokenizer,
+                    config=config,
+                    generation_config=generation_config,
+                )
+                post_result_df.insert(0, "stage", "post-edit")
+                post_result_df.insert(
+                    0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
+                )
+                # if question_type == "efficacy":
+                #     post_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
+                # else:
+                post_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
+                post_result_df.insert(0, "question_type", question_type)
+                post_result_df.insert(0, "id", str(i))
+                all_datum_result_df.append(post_result_df)
 
         del edited_model
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-        # all_datum_result_df = pd.concat(all_datum_result_df)
-
+        all_datum_result_df = pd.concat(all_datum_result_df)
+        all_results.append(all_datum_result_df)
 
     all_results = pd.concat(all_results)
 

@@ -12,6 +12,22 @@ from datasets import Dataset
 
 score_tag_extractor = extractor.tag_content_extractor("score")
 
+from knowledge_propagation.modules.evaluators import (
+    NumDiffEvaluator,
+)
+year_diff_evaluator = NumDiffEvaluator()
+
+def score_df(df):
+    diff_per_example = year_diff_evaluator.compute_metric(
+        predictions=df["predicted_answer"],
+        references=df["answer"],
+        use_aggregator=False,
+    )
+
+    model_response_w_score = df.join(pd.DataFrame({**diff_per_example}))
+    
+    return model_response_w_score
+
 
 class LlmAsJudge(curator.LLM):
     MAX_VAL: float = 10.0
@@ -63,21 +79,31 @@ Return the numerical score wrapped in <score>..</score> tag
         return {**input}
 
 
+
 llm_judge = LlmAsJudge(
     model_name="gpt-4o-mini", backend_params={"max_requests_per_minute": 30_000, "max_tokens_per_minute": 150_000_000}
 )
-fpath = "/u/zliu/datastor1/mend/drop_exp_output/drop-6K_heavy_share_mid-upper3/drop/mend_eval_loss=clm_input=seen_n=100_prompt=no_w-gen_wo-icl_e_drop-question.xlsx"
+fpath = "/u/zliu/datastor1/mend/debug_exp_output/Llama-3.2-1B-common-date-year-after-eos-sft-bio_syn_v2-pretrain-all_clm-baseline_lr=1e-05_epoch=4.0/all_results_ood.xlsx"
 # fpath = "/u/zliu/datastor1/mend/exp_output/eos-sft_musique_propagator_text_hidden_w-atomq/musique/mend_eval_loss=clm_input=hidden_n=1000_prompt=no_w-gen_wo-icl_spec.xlsx"
 scored_df = pd.read_excel(fpath)
 scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)
 scored_df["answer"] = scored_df["answer"].astype(str)
 
 
-scored_dataset = Dataset.from_pandas(scored_df[:])
+# scored_df = score_df(scored_df)
+if "is_num" in scored_df.columns:
+    non_numeric_df = scored_df[~scored_df["is_num"]]
+else:
+    non_numeric_df = scored_df
+scored_dataset = Dataset.from_pandas(non_numeric_df)
 scored_dataset = llm_judge(
     scored_dataset,
 )
 
-scored_dataset.to_pandas().to_excel(fpath, index=False)
+non_numeric_scored_df = scored_dataset.to_pandas()
 
+if "is_num" in scored_df.columns:
+    pd.concat([scored_df[scored_df["is_num"]], non_numeric_scored_df]).sort_values(by=["id", "question_tag"]).to_excel(fpath, index=False)
+else:
+    non_numeric_scored_df.sort_values(by=["id", "question_tag"]).to_excel(fpath, index=False)
 print(fpath)

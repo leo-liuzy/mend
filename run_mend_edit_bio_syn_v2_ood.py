@@ -17,13 +17,12 @@ from knowledge_propagation.utils import io, vars, extractor
 from knowledge_propagation.modules.inferencers import QAInferencer
 from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
-
+from typing import List, Dict
 from knowledge_propagation.modules.evaluators import (
     ExactMatchEvaluator,
     RougeEvaluator,
     OpenAIEvaluator,
 )
-from typing import List, Dict
 
 from copy import deepcopy
 import models
@@ -49,6 +48,18 @@ icl_prompt = "\n".join(
         "A: No",
     ]
 )
+
+
+def add_padding(tokenizer, model):
+    import transformers
+
+    tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+    model.resize_token_embeddings(len(tokenizer))
+    if not isinstance(model, transformers.LlamaForCausalLM):
+        #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
+        # else:
+        model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
+
 
 def generate_multi_answers(
     context: str,
@@ -95,16 +106,6 @@ def generate_multi_answers(
         ]
     )
     return model_response # score_df(model_response)
-
-def add_padding(tokenizer, model):
-    import transformers
-
-    tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-    model.resize_token_embeddings(len(tokenizer))
-    if not isinstance(model, transformers.LlamaForCausalLM):
-        #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
-        # else:
-        model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
 
 
 @hydra.main(config_path="config", config_name="config")
@@ -155,14 +156,12 @@ def run(config):
 
     # pdb.set_trace()
     if config.date_data == "all_propagation_ood":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
-    elif config.date_data == "all_propagation_ood_w_ood_country":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country.jsonl")
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_ood.jsonl")
     # else:
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
     if config.spec_question:
-        spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl")
+        spec_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
 
     all_results = []
     edit_model_infos = []
@@ -212,7 +211,7 @@ def run(config):
         model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
         edit_model_infos.append(model_info)
 
-        
+        # import pdb; pdb.set_trace()
         question_types = [
             ("efficacy", datum["ood_questions"]),
         ]
@@ -238,21 +237,21 @@ def run(config):
                     post_result_df.insert(
                         0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
                     )
-                    if question_type == "efficacy" or  question_type == "ood_efficacy":
+                    if question_type == "efficacy":
                         post_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
                     else:
                         post_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
                     post_result_df.insert(0, "question_type", question_type)
                     post_result_df.insert(0, "id", str(i))
-                    all_results.append(post_result_df)
+                    all_datum_result_df.append(post_result_df)
 
         del edited_model
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-        # all_datum_result_df = pd.concat(all_datum_result_df)
-
+        all_datum_result_df = pd.concat(all_datum_result_df)
+        all_results.append(all_datum_result_df)
 
     all_results = pd.concat(all_results)
 

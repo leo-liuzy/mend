@@ -78,13 +78,40 @@ Return the question wrapped in <question>..</question> tag, and answer wrapped i
         input["qa_pairs"] = processed_qa_pairs
         return {**input}
     
+class CommonFactsAnswerer(curator.LLM):
+    PROMPT : str = """
+Give me answer(s) to the question below. 
+
+[Question]
+{question}
+
+Return answer wrapped in <answer>..</answer> tag.
+If the question is not answerable, please give "<answer>I don't know</answer>" as the answer.
+If the question has multiple answers, wrap each answer in <answer>..</answer> tag.
+Each answer should be short and concise.
+    """.strip()
+    def prompt(self, input: dict) -> str:
+        """Generate a prompt for the subsubject generator."""
+        return self.PROMPT.format(question=input["question"],)
+
+    def parse(self, input: dict, response: str) -> dict:
+        """Parse the model response along with the input to the model into the desired output format.."""
+        answers_ = answer_extractor(response)
+        # import pdb; pdb.set_trace()
+        assert len(answers_) > 0
+        answers = [a.strip() for a in answers_]
+            
+        input["answers"] = answers
+        return {**input}
+    
 
 
-fact_generator = CommonFactsGenerator(model_name="gpt-4o")
-df = pd.DataFrame(event_categories, columns=["topic"])
+answer_generator = CommonFactsAnswerer(model_name="gpt-4o")
 
+questions = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/popular_ood_questions.jsonl")
+df = pd.DataFrame(questions,)
 dataset = Dataset.from_pandas(df)
-dataset = fact_generator(dataset)
+dataset = answer_generator(dataset)
 
-dataset.save_to_disk("/u/zliu/datastor1/KE-by-CP/data/debug_meta_train/common_date_data/common_date_question_generation.hf",)
+dataset.save_to_disk(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/popular_ood_questions_answers.hf",)
 print()

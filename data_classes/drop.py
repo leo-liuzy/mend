@@ -67,6 +67,8 @@ class DropDataset(Dataset):
         # ! this is to avoid model exploiting potential heuristics in data order.
         np.random.shuffle(texts)
         np.random.shuffle(qas)
+        if self.config.n_qa is not None:
+            qas = qas[:self.config.n_qa]
         
         answers = [("" if len(qa["answer"]) != 0 and qa["answer"][0] == " " else " ") + qa["answer"] for qa in qas]
         
