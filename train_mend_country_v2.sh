@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=3
 
 train_set_size=3_000
 
@@ -6,7 +6,7 @@ train_set_size=3_000
 # llama3.2-1B-common-date-year-after-eos-sft
 # llama3.2-1B-common-date-year-after-eos-sft-mid-upper
 
-for n_template in 7
+for n_template in 7 5 2 1
 do
 for n_seen_pair in 50
 do

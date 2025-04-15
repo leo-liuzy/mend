@@ -175,7 +175,6 @@ def print_trainable_parameters(model):
     )
 
 
-
 @dataclass
 class CustomConfig:
     example_idx: int
@@ -204,9 +203,11 @@ os.makedirs(exp_save_dir, exist_ok=True)
 
 
 if custom_cfg.date_data == "recent":
+    delta_params_save_dir = f"{exp_save_dir}/delta_params_recent"
     individual_result_save_dir = f"{exp_save_dir}/individual_results_recent"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test.jsonl")
 elif custom_cfg.date_data == "recent+popular":
+    delta_params_save_dir = f"{exp_save_dir}/delta_params_recent+popular"
     individual_result_save_dir = f"{exp_save_dir}/individual_results_recent+popular"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test.jsonl")
 else:
@@ -224,7 +225,9 @@ fpath = (
     + ("_e+s" if custom_cfg.spec_question else "_e")
     + ".xlsx"
 )
-if os.path.exists(fpath):
+if os.path.exists(fpath) and os.path.exists(
+    f"{delta_params_save_dir}/{custom_cfg.example_idx}_{custom_cfg.tunable_params}.pt"
+):
     logging.info("=" * 20 + "Already evaluated" + "=" * 20)
     exit(0)
 
@@ -264,7 +267,6 @@ args.per_device_train_batch_size = len(train_dataset)
 # valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
 if custom_cfg.tunable_params != "all":
-    
     if custom_cfg.tunable_params == "top3-mlp":
         params = [
             "model.layers.13.mlp.gate_proj.weight",
@@ -323,6 +325,7 @@ if custom_cfg.tunable_params != "all":
     for n, param in model.named_parameters():
         if any(p in n for p in params):
             import pdb
+
             pdb.set_trace()
             delta_params[n] = param - original_params[n]
         else:

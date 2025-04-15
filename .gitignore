@@ -183,3 +183,5 @@ wandb/
 
 debug_exp_output/
 ripple_exp_output/
+outputs
+outputs_old_noDELETE/
