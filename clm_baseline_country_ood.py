@@ -260,10 +260,16 @@ if custom_cfg.date_data == "all_propagation":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
 elif custom_cfg.date_data == "all_propagation_ood":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_ood_{custom_cfg.text_data}"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_id+ood_{custom_cfg.text_data}"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_v1.jsonl")
 elif custom_cfg.date_data == "all_propagation_ood_w_ood_country":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_ood_w_ood_country_{custom_cfg.text_data}"
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_id+ood_w_ood_country_{custom_cfg.text_data}"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country_v1.jsonl")
+elif custom_cfg.date_data == "all_propagation_ood_v2":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_id+ood_v2_{custom_cfg.text_data}"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
+elif custom_cfg.date_data == "all_propagation_ood_w_ood_country_v2":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_id+ood_w_ood_country_v2_{custom_cfg.text_data}"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country.jsonl")
     
 else:
@@ -307,7 +313,7 @@ assert tokenizer.eos_token != tokenizer.pad_token
 assert tokenizer.eos_token_id != tokenizer.pad_token_id
 
 if custom_cfg.tunable_params != "all":
-    assert custom_cfg.tunable_params in custom_cfg.base_model_name
+    # assert custom_cfg.tunable_params in custom_cfg.base_model_name
     if custom_cfg.tunable_params == "top3-mlp":
         params = [
             "model.layers.13.mlp.gate_proj.weight",
@@ -391,7 +397,8 @@ eos_token_id = tokenizer.eos_token_id
 
 question_types = [
     # ("efficacy", [{"question": instance["question"], "answer": instance["answer"]}]),
-    ("efficacy", instance["ood_questions"]),
+    ("efficacy", instance["questions"]),
+    ("efficacy-ood", instance["ood_questions"]),
 ]
 if custom_cfg.spec_question:
     question_types.append(("specificity", spec_dev_dataset))
@@ -402,10 +409,14 @@ all_result_df = []
 for question_type, questions in question_types:
     logging.info(f"Question type: {question_type}")
 
-    for question_key in ["question", "unaliased_question"]:
+    for question_key in ["question", ]: # "unaliased_question"
         for q_i, question in tqdm(enumerate(questions), total=len(questions)):
+            
+            if "ood" in question_type: 
+                test_queries_a_str = question["answer"]
+            else:
+                test_queries_a_str = [question["answer"]]
             test_queries_q_str = question[question_key]
-            test_queries_a_str = question["answer"]
             
             post_result_df = generate_multi_answers(
                 test_queries_q_str, test_queries_a_str, custom_cfg, model, tokenizer, generation_config
@@ -413,7 +424,7 @@ for question_type, questions in question_types:
             
             post_result_df.insert(0, "question_key", question_key)
             post_result_df.insert(0, "stage", "post-edit")
-            if question_type == "efficacy":
+            if "efficacy" in question_type:
                 post_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
             else:
                 post_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")

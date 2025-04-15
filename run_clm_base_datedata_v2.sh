@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=4
+export CUDA_VISIBLE_DEVICES=2
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -21,9 +21,12 @@ epoch=4
 # second-1hop
 
 tunable_params="all"
+# tunable_params="midupper3-mlp"
 # base_model_name="Llama-3.2-1B-common-date-year-after-eos-sft-bio_syn_v2-pretrain-all"
 base_model_name="Llama-3.2-1B-common-date-year-after-eos-sft"
 
+for date_data in all_propagation_ood_v2
+do
 for example_idx in {0..99} # {0..999}
 do
 
@@ -58,9 +61,11 @@ python clm_baseline_datedata_v2_ood.py \
     --report_to="none" \
     --spec_question=False \
     --base_model_name=${base_model_name} \
-    --date_data="all_propagation_ood" \
+    --date_data=${date_data} \
     --text_data=${text_data} \
+    --add_icl=True \
     --tunable_params=${tunable_params} 
     
+done
 done
 done

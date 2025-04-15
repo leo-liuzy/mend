@@ -42,14 +42,34 @@ rouge_evaluator = RougeEvaluator()
 llm_evaluator = OpenAIEvaluator()
 year_diff_evaluator = NumDiffEvaluator()
 
+# icl_prompt = "\n".join(
+#     [
+#         "Q: When did the simpsons first air on television?",
+#         "A: 1989",
+#         "Q: When was Jesus born?",
+#         "A: 6 to 4 BC",
+#         "Q: What year did the United State declare independence?",
+#         "A: 1776",
+#     ]
+# )
 icl_prompt = "\n".join(
     [
-        "Q: When did the simpsons first air on television?",
-        "A: 1989",
-        "Q: When was Jesus born?",
-        "A: 6 to 4 BC",
-        "Q: What year did the United State declare independence?",
-        "A: 1776",
+        "Q: Which continent is Sweden located in?",
+        "A: Europe",
+        "Q: What country is Phoenix in?",
+        "A: United States",
+        "Q: What is the capital of France?",
+        "A: Paris",
+        "Q: Which religion has the most followers in Austria?",
+        "A: Christianity",
+        "Q: Which ethnic group is the largest in India?",
+        "A: Indo-Aryan",
+        "Q: What is the currency of Colombia?",
+        "A: Colombian Peso",
+        "Q: Which country is the largest in Asia by area?",
+        "A: Russian",
+        "Q: What language has the most speakers in South Korea?",
+        "A: Korean",
     ]
 )
 
@@ -221,7 +241,8 @@ def run(config):
 
     model = models.get_model(config)
     tokenizer = models.get_tokenizer(config)
-    add_padding(tokenizer, model)
+    models.add_padding(tokenizer, model)
+    model = model.to(config.device)
 
     from data_classes.zsre import ZsreDataset
 
@@ -247,18 +268,29 @@ def run(config):
         eos_token_id=tokenizer.eos_token_id,
     )
 
-    trainer = EditTrainer(alg, config, train_set, val_set)
+    # trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
     if config.date_data == "common":
         question_type = "specificity"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl")
+        config.val_steps = 81
+    elif config.date_data == "common_train":
+        question_type = "specificity"
+        config.val_steps = 584
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl")
     elif config.date_data == "country_syn":
         question_type = "efficacy"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
     elif config.date_data == "country_syn_ood":
         question_type = "efficacy"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_v1.jsonl")
+    elif config.date_data == "country_syn_ood_v2":
+        question_type = "efficacy"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
     elif config.date_data == "country_syn_ood_w_ood_country":
+        question_type = "efficacy"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country_v1.jsonl")
+    elif config.date_data == "country_syn_ood_w_ood_country_v2":
         question_type = "efficacy"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country.jsonl")
     # elif config.date_data == "country_syn_ood_hard":
@@ -285,7 +317,7 @@ def run(config):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = val_data[i]
 
-        if config.date_data == "common":
+        if any(config.date_data for x in ["common", "common_"]):
             test_queries = [
                 {"question": datum["question"], "answer": datum["answer"]}
                 # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
@@ -297,7 +329,7 @@ def run(config):
 
         # prepare [Q][A] accuracy and generation inputs
 
-        for question_key in ["question", "unaliased_question"]:
+        for question_key in ["question", "unaliased_question"][:1]:
             for q_i, test_query in enumerate(test_queries):
                 # import pdb; pdb.set_trace()
                 if config.ice:
@@ -305,9 +337,12 @@ def run(config):
                 else:
                     test_queries_q_str = test_query[question_key].strip()
 
+                if hasattr(config, "add_icl") and config.add_icl:
+                    test_queries_q_str = icl_prompt + "\nQ: " + test_queries_q_str + "\nA: "
+                    
                 if config.do_generation:
                     pre_result_df = generate_multi_answers(
-                        test_queries_q_str, test_query["answer"], config, trainer.model.model, tokenizer, generation_config
+                        test_queries_q_str, test_query["answer"], config, model, tokenizer, generation_config
                     )
                 else:
                     pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
@@ -333,13 +368,11 @@ def run(config):
             # using relative path
             save_dir = f"{base_dir}/{config.generation.save_dir}"
         save_dir = os.path.join(save_dir, config.date_data)
-        LOG.info(f"Saving to dir: {save_dir}")
+        fpath = f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_ice={config.ice}.xlsx"
+        LOG.info(f"Saving to dir: {fpath}")
 
         os.makedirs(save_dir, exist_ok=True)
-        all_results.to_excel(
-            f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_ice={config.ice}.xlsx",
-            index=False,
-        )
+        all_results.to_excel(fpath, index=False,)
 
 
 if __name__ == "__main__":

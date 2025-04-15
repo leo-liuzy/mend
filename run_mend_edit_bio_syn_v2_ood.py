@@ -24,6 +24,7 @@ from knowledge_propagation.modules.evaluators import (
     OpenAIEvaluator,
 )
 
+
 from copy import deepcopy
 import models
 import utils
@@ -38,6 +39,61 @@ logging.basicConfig(format="%(asctime)s - %(levelname)s [%(filename)s:%(lineno)d
 LOG = logging.getLogger(__name__)
 
 
+from bespokelabs import curator
+from datasets import Dataset
+
+score_tag_extractor = extractor.tag_content_extractor("score")
+
+
+class LlmAsJudge(curator.LLM):
+    MAX_VAL: float = 10.0
+    PROMPT: str = """
+[Instruction]
+Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. For this evaluation, you should primarily consider the following criteria:
+accuracy: 
+                Score 1: The answer is completely unrelated to the reference.
+                Score 3: The answer has minor relevance but does not align with the reference.
+                Score 5: The answer has moderate relevance but contains inaccuracies.
+                Score 7: The answer aligns with the reference but has minor omissions.
+                Score 10: The answer is completely accurate and aligns perfectly with the reference.
+                Only respond with a numerical score.
+
+[Question]
+{question}
+
+[The Start of Ground truth]
+{reference}
+[The End of Ground truth]
+
+[The Start of Assistant's Answer]
+{prediction}
+[The End of Assistant's Answer]
+
+Return the numerical score wrapped in <score>..</score> tag
+    """.strip()
+
+    def prompt(self, input: dict) -> str:
+        """Generate a prompt for the subsubject generator."""
+        return self.PROMPT.format(
+            question=input["question"], prediction=input["predicted_answer"], reference=input["answer"]
+        )
+
+    def parse(self, input: dict, response: str) -> dict:
+        """Parse the model response along with the input to the model into the desired output format.."""
+        score_ = score_tag_extractor(response)
+        assert len(score_) == 1
+        score = score_[0].strip()
+        assert score.isdigit()
+        assert 1 <= float(score) <= 10
+        score = float(score)
+        score /= self.MAX_VAL
+        if "llm_accuracy" in input:
+            existing_llm_acc = input["llm_accuracy"]
+            del input["llm_accuracy"]
+        input["llm_accuracy"] = score
+
+        return {**input}
+
 icl_prompt = "\n".join(
     [
         "Q: When did the simpsons first air on television?",
@@ -49,6 +105,33 @@ icl_prompt = "\n".join(
     ]
 )
 
+from knowledge_propagation.modules.evaluators import (
+    NumDiffEvaluator,
+    ExactMatchEvaluator,
+)
+year_diff_evaluator = NumDiffEvaluator()
+em_evaluator = ExactMatchEvaluator()
+
+def score_df(df):
+    em_per_example = em_evaluator.compute_metric(
+        predictions=df["predicted_answer"],
+        references=df["answer"],
+        use_aggregator=False,
+    )
+    
+    diff_per_example = year_diff_evaluator.compute_metric(
+        predictions=df["predicted_answer"].tolist(),
+        references=df["answer"].tolist(),
+        use_aggregator=False,
+    )
+    
+    # model_response_w_score = df.join(pd.DataFrame({
+    #     **em_per_example, 
+    #     **diff_per_example,
+    # }))
+    result_subdf = pd.DataFrame({**em_per_example, **diff_per_example,})
+    
+    return pd.concat([df.reset_index(), result_subdf], axis=1).drop(columns=["index"])
 
 def add_padding(tokenizer, model):
     import transformers
@@ -156,7 +239,9 @@ def run(config):
 
     # pdb.set_trace()
     if config.date_data == "all_propagation_ood":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_ood.jsonl")
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_ood_v1.jsonl")
+    elif config.date_data == "all_propagation_ood_v2":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_ood.jsonl")
     # else:
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
@@ -166,7 +251,7 @@ def run(config):
     all_results = []
     edit_model_infos = []
     # trainer.validate(log=True)
-    assert config.val_steps <= len(edit_dev_dataset)
+    assert config.val_steps <= len(val_data)
     assert config.eval_only
     if hasattr(config, "add_icl") and config.add_icl:
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
@@ -176,7 +261,7 @@ def run(config):
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
-        datum = edit_dev_dataset[i]
+        datum = val_data[i]
 
         sentences = [datum["text"]]
 
@@ -270,8 +355,30 @@ def run(config):
             + f"_{config.date_data}-question"
             + ".xlsx"
         )
-
+        all_results["predicted_answer"] = all_results["predicted_answer"].astype(str)
+        all_results["answer"] = all_results["answer"].astype(str)
+        # import pdb; pdb.set_trace()
+        all_results = score_df(all_results)
+        # this is in case llm-as-judge 
         all_results.to_excel(fpath, index=False)
+        
+        # if "is_num" in all_results.columns:
+        #     non_numeric_df = all_results[~all_results["is_num"]]
+        # else:
+        #     non_numeric_df = all_results
+        # # import pdb; pdb.set_trace()
+        # scored_dataset = Dataset.from_pandas(non_numeric_df)
+        # llm_judge = LlmAsJudge(
+        #     model_name="gpt-4o-mini", backend_params={"max_requests_per_minute": 30_000, "max_tokens_per_minute": 150_000_000}
+        # )
+        # scored_dataset = llm_judge(
+        #     scored_dataset,
+        # )
+
+        # non_numeric_all_results = scored_dataset.to_pandas()
+        # all_results = pd.concat([all_results[all_results["is_num"]], non_numeric_all_results])
+                
+        # all_results.sort_values(by=["id", "question_tag"]).to_excel(fpath, index=False)
         io.dump_jsonlines(
             edit_model_infos,
             f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",

@@ -1,0 +1,9 @@
+# @package _global_
+
+task: country_syn_v2
+dataset: country_syn_v2
+n_template: 
+n_seen_pair: 
+cbase: 1.0
+heavy_outerloop: true
+# doc_dropout: 0.5 # w. prob 0.5 randomly drop 1 doc

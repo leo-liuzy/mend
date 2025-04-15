@@ -53,11 +53,11 @@ icl_prompt = "\n".join(
 
 
 def score_df(df):
-    # em_per_example = em_evaluator.compute_metric(
-    #     predictions=df["predicted_answer"],
-    #     references=df["answer"],
-    #     use_aggregator=False,
-    # )
+    em_per_example = em_evaluator.compute_metric(
+        predictions=df["predicted_answer"],
+        references=df["answer"],
+        use_aggregator=False,
+    )
     # rouge_per_example = rouge_evaluator.compute_metric(
     #     predictions=df["predicted_answer"],
     #     references=df["answer"],
@@ -70,7 +70,7 @@ def score_df(df):
         use_aggregator=False,
     )
 
-    model_response_w_score = df.join(pd.DataFrame({**diff_per_example}))
+    model_response_w_score = df.join(pd.DataFrame({**em_per_example, **diff_per_example}))
     return model_response_w_score
 
 
@@ -245,7 +245,11 @@ def run(config):
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
     elif config.date_data == "bio_syn_v2":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
+    elif config.date_data == "bio_syn_v2_w_unalias":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_w_unalias.jsonl")
     elif config.date_data == "bio_syn_v2_ood":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_ood_v1.jsonl")
+    elif config.date_data == "bio_syn_v2_ood_v2":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_ood.jsonl")
     else:
         raise ValueError(f"Unknown date_data: {config.date_data}")

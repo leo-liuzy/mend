@@ -43,12 +43,22 @@ year_diff_evaluator = NumDiffEvaluator()
 
 icl_prompt = "\n".join(
     [
-        "Q: When did the simpsons first air on television?",
-        "A: 1989",
-        "Q: When was Jesus born?",
-        "A: 6 to 4 BC",
-        "Q: What year did the United State declare independence?",
-        "A: 1776",
+        "Q: Which continent is Sweden located in?",
+        "A: Europe",
+        "Q: What country is Phoenix in?",
+        "A: United States",
+        "Q: What is the capital of France?",
+        "A: Paris",
+        "Q: Which religion has the most followers in Austria?",
+        "A: Christianity",
+        "Q: Which ethnic group is the largest in India?",
+        "A: Indo-Aryan",
+        "Q: What is the currency of Colombia?",
+        "A: Colombian Peso",
+        "Q: Which country is the largest in Asia by area?",
+        "A: Russian",
+        "Q: What language has the most speakers in South Korea?",
+        "A: Korean",
     ]
 )
 
@@ -204,6 +214,23 @@ def run(config):
     if config.date_data == "common":
         question_type = "specificity"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl")
+        config.val_steps = 50
+    elif config.date_data == "common_continent":
+        question_type = "specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid_continent.jsonl")
+        config.val_steps = 31
+    elif config.date_data == "common_train":
+        question_type = "specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl")
+        config.val_steps = 515
+    elif config.date_data == "common_continent_train":
+        question_type = "specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train_continent.jsonl")
+        config.val_steps = 69
+    elif config.date_data == "ood_v2_prefilter":
+        question_type = "ood_specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/ood_questions_v2.jsonl")
+        config.val_steps = 1085
     elif config.date_data == "country_syn":
         question_type = "efficacy"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
@@ -233,8 +260,7 @@ def run(config):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = val_data[i]
-
-        if config.date_data == "common":
+        if any(x in config.date_data for x in ["common_", "common", "ood_v2"]):
             test_queries = [
                 {"question": datum["question"], "answer": datum["answer"]}
                 # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
@@ -252,6 +278,10 @@ def run(config):
                 test_queries_q_str = datum["text"] + "\n\n" + test_query["question"].strip()
             else:
                 test_queries_q_str = test_query["question"].strip()
+            # import pdb; pdb.set_trace()
+            if hasattr(config, "add_icl") and config.add_icl:
+                test_queries_q_str = icl_prompt + "\nQ: " + test_queries_q_str + "\nA:"
+            
             test_queries_a_str = test_query["answer"].strip()
             # test_queries_q_str = test_queries[0]["question"]
             # test_queries_a_str = test_queries[0]["answer"]
@@ -295,7 +325,7 @@ def run(config):
 
             if config.do_generation:
                 pre_result_df = generate(
-                    test_queries_q_str, test_queries_a_str, config, trainer.model.model, tokenizer, generation_config
+                    test_queries_q_str + + (" " if hasattr(config, "add_icl") and config.add_icl else ""), test_queries_a_str, config, trainer.model.model, tokenizer, generation_config
                 )
             else:
                 pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
@@ -305,6 +335,10 @@ def run(config):
             pre_result_df.insert(1, "stage", "pre-edit")
             if question_type == "efficacy" or question_type == "ood_efficacy":
                 pre_result_df.insert(0, "question_tag", f"{question_type}_{test_query['question_type']}")
+            elif config.date_data == "ood_v2_prefilter":
+                pre_result_df.insert(0, "domain", f"{datum['domain']}")
+                pre_result_df.insert(0, "template", f"{datum['template']}")
+                pre_result_df.insert(0, "key", f"{datum['key']}")
             else:
                 pre_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
             pre_result_df.insert(0, "question_type", f"{question_type}")

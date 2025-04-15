@@ -155,9 +155,14 @@ def run(config):
 
     # pdb.set_trace()
     if config.date_data == "all_propagation_ood":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_v1.jsonl")
     elif config.date_data == "all_propagation_ood_w_ood_country":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country_v1.jsonl")
+    elif config.date_data == "all_propagation_ood_v2":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
+    elif config.date_data == "all_propagation_ood_w_ood_country_v2":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country.jsonl")
+    # else:
     # else:
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")

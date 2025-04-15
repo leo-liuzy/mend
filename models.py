@@ -158,17 +158,35 @@ def get_model(config):
 def get_tokenizer(config):
     tok_name = config.model.tokenizer_name if config.model.tokenizer_name is not None else config.model.name
     tokenizer = transformers.AutoTokenizer.from_pretrained(tok_name,)
+    # import pdb; pdb.set_trace()
     if isinstance(tokenizer, transformers.LlamaTokenizer) or "Llama" in tok_name:
         # tokenizer.pad_token_id = tokenizer.eos_token_id
         tokenizer.padding_side = "left"
     elif isinstance(tokenizer, transformers.GPT2Tokenizer) or isinstance(tokenizer, transformers.GPT2TokenizerFast):
         # tokenizer.pad_token_id = tokenizer.eos_token_id
         tokenizer.padding_side = "left"
+    elif isinstance(tokenizer, transformers.Qwen2Tokenizer) or isinstance(tokenizer, transformers.Qwen2TokenizerFast):
+        tokenizer.padding_side = "left"
     else:
         raise NotImplementedError(f"From Leo: tokenizer is out of scope `{tokenizer}`")
     # return getattr(transformers, config.model.tokenizer_class).from_pretrained(tok_name,)
     return tokenizer
 
+
+def add_padding(tokenizer, model):
+    import transformers
+    
+    if isinstance(tokenizer, transformers.Qwen2Tokenizer) or isinstance(tokenizer, transformers.Qwen2TokenizerFast):
+        # pass
+        tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        model.resize_token_embeddings(len(tokenizer))
+        
+    elif isinstance(model, transformers.LlamaForCausalLM):
+        tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        model.resize_token_embeddings(len(tokenizer))
+        # model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
+    else:
+        raise NotImplementedError(f"From Leo: tokenizer is out of scope `{tokenizer}`")
 
 if __name__ == '__main__':
     m = BertClassifier("bert-base-uncased")

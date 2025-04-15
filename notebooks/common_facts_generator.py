@@ -100,7 +100,6 @@ Each answer should be short and concise.
         # import pdb; pdb.set_trace()
         assert len(answers_) > 0
         answers = [a.strip() for a in answers_]
-            
         input["answers"] = answers
         return {**input}
     
@@ -108,10 +107,11 @@ Each answer should be short and concise.
 
 answer_generator = CommonFactsAnswerer(model_name="gpt-4o")
 
-questions = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/popular_ood_questions.jsonl")
+questions = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data_v2/country_knowledge_questions_missing2.jsonl")
 df = pd.DataFrame(questions,)
+# df = pd.read_excel(f"{vars.DATA_DIR}/debug_meta_train/ood_country_question_df_v3.xlsx")
 dataset = Dataset.from_pandas(df)
 dataset = answer_generator(dataset)
 
-dataset.save_to_disk(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/popular_ood_questions_answers.hf",)
+dataset.save_to_disk(f"{vars.DATA_DIR}/debug_meta_train/country_knowledge_questions_missing2.hf",)
 print()

@@ -14,17 +14,28 @@ score_tag_extractor = extractor.tag_content_extractor("score")
 
 from knowledge_propagation.modules.evaluators import (
     NumDiffEvaluator,
+    ExactMatchEvaluator,
 )
 year_diff_evaluator = NumDiffEvaluator()
+em_evaluator = ExactMatchEvaluator()
 
 def score_df(df):
+    em_per_example = em_evaluator.compute_metric(
+        predictions=df["predicted_answer"],
+        references=df["answer"],
+        use_aggregator=False,
+    )
+    
     diff_per_example = year_diff_evaluator.compute_metric(
         predictions=df["predicted_answer"],
         references=df["answer"],
         use_aggregator=False,
     )
 
-    model_response_w_score = df.join(pd.DataFrame({**diff_per_example}))
+    model_response_w_score = df.join(pd.DataFrame({
+        **em_per_example, 
+        # **diff_per_example,
+    }))
     
     return model_response_w_score
 
@@ -83,14 +94,14 @@ Return the numerical score wrapped in <score>..</score> tag
 llm_judge = LlmAsJudge(
     model_name="gpt-4o-mini", backend_params={"max_requests_per_minute": 30_000, "max_tokens_per_minute": 150_000_000}
 )
-fpath = "/u/zliu/datastor1/mend/debug_exp_output/Llama-3.2-1B-common-date-year-after-eos-sft-bio_syn_v2-pretrain-all_clm-baseline_lr=1e-05_epoch=4.0/all_results_ood.xlsx"
+fpath = "/u/zliu/datastor1/mend/debug_exp_output/Llama-3.2-1B-common-date-year-after-eos-sft_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/all_results_id+ood_v2_text_w-icl=True.xlsx"
 # fpath = "/u/zliu/datastor1/mend/exp_output/eos-sft_musique_propagator_text_hidden_w-atomq/musique/mend_eval_loss=clm_input=hidden_n=1000_prompt=no_w-gen_wo-icl_spec.xlsx"
 scored_df = pd.read_excel(fpath)
 scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)
 scored_df["answer"] = scored_df["answer"].astype(str)
 
-
-# scored_df = score_df(scored_df)
+scored_df = scored_df.drop(columns=["__index_level_0__"], inplace=False, errors="ignore")
+scored_df = score_df(scored_df)
 if "is_num" in scored_df.columns:
     non_numeric_df = scored_df[~scored_df["is_num"]]
 else:

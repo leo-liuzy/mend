@@ -325,7 +325,7 @@ class EditTrainer(BaseTrainer):
         elapsed = (time.time() - start_time) / (step + 1)
         prog = f"{step+1}/{steps}".ljust(20)
         acc = f"{stats['edit/acc_val']:<12.5f}"
-        if self.config.task in ["fc", "qa", "zsre", "musique", "musique_dropout", "musique_dropout_better", "musique_combiner_q", "musique_injector", "musique_combiner_text", "musique_propagator_text", "bio_syn", "bio_syn_v2", "country_syn", "ripple_edits", "ripple_edits_mend", "drop"]:
+        if self.config.task in ["fc", "qa", "zsre", "musique", "musique_dropout", "musique_dropout_better", "musique_combiner_q", "musique_injector", "musique_combiner_text", "musique_propagator_text", "bio_syn", "bio_syn_v2", "country_syn", "ripple_edits", "ripple_edits_mend", "drop",]: # country_syn_v2
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"
             draw_diff = f"{stats['acc/pre_val']-stats['acc/post_val']:<12.5f}"

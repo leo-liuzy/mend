@@ -6,7 +6,7 @@ from typing import List, Dict
 import re
 from copy import deepcopy
 import pandas as pd
-
+from glob import glob
 from bespokelabs import curator
 from datasets import Dataset
 
@@ -63,21 +63,35 @@ Return the numerical score wrapped in <score>..</score> tag
         return {**input}
 
 
+
 llm_judge = LlmAsJudge(
     model_name="gpt-4o-mini", backend_params={"max_requests_per_minute": 30_000, "max_tokens_per_minute": 150_000_000}
 )
-fpath = "/u/zliu/datastor1/mend/drop_exp_output/drop-6K_heavy_share_mid-upper3/drop/mend_eval_loss=clm_input=seen_n=100_prompt=no_w-gen_wo-icl_e_drop-question.xlsx"
+all_files = glob("/u/zliu/datastor1/mend/country_exp_out/**/*.xlsx", recursive=True)
+
+for fpath in tqdm(all_files):
+    scored_df = pd.read_excel(fpath)
+    
+    if "llm_accuracy" in scored_df.columns:
+        continue
+    
+    scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)
+    scored_df["answer"] = scored_df["answer"].astype(str)
+
+
+    scored_dataset = Dataset.from_pandas(scored_df[:])
+    scored_dataset = llm_judge(
+        scored_dataset,
+    )
+
+    scored_dataset.to_pandas().to_excel(fpath, index=False)
+
+    print(fpath)
+
+
+# from pdb import set_trace
+# set_trace()
+# fpath = "/datastor1/zliu/mend/debug_exp_output/llama3.2-1B-eos-sft/ood_v3_prefilter/base_n=1185_prompt=no_w-gen_wo-icl_ice=False.xlsx"
 # fpath = "/u/zliu/datastor1/mend/exp_output/eos-sft_musique_propagator_text_hidden_w-atomq/musique/mend_eval_loss=clm_input=hidden_n=1000_prompt=no_w-gen_wo-icl_spec.xlsx"
-scored_df = pd.read_excel(fpath)
-scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)
-scored_df["answer"] = scored_df["answer"].astype(str)
+# import pdb; pdb.set_trace()
 
-
-scored_dataset = Dataset.from_pandas(scored_df[:])
-scored_dataset = llm_judge(
-    scored_dataset,
-)
-
-scored_dataset.to_pandas().to_excel(fpath, index=False)
-
-print(fpath)

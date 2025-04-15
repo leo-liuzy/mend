@@ -40,14 +40,34 @@ rouge_evaluator = RougeEvaluator()
 llm_evaluator = OpenAIEvaluator()
 year_diff_evaluator = NumDiffEvaluator()
 
+# icl_prompt = "\n".join(
+#     [
+#         "Q: When did the simpsons first air on television?",
+#         "A: 1989",
+#         "Q: When was Jesus born?",
+#         "A: 6 to 4 BC",
+#         "Q: What year did the United State declare independence?",
+#         "A: 1776",
+#     ]
+# )
 icl_prompt = "\n".join(
     [
-        "Q: When did the simpsons first air on television?",
-        "A: 1989",
-        "Q: When was Jesus born?",
-        "A: 6 to 4 BC",
-        "Q: What year did the United State declare independence?",
-        "A: 1776",
+        "Q: Which continent is Sweden located in?",
+        "A: Europe",
+        "Q: What country is Phoenix in?",
+        "A: United States",
+        "Q: What is the capital of France?",
+        "A: Paris",
+        "Q: Which religion has the most followers in Austria?",
+        "A: Christianity",
+        "Q: Which ethnic group is the largest in India?",
+        "A: Indo-Aryan",
+        "Q: What is the currency of Colombia?",
+        "A: Colombian Peso",
+        "Q: Which country is the largest in Asia by area?",
+        "A: Russian",
+        "Q: What language has the most speakers in South Korea?",
+        "A: Korean",
     ]
 )
 
@@ -76,13 +96,19 @@ def score_df(df):
 
 def add_padding(tokenizer, model):
     import transformers
-
-    tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-    model.resize_token_embeddings(len(tokenizer))
-    if not isinstance(model, transformers.LlamaForCausalLM):
-        #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
-        # else:
-        model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
+    
+    if isinstance(tokenizer, transformers.Qwen2Tokenizer) or isinstance(tokenizer, transformers.Qwen2TokenizerFast):
+        # pass
+        tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        model.resize_token_embeddings(len(tokenizer))
+        
+    elif isinstance(model, transformers.LlamaForCausalLM):
+        tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        model.resize_token_embeddings(len(tokenizer))
+        # model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
+    else:
+        raise NotImplementedError(f"From Leo: tokenizer is out of scope `{tokenizer}`")
+        
 
 
 def add_eos(tokenizer_output, eos_token_id, ignore=False):
@@ -165,9 +191,11 @@ def run(config):
     torch.manual_seed(config.seed)
 
     model = models.get_model(config)
+    
     tokenizer = models.get_tokenizer(config)
-    add_padding(tokenizer, model)
-
+    models.add_padding(tokenizer, model)
+    model = model.to(config.device)
+    
     from data_classes.zsre import ZsreDataset
 
     train_set = ZsreDataset(
@@ -191,11 +219,19 @@ def run(config):
         bos_token_id=tokenizer.bos_token_id,
         eos_token_id=tokenizer.eos_token_id,
     )
-
-    trainer = EditTrainer(alg, config, train_set, val_set)
+    
+    # trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
     if config.date_data == "common":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl")
+    elif config.date_data == "ood_v2_prefilter":
+        # question_type = "ood_specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/ood_questions_v2.jsonl")
+        config.val_steps = 1085
+    elif config.date_data == "ood_v3_prefilter":
+        # question_type = "ood_specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data_v2/all_country_questions_prefilter.jsonl")
+        config.val_steps = 1185
     elif config.date_data == "bio_syn_v2":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
     elif config.date_data == "bio_syn_v2_ood":
@@ -206,7 +242,7 @@ def run(config):
     all_results = []
     edit_model_infos = []
     # trainer.validate(log=True)
-    assert config.val_steps <= len(val_data)
+    assert config.val_steps <= len(val_data), f"# data = {len(val_data)}"
     assert config.eval_only
 
     assert hasattr(config, "ice")
@@ -223,7 +259,7 @@ def run(config):
         # import pdb
 
         # pdb.set_trace()
-        if config.date_data == "common":
+        if any(x in config.date_data for x in [ "common", "ood_v2", "ood_v3",]):
             test_queries = [
                 {"question": datum["question"], "answer": datum["answer"]}
                 # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
@@ -244,6 +280,8 @@ def run(config):
                 test_queries_q_str = datum["text"] + "\n\n" + test_query["question"].strip()
             else:
                 test_queries_q_str = test_query["question"].strip()
+            if hasattr(config, "add_icl") and config.add_icl:
+                test_queries_q_str = icl_prompt + "\nQ: " + test_queries_q_str + "\nA:"
             test_queries_a_str = test_query["answer"].strip()
             # test_queries_q_str = test_queries[0]["question"]
             # test_queries_a_str = test_queries[0]["answer"]
@@ -271,23 +309,27 @@ def run(config):
             clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
 
             print("Input for [Q][A] Accuracy: ")
+            # import pdb; pdb.set_trace()
             print("[" + tokenizer.decode(acc_toks["input_ids"][0]) + "]")
             print("SFT label:", "[" + tokenizer.decode(sft_labels[0]) + "]")
             print("CLM label(before ShiftLeft):", "[" + tokenizer.decode(clm_labels[0]) + "]")
             print()
-            with torch.no_grad():
-                pre_edit_logits = trainer.model(
-                    input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"]
-                )
+            # with torch.no_grad():
+            #     pre_edit_logits = model(
+            #         input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"]
+            #     )
 
-                pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
-                pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
-                pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
-                pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
+            #     pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
+            #     pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
+            #     pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
+            #     pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
 
             if config.do_generation:
                 pre_result_df = generate(
-                    test_queries_q_str, test_queries_a_str, config, trainer.model.model, tokenizer, generation_config
+                    test_queries_q_str + (" " if hasattr(config, "add_icl") and config.add_icl else ""), test_queries_a_str, config, 
+                    # trainer.model.model, 
+                    model,
+                    tokenizer, generation_config
                 )
             else:
                 pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
@@ -295,12 +337,17 @@ def run(config):
 
             pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
             pre_result_df.insert(1, "stage", "pre-edit")
-            pre_result_df.insert(0, "question_tag", test_query["question_type"])
+            if any(x in config.date_data for x in ["_prefilter",]):
+                pre_result_df.insert(0, "domain", f"{datum['domain']}")
+                pre_result_df.insert(0, "template", f"{datum['template']}")
+                pre_result_df.insert(0, "key", f"{datum['key']}")
+            else:
+                pre_result_df.insert(0, "question_tag", test_query["question_type"])
             pre_result_df.insert(0, "id", str(i))
-            pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
-            pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
-            pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc EM", pre_edit_sft_em_dict["acc"].item())
-            pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc PM", pre_edit_sft_pm_dict["acc"].item())
+            # pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
+            # pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
+            # pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc EM", pre_edit_sft_em_dict["acc"].item())
+            # pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc PM", pre_edit_sft_pm_dict["acc"].item())
             all_results.append(pre_result_df)
 
     all_results = pd.concat(all_results)
@@ -311,13 +358,11 @@ def run(config):
             # using relative path
             save_dir = f"{base_dir}/{config.generation.save_dir}"
         save_dir = os.path.join(save_dir, config.date_data)
-        LOG.info(f"Saving to dir: {save_dir}")
+        fpath = f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_ice={config.ice}.xlsx"
+        LOG.info(f"Saving to dir: {fpath}")
 
         os.makedirs(save_dir, exist_ok=True)
-        all_results.to_excel(
-            f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_ice={config.ice}.xlsx",
-            index=False,
-        )
+        all_results.to_excel(fpath, index=False,)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=3
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -32,9 +32,9 @@ base_model_name="Llama-3.2-1B-common-country-eos-sft"
 # date_data="all_propagation_ood"
 # date_data="all_propagation_ood_w_ood_country"
 
-for date_data in all_propagation_ood_w_ood_country # all_propagation_ood # all_propagation_ood_w_ood_country #  
+for date_data in all_propagation_ood_v2 # all_propagation_ood_w_ood_country_v2 all_propagation_ood_w_ood_country # all_propagation_ood_w_ood_country #  
 do 
-    for example_idx in {0..55} #  47 48 49 51 52 53 54 59 71 72 {75..99} # {0..99} # {0..999}
+    for example_idx in {0..99} #  47 48 49 51 52 53 54 59 71 72 {75..99} # {0..99} # {0..999}
     do
 
     for text_data in "text" 

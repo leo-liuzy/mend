@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=4
+export CUDA_VISIBLE_DEVICES=2
 
 declare -A name2id=(
     # metatrain debug on date data
@@ -7,6 +7,8 @@ declare -A name2id=(
 
     [common-country_3K_heavy_noshare_top3]=2025-03-22_19-48-59_4148028265
     [common-country_3K_heavy_noshare_mid-upper3]=2025-03-22_19-48-59_3832569414
+    [common-country_10K_heavy_noshare_mid-upper3]=2025-04-06_22-50-37_605477324
+    [common-country_100K_heavy_noshare_mid-upper3]=2025-04-07_00-32-21_5897704671
 
     [common-country_3K_light_share_top3]=2025-03-22_19-42-08_988540734
     [common-country_3K_light_share_mid-upper3]=2025-03-22_19-42-09_0177528181
@@ -20,13 +22,13 @@ n_val=100
 prompt=no
 task=country_syn
 
-exp_dir_name=common-country_3K_light_share_mid-upper3
+exp_dir_name=common-country_3K_heavy_share_mid-upper3
 archive=${name2id[$exp_dir_name]}
 
-for date_data in all_propagation_ood all_propagation_ood_w_ood_country
+for date_data in all_propagation_ood_v2 all_propagation_ood_w_ood_country_v2
 do
 
-python run_mend_edit_country_ood.py +alg=mend +experiment=${task} +model=llama3.2-1B-common-country-eos-sft-mid-upper archive=${archive} eval_only=True generation.save_dir=debug_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=False +date_data=${date_data} # mend.shared=False
+python run_mend_edit_country_ood.py +alg=mend +experiment=${task} +model=llama3.2-1B-common-country-eos-sft-mid-upper archive=${archive} eval_only=True generation.save_dir=debug_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=False +date_data=${date_data} #  mend.shared=False
 
 # python run_mend_edit_country_ood.py +alg=mend +experiment=${task} +model=llama3.2-1B-common-country-eos-sft archive=${archive} eval_only=True generation.save_dir=debug_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=False +date_data=${date_data} mend.shared=False
 
