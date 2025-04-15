@@ -36,14 +36,11 @@ archive=${name2id[$exp_dir_name]}
 # base_model_name=llama3.2-1B-instruct
 # base_model_name=llama3.2-1B-common-date-year-after-eos-sft-bio_syn_v2-pretrain-top3
 # base_model_name=llama3.2-1B-common-date-year-after-eos-sft
-<<<<<<< HEAD
-=======
 # base_model_name=llama3.2-1B-common-date-year-after-eos-sft
 # base_model_name=llama3.2-1B
 # base_model_name=llama3.2-1B-common-country-eos-sft
 # base_model_name=llama3.2-1B-eos-sft-country-template-format-lr2e-6
 # base_model_name=qwen2.5-1.5B
->>>>>>> 0c016a62e78375e79ec65681f8236da8fb730494
 # base_model_name=llama3.2-1B-eos-sft
 # sft(q_p, a_p)
 # python run_base_generate_datedata_v2_ood.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=debug_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +ice=False +date_data=bio_syn_v2_ood_v2
