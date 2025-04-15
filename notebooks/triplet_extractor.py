@@ -94,9 +94,9 @@ Only return the context and the object wrapped in <context>..</context> and <obj
         input["paraphrase"] = paraphrase
         input["object"] = obj
         input["subject"] = sub
-        # import pdb
+        import pdb
 
-        # pdb.set_trace()
+        pdb.set_trace()
         # assert obj in input["prompt"]
         # assert subject in input["prompt"]
 

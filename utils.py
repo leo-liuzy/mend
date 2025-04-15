@@ -34,14 +34,15 @@ class EditLoss(StrEnum):
     sft = "sft"
 
     clm = "clm"
-    
+
+
 class EditInput(StrEnum):
     question = "question"
 
     two_doc = "2doc"
-    
+
     single_doc = "1doc"
-    
+
 
 def _inner_params(named_parameters, inner_names):
     param_dict = dict(named_parameters)
@@ -67,7 +68,7 @@ def scr():
 
 def uuid(digits=4):
     if not hasattr(uuid, "uuid_value"):
-        uuid.uuid_value = struct.unpack('I', os.urandom(4))[0] % int(10**digits)
+        uuid.uuid_value = struct.unpack("I", os.urandom(4))[0] % int(10**digits)
 
     return uuid.uuid_value
 
@@ -137,13 +138,16 @@ def load_archive(path):
         # We've not passed an explicit path, but a part of the filename
         wd = hydra.utils.get_original_cwd()
         # directories = ["outputs", "multirun"]
-        directories = ["outputs",]
+        directories = [
+            "outputs",
+        ]
         matches = []
         for d in directories:
             search = os.path.join(wd, d)
             for run_dir in os.listdir(search):
                 if path in run_dir:
                     matches.append(os.path.join(search, run_dir))
+
         assert len(matches) == 1, f">1 matches for search {path}; specify exact path"
 
         full_run_dir = matches[0]
@@ -151,10 +155,9 @@ def load_archive(path):
             full_run_dir = os.path.join(full_run_dir, "0")
         models_dir = os.path.join(full_run_dir, "models")
         models = os.listdir(models_dir)
-        non_bk = [m for m in models if not m.endswith(".bk")]
-        assert (
-            len(non_bk) == 1
-        ), f"Expected a single model in {models_dir}, got {len(non_bk)}"
+        # non_bk = [m for m in models if not m.endswith(".bk")]
+        non_bk = [m for m in models if ".bk" not in m]
+        assert len(non_bk) == 1, f"Expected a single model in {models_dir}, got {len(non_bk)}"
         path = os.path.join(models_dir, non_bk[0])
 
     LOG.info(f"Loading checkpoint from {path}")
@@ -254,9 +257,7 @@ class EditBatchSampler:
         self.edit_position = 0
 
     def sample(self, batch_size):
-        assert (
-            batch_size > self.n_edits
-        ), "Batch size is interpreted such that batch_size = n_edits + n_loc"
+        assert batch_size > self.n_edits, "Batch size is interpreted such that batch_size = n_edits + n_loc"
 
         if self.memorize_mode:
             return list(range(self.n_edits)), list(range(batch_size - self.n_edits))
@@ -264,7 +265,7 @@ class EditBatchSampler:
         if self.edit_position >= self.n:
             self._init()
 
-        edit_idxs = self.perm[self.edit_position: self.edit_position + self.n_edits]
+        edit_idxs = self.perm[self.edit_position : self.edit_position + self.n_edits]
         self.edit_position += self.n_edits
 
         loc_idxs = self.rng.choice(self.n, batch_size - self.n_edits)
@@ -276,7 +277,7 @@ class EditBatchSampler:
 
 
 def parent_module(model, pname):
-    comps = pname.split('.')
+    comps = pname.split(".")
     parent = model
     for comp in comps[:-1]:
         if hasattr(parent, comp):
@@ -289,8 +290,9 @@ def parent_module(model, pname):
     return parent
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import random
+
     stopper = EarlyStopper(1000, "loss/edit")
 
     data = [(100 * idx, {"loss/edit": 2 ** (1 - idx / 10) + random.random()}) for idx in range(100)]
@@ -298,4 +300,3 @@ if __name__ == '__main__':
     for d in data:
         stopper.update(*d)
         print(stopper.current_iter, stopper.should_stop(), stopper.best_iter, d[1]["loss/edit"])
-

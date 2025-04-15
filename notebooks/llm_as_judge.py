@@ -66,9 +66,13 @@ Return the numerical score wrapped in <score>..</score> tag
 llm_judge = LlmAsJudge(
     model_name="gpt-4o-mini", backend_params={"max_requests_per_minute": 30_000, "max_tokens_per_minute": 150_000_000}
 )
-all_files = glob("/u/zliu/datastor1/mend/country_exp_out/**/*.xlsx", recursive=True)
+# all_files = glob("/u/zliu/datastor1/mend/country_exp_out/**/*.xlsx", recursive=True)
 
-for fpath in tqdm(all_files):
+for fpath in tqdm(
+    [
+        "/data/users/zliu/mend/ripple_exp_output/ripple_edits_recent+popular_heavy-noshare-mid4-lower3/ripple_edits/mend_eval_loss=clm_input=seen_n=200_prompt=no_w-gen_wo-icl_e+s_recent+popular-question.xlsx"
+    ]
+):
     scored_df = pd.read_excel(fpath)
 
     if "llm_accuracy" in scored_df.columns:
