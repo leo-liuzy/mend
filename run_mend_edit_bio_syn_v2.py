@@ -110,7 +110,9 @@ def run(config):
     # pdb.set_trace()
     if config.date_data == "all_propagation":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
-    # else:
+    else:
+        raise ValueError(f"date_data `{config.date_data}` is not supported")
+    
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
     if config.spec_question:

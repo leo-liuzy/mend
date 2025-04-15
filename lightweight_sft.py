@@ -31,7 +31,8 @@ def prepare_sft_text(args, dataset: list, tokenizer):
 
 parser = HfArgumentParser((SFTConfig,))
 (args,) = parser.parse_args_into_dataclasses()
-model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B"
+# model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B"
+model_name_or_path = "/u/zliu/datastor1/mend/models/Llama-3.2-1B-eos-sft"
 
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False)
@@ -59,14 +60,17 @@ assert tokenizer.eos_token_id != tokenizer.pad_token_id
 # )
 
 train_dataset = prepare_sft_text(
-    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl"), tokenizer
+    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/llama3.2-1B-eos-sft_country_templates_format_training_v2.jsonl"), tokenizer
 )
-valid_dataset = prepare_sft_text(
-    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl"), tokenizer
-)
+# train_dataset = prepare_sft_text(
+#     args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl"), tokenizer
+# )
+# valid_dataset = prepare_sft_text(
+#     args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl"), tokenizer
+# )
 
 train_dataset = Dataset.from_list(train_dataset)
-valid_dataset = Dataset.from_list(valid_dataset)
+# valid_dataset = Dataset.from_list(valid_dataset)
 
 response_template = "?"  # tokenizer.additional_special_tokens[0] # "?" alternative "Ġ?"
 
@@ -75,7 +79,7 @@ collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenize
 trainer = SFTTrainer(
     model,
     train_dataset=train_dataset,  # type: ignore
-    eval_dataset=valid_dataset,  # type: ignore
+    # eval_dataset=valid_dataset,  # type: ignore
     args=args,
     data_collator=collator,
 )
@@ -87,3 +91,4 @@ trainer.model.resize_token_embeddings(original_vocab_size)
 trainer.model.save_pretrained(save_directory=args.output_dir)
 
 trainer.accelerator.wait_for_everyone()
+

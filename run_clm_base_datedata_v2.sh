@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=2
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -20,8 +20,13 @@ epoch=4
 
 # second-1hop
 
-tunable_params="midupper3-mlp"
+tunable_params="all"
+# tunable_params="midupper3-mlp"
+# base_model_name="Llama-3.2-1B-common-date-year-after-eos-sft-bio_syn_v2-pretrain-all"
+base_model_name="Llama-3.2-1B-common-date-year-after-eos-sft"
 
+for date_data in all_propagation_ood_v2
+do
 for example_idx in {0..99} # {0..999}
 do
 
@@ -31,7 +36,7 @@ echo "Example idx: ${example_idx}"
 
 # accelerate launch --config_file="fsdp_config.yaml" \
     # --main_process_port 29700 \
-python clm_baseline_datedata_v2.py \
+python clm_baseline_datedata_v2_ood.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
     --learning_rate=${lr} \
@@ -54,10 +59,13 @@ python clm_baseline_datedata_v2.py \
     --run_name="propagator-clm-baseline" \
     --example_idx=${example_idx} \
     --report_to="none" \
-    --spec_question=True \
-    --date_data="all_propagation" \
+    --spec_question=False \
+    --base_model_name=${base_model_name} \
+    --date_data=${date_data} \
     --text_data=${text_data} \
+    --add_icl=True \
     --tunable_params=${tunable_params} 
     
+done
 done
 done

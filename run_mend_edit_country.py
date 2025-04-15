@@ -110,9 +110,11 @@ def run(config):
     # pdb.set_trace()
     if config.date_data == "all_propagation":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
-    elif config.date_data == "all_propagation_ood":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
-    # else:
+    elif config.date_data == "all_propagation_w_ood_country":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_w_ood_country.jsonl")
+    else:
+        raise ValueError(f"Unknown date_data: {config.date_data}")
+    
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
     if config.spec_question:

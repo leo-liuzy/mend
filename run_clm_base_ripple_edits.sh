@@ -25,7 +25,16 @@ tunable_params="midupper3-mlp"
 # base_model_name="Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-all"
 base_model_name="Llama-3.2-1B-eos-sft"
 
+<<<<<<< HEAD
 for example_idx in {0..200} # {0..999}
+=======
+tunable_params="midupper3-mlp"
+# tunable_params="all"
+# base_model_name="Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-all"
+base_model_name="Llama-3.2-1B-eos-sft"
+
+for example_idx in {0..150} # {0..999}
+>>>>>>> 0c016a62e78375e79ec65681f8236da8fb730494
 do
 
 echo "Example idx: ${example_idx}"

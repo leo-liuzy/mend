@@ -267,7 +267,6 @@ args.per_device_train_batch_size = len(train_dataset)
 # valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
 if custom_cfg.tunable_params != "all":
-    os.makedirs(delta_params_save_dir, exist_ok=True)
     if custom_cfg.tunable_params == "top3-mlp":
         params = [
             "model.layers.13.mlp.gate_proj.weight",
@@ -297,7 +296,7 @@ if custom_cfg.tunable_params != "all":
     original_params = {}
     for n, param in model.named_parameters():
         if any(p in n for p in params):
-            original_params[n] = param.clone().cpu()
+            original_params[n] = param.clone()
             param.requires_grad = True
         else:
             param.requires_grad = False
@@ -325,12 +324,12 @@ if custom_cfg.tunable_params != "all":
     delta_params = {}
     for n, param in model.named_parameters():
         if any(p in n for p in params):
-            delta_params[n] = param.clone().cpu() - original_params[n]
+            import pdb
+
+            pdb.set_trace()
+            delta_params[n] = param - original_params[n]
         else:
             param.requires_grad = False
-
-    torch.save(delta_params, f"{delta_params_save_dir}/{custom_cfg.example_idx}_{custom_cfg.tunable_params}.pt")
-
 # clear internal pointer in trainer/accelerator
 trainer.accelerator.free_memory(trainer.model, trainer.optimizer, trainer.lr_scheduler)
 del trainer.model, trainer.optimizer, trainer.lr_scheduler

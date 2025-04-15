@@ -210,11 +210,15 @@ os.makedirs(exp_save_dir, exist_ok=True)
 
 
 if custom_cfg.date_data == "all_propagation":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}"
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_w-ood_{custom_cfg.text_data}"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
-if custom_cfg.date_data == "all_propagation_ood":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_ood_{custom_cfg.text_data}"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
+    ood_cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl"
+    )
+elif custom_cfg.date_data == "all_propagation_w_ood_country":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_ood_country_w-ood_{custom_cfg.text_data}"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_w_ood_country.jsonl")
+    ood_cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_w_ood_country.jsonl")
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
@@ -341,6 +345,8 @@ question_types = [
     # ("efficacy", [{"question": instance["question"], "answer": instance["answer"]}]),
     ("efficacy", instance["questions"]),
 ]
+# import pdb
+# pdb.set_trace()
 if custom_cfg.spec_question:
     question_types.append(("specificity", spec_dev_dataset))
 
@@ -349,7 +355,8 @@ logging.info("Start evaluating model: Generation, Accuracy")
 all_result_df = []
 for question_type, questions in question_types:
     logging.info(f"Question type: {question_type}")
-
+    # import pdb
+    # pdb.set_trace()
     for q_i, question in tqdm(enumerate(questions), total=len(questions)):
         test_queries_q_str = question["question"]
         test_queries_a_str = question["answer"]

@@ -110,7 +110,7 @@ def run(config):
 
     # pdb.set_trace()
     if config.date_data == "recent+popular":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits_recent+popular/meta_train/test_mend.jsonl")
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test_mend.jsonl")
     elif config.date_data == "recent":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_mend.jsonl")
     else:

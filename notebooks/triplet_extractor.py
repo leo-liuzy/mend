@@ -101,7 +101,7 @@ Only return the context and the object wrapped in <context>..</context> and <obj
 
 # dataset.save_to_disk("/u/zliu/datastor1/KE-by-CP/data/debug_meta_train/country_data/common_cities_generation.hf",)
 split = "test"
-test_instances = list(io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/{split}.jsonl"))
+test_instances = list(io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/{split}.jsonl"))
 
 triplet_extractor = PrefixSplit(
     model_name="gpt-4o",
@@ -119,7 +119,7 @@ new_ds = triplet_extractor(
     dataset,
 )
 new_ds.save_to_disk(
-    f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/{split}_w_prefix.hf",
+    f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/{split}_w_prefix.hf",
 )
 
 

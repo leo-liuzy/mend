@@ -66,6 +66,7 @@ countries = [
 
 
 city_extractor = extractor.tag_content_extractor("city")
+country_extractor = extractor.tag_content_extractor("country")
 continent_extractor = extractor.tag_content_extractor("continent")
     
 class CommonCitiesGenerator(curator.LLM):
@@ -106,6 +107,25 @@ Only return continent name wrapped in <continent>..</continent> tag.
         input["continent"] = continent
         
         return {**input}
+
+class CountryGenerator(curator.LLM):
+    PROMPT : str = """
+Which country is {city} located in?
+
+Only return country name wrapped in <country>..</country> tag.
+    """.strip()
+    def prompt(self, input: dict) -> str:
+        """Generate a prompt for the subsubject generator."""
+        return self.PROMPT.format(city=input["city"],)
+
+    def parse(self, input: dict, response: str) -> dict:
+        """Parse the model response along with the input to the model into the desired output format.."""
+        country_ = country_extractor(response)
+        assert len(country_) == 1
+        country = country_[0].strip()
+        input["country"] = country
+        # import pdb; pdb.set_trace()
+        return {**input}
     
 
 
@@ -117,14 +137,20 @@ Only return continent name wrapped in <continent>..</continent> tag.
 
 # dataset.save_to_disk("/u/zliu/datastor1/KE-by-CP/data/debug_meta_train/country_data/common_cities_generation.hf",)
 
-continent_generator = ContinentGenerator(model_name="gpt-4o")
-split = "valid"
-country_train_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/{split}.jsonl")
-city_country_pairs = [d["(city, country)"] for d in country_train_data]
-common_countries = list(set([cc[1] for cc in city_country_pairs]))
-df = pd.DataFrame(common_countries, columns=["country"])
+# continent_generator = ContinentGenerator(model_name="gpt-4o")
+# split = "valid"
+# country_train_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/{split}.jsonl")
+# city_country_pairs = [d["(city, country)"] for d in country_train_data]
+# common_countries = list(set([cc[1] for cc in city_country_pairs]))
+# df = pd.DataFrame(common_countries, columns=["country"])
+# dataset = Dataset.from_pandas(df)
+# continent_generator(dataset).save_to_disk(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/continent_generation_{split}.hf",)
+
+country_generator = CountryGenerator(model_name="gpt-4o")
+cities = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_birth_cities.jsonl")
+df = pd.DataFrame(cities, columns=["city"])
 dataset = Dataset.from_pandas(df)
-continent_generator(dataset).save_to_disk(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/continent_generation_{split}.hf",)
+country_generator(dataset).save_to_disk(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_birth_country.hf",)
 
 
 print()

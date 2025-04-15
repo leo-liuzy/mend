@@ -289,6 +289,29 @@ def run(config):
         )
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
+    elif config.task == "qa" or config.task == "country_syn_v2":
+        add_padding(tokenizer, model)
+        from data_classes.bio_syn_v2 import BioSynDataset
+
+        assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
+        sub_data_dir = f"n_template_{config.n_template}_n_seen_pairs_{config.n_seen_pair}"
+        config.dataset += f"-{config.train_set_size}-({config.n_template}, {config.n_seen_pair})"
+        train_set = BioSynDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/country_syn_data_v2/{sub_data_dir}/train.jsonl",
+            config,
+            size=config.train_set_size,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = BioSynDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/country_syn_data_v2/{sub_data_dir}/valid.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+            is_eval=True,
+        )
+        LOG.info(f"train_set size: {len(train_set)}")
+        LOG.info(f"val_set size: {len(val_set)}")
     elif config.task == "qa" or config.task == "ripple_edits":
         add_padding(tokenizer, model)
         from data_classes.ripple_edits import RippleEditsDataset
@@ -296,14 +319,16 @@ def run(config):
         assert hasattr(config, "train_set_size"), "ripple_edits config must be provided"
         train_set = RippleEditsDataset(
             tokenizer,
-            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/train.jsonl",
+            # f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/train.jsonl",
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/train.jsonl",
             config,
             size=config.train_set_size,
             max_length=tokenizer.model_max_length,
         )
         val_set = RippleEditsDataset(
             tokenizer,
-            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid.jsonl",
+            # f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid.jsonl",
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/valid.jsonl",
             config,
             max_length=tokenizer.model_max_length,
             is_eval=True,
@@ -317,13 +342,15 @@ def run(config):
         # assert hasattr(config, "train_set_size"), "ripple_edits config must be provided"
         train_set = RippleEditsMENDDataset(
             tokenizer,
-            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/train_mend.jsonl",
+            # f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/train_mend.jsonl",
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/train_mend.jsonl",
             config,
             max_length=tokenizer.model_max_length,
         )
         val_set = RippleEditsMENDDataset(
             tokenizer,
-            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid_mend.jsonl",
+            # f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid_mend.jsonl",
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/valid_mend.jsonl",
             config,
             max_length=tokenizer.model_max_length,
         )
