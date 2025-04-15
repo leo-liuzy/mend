@@ -46,6 +46,9 @@ class BaseTrainer:
             self.opt = self.OptimizerClass(self.model.outer_parameters(), lr=config.lr)
 
         if config.archive is not None:
+            # import pdb
+
+            # pdb.set_trace()
             archive, config.archive = utils.load_archive(str(config.archive))
             # import pdb; pdb.set_trace()
             self.model.load_state_dict(archive["model"])

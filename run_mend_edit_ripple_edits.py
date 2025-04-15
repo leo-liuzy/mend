@@ -110,7 +110,7 @@ def run(config):
 
     # pdb.set_trace()
     if config.date_data == "recent+popular":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits_recent+popular/meta_train/test.jsonl")
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test.jsonl")
     elif config.date_data == "recent":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test.jsonl")
     else:
@@ -189,32 +189,32 @@ def run(config):
             ("specificity", locality_queries),
         ]
 
-        for question_type, questions in question_types:
-            logging.info(f"Question type: {question_type}")
+        # for question_type, questions in question_types:
+        #     logging.info(f"Question type: {question_type}")
 
-            for q_i, question in enumerate(questions):
-                answer_candidates = [a["value"] for a in question["answers"]]
-                answer = answer_candidates[0]
+        #     for q_i, question in enumerate(questions):
+        #         answer_candidates = [a["value"] for a in question["answers"]]
+        #         answer = answer_candidates[0]
 
-                pre_result_df = get_eval_result(
-                    question=question["prompt"],
-                    answer=answer,
-                    model=trainer.model.model,
-                    tokenizer=tokenizer,
-                    config=config,
-                    generation_config=generation_config,
-                )
-                pre_result_df.insert(0, "stage", "pre-edit")
-                pre_result_df.insert(
-                    0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
-                )
-                pre_result_df.insert(0, "relation", f"{question['relation']}")
-                pre_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
-                pre_result_df.insert(0, "question_type", question_type)
-                pre_result_df.insert(0, "id", str(i))
-                # import pdb
-                # pdb.set_trace()
-                all_datum_result_df.append(pre_result_df)
+        #         pre_result_df = get_eval_result(
+        #             question=question["prompt"],
+        #             answer=answer,
+        #             model=trainer.model.model,
+        #             tokenizer=tokenizer,
+        #             config=config,
+        #             generation_config=generation_config,
+        #         )
+        #         pre_result_df.insert(0, "stage", "pre-edit")
+        #         pre_result_df.insert(
+        #             0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
+        #         )
+        #         pre_result_df.insert(0, "relation", f"{question['relation']}")
+        #         pre_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
+        #         pre_result_df.insert(0, "question_type", question_type)
+        #         pre_result_df.insert(0, "id", str(i))
+        #         # import pdb
+        #         # pdb.set_trace()
+        #         all_datum_result_df.append(pre_result_df)
 
         # edit the model with MEND
         edited_model, model_info = trainer.model.edit(edit_inner)
@@ -265,8 +265,6 @@ def run(config):
             # using relative path
             save_dir = f"{base_dir}/{config.generation.save_dir}"
 
-        LOG.info(f"Saving to dir: {save_dir}")
-
         os.makedirs(save_dir, exist_ok=True)
         fpath = (
             f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
@@ -274,6 +272,7 @@ def run(config):
             + f"_{config.date_data}-question"
             + ".xlsx"
         )
+        LOG.info(f"Saving to dir: {fpath}")
 
         all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(
