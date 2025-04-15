@@ -62,10 +62,10 @@ class BaseTrainer:
         with open(os.getcwd() + "/config.json", "w") as f:
             json.dump(OmegaConf.to_container(config), f)
 
-        model_dir = os.path.join(os.getcwd(), 'models')
+        model_dir = os.path.join(os.getcwd(), "models")
         if not (self.config.debug and not self.config.save) and not config.eval_only:
             os.makedirs(model_dir)
-        run_date = os.getcwd().split('/')[-1]
+        run_date = os.getcwd().split("/")[-1]
         self.run_date = run_date
         safe_model_name = self.config.model.name.split("/")[-1]  # Make sure no slashes
         self.save_path = f"{model_dir}/{safe_model_name}.{run_date}"
@@ -75,14 +75,14 @@ class BaseTrainer:
             wandb_name = f"{self.config.dataset} - {self.config.alg} - {safe_model_name} - {run_date}"
             if self.config.ref is not None:
                 wandb_name += f" - {self.config.ref}"
-            LOG.info(f"Writing wandb run \"{wandb_name}\" to {wandb_dir}")
+            LOG.info(f'Writing wandb run "{wandb_name}" to {wandb_dir}')
             wandb.init(
                 project="mend",
                 entity="leo-liuzy",
                 config=utils.flatten_dict(self.config),
                 name=wandb_name,
                 dir=wandb_dir,
-                tags=[self.config.ref] if self.config.ref is not None else None
+                tags=[self.config.ref] if self.config.ref is not None else None,
             )
 
         self.start_time = formatted_timestamp()
@@ -98,7 +98,7 @@ class BaseTrainer:
             "val_stats": stats,
             "start_time": self.start_time,
             "elapsed_time": time_delta_seconds(self.start_time),
-            "step": self.global_iter
+            "step": self.global_iter,
         }
         LOG.info(f"Saving model to {self.save_path}")
 
@@ -116,6 +116,7 @@ class BaseTrainer:
 
             def key_format(k):
                 return k.ljust(20) if pretty else k
+
             LOG.info(f"Step {train_step}:")
             LOG.info(sep.join([f"{key_format(k)}: {v: 0.5f}" for k, v in info_dict.items()]))
 
@@ -223,16 +224,22 @@ class EditTrainer(BaseTrainer):
             # Editing loss
             # ! original line: `post_edit_logits = edited_model(**batch["edit_outer"])`
             if self.config.l_e_data == "rephrase":
-                post_edit_logits = edited_model(input_ids=batch["edit_outer"]["input_ids"], attention_mask=batch["edit_outer"]["attention_mask"])
+                post_edit_logits = edited_model(
+                    input_ids=batch["edit_outer"]["input_ids"], attention_mask=batch["edit_outer"]["attention_mask"]
+                )
                 l_edit = self.model.edit_loss_fn(post_edit_logits, batch["edit_outer"]["labels"])["nll"]
             else:
                 assert self.config.l_e_data == "source"
-                post_edit_logits = edited_model(input_ids=batch["edit_inner"]["input_ids"], attention_mask=batch["edit_inner"]["attention_mask"])
+                post_edit_logits = edited_model(
+                    input_ids=batch["edit_inner"]["input_ids"], attention_mask=batch["edit_inner"]["attention_mask"]
+                )
                 l_edit = self.model.edit_loss_fn(post_edit_logits, batch["edit_inner"]["labels"])["nll"]
 
             # Locality loss
             # ! original line: `post_base_logits = edited_model(**batch["loc"])`
-            post_base_logits = edited_model(input_ids=batch["loc"]["input_ids"], attention_mask=batch["loc"]["attention_mask"])
+            post_base_logits = edited_model(
+                input_ids=batch["loc"]["input_ids"], attention_mask=batch["loc"]["attention_mask"]
+            )
             kl_mask = batch["loc"].get("decoder_attention_mask", batch["loc"]["attention_mask"])
             l_loc = kl_loc_loss(base_logits.detach(), post_base_logits, mask=kl_mask)
 
@@ -240,7 +247,7 @@ class EditTrainer(BaseTrainer):
 
         if training:
             safe_backward(l_total_edit, self.model.outer_parameters(), self.config.accumulate_bs, allow_unused=True)
-        
+
         # ! Leo: we no longer need l_total_edit for gradient
         l_total_edit = l_total_edit.detach()
         # Collect some useful metrics
@@ -257,11 +264,11 @@ class EditTrainer(BaseTrainer):
             del base_logits
 
         info_dict = {}
-        info_dict['loss/edit'] = l_edit.item()
-        info_dict['loss/loc'] = l_loc.item()
-        info_dict['edit/acc'] = post_edit_dict["acc"].item()
-        info_dict['edit/log_prob'] = post_edit_dict["log_prob"].item()
-        info_dict['edit/prob'] = post_edit_dict["prob"].item()
+        info_dict["loss/edit"] = l_edit.item()
+        info_dict["loss/loc"] = l_loc.item()
+        info_dict["edit/acc"] = post_edit_dict["acc"].item()
+        info_dict["edit/log_prob"] = post_edit_dict["log_prob"].item()
+        info_dict["edit/prob"] = post_edit_dict["prob"].item()
         info_dict["acc/pre"] = pre_loc_dict["acc"].item()
         info_dict["acc/post"] = post_loc_dict["acc"].item()
         info_dict["nll/pre"] = pre_loc_dict["nll"].item()
@@ -284,12 +291,12 @@ class EditTrainer(BaseTrainer):
 
             # ! Leo: we no longer need l_total_edit for gradient
             l_base = l_base.detach()
-            info_dict['loss/base'] = l_base.item()
-            info_dict['nll/original'] = original_loc_dict["nll"].item()
-            info_dict['acc/original'] = original_loc_dict["acc"].item()
+            info_dict["loss/base"] = l_base.item()
+            info_dict["nll/original"] = original_loc_dict["nll"].item()
+            info_dict["acc/original"] = original_loc_dict["acc"].item()
             info_dict["n_tokens/original"] = original_loc_dict["n_tokens"]
         else:
-            l_base = torch.tensor(0.)
+            l_base = torch.tensor(0.0)
 
         l_total = l_total_edit + self.config.cbase * l_base
 
@@ -305,9 +312,10 @@ class EditTrainer(BaseTrainer):
         l_total, l_edit, l_loc, l_base, info_dict = self.edit_step(next(self.edit_gen), training=True)
 
         if self.global_iter > 0 and self.global_iter % self.config.accumulate_bs == 0:
-            grad = torch.nn.utils.clip_grad_norm_(self.model.outer_parameters(), self.config.grad_clip,
-                                                  error_if_nonfinite=True)
-            info_dict['grad'] = grad.item()
+            grad = torch.nn.utils.clip_grad_norm_(
+                self.model.outer_parameters(), self.config.grad_clip, error_if_nonfinite=True
+            )
+            info_dict["grad"] = grad.item()
 
             self.opt.step()
             self.opt.zero_grad()
@@ -317,7 +325,7 @@ class EditTrainer(BaseTrainer):
                 self.lr_opt.zero_grad()
 
                 for lr_idx, lr in enumerate(self.model.edit_lrs):
-                    info_dict[f'lr/lr{lr_idx}'] = lr.item()
+                    info_dict[f"lr/lr{lr_idx}"] = lr.item()
 
         return info_dict
 
@@ -325,7 +333,24 @@ class EditTrainer(BaseTrainer):
         elapsed = (time.time() - start_time) / (step + 1)
         prog = f"{step+1}/{steps}".ljust(20)
         acc = f"{stats['edit/acc_val']:<12.5f}"
-        if self.config.task in ["fc", "qa", "zsre", "musique", "musique_dropout", "musique_dropout_better", "musique_combiner_q", "musique_injector", "musique_combiner_text", "musique_propagator_text", "bio_syn", "bio_syn_v2", "country_syn", "ripple_edits", "ripple_edits_mend", "drop"]:
+        if self.config.task in [
+            "fc",
+            "qa",
+            "zsre",
+            "musique",
+            "musique_dropout",
+            "musique_dropout_better",
+            "musique_combiner_q",
+            "musique_injector",
+            "musique_combiner_text",
+            "musique_propagator_text",
+            "bio_syn",
+            "bio_syn_v2",
+            "country_syn",
+            "ripple_edits",
+            "ripple_edits_mend",
+            "drop",
+        ]:
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"
             draw_diff = f"{stats['acc/pre_val']-stats['acc/post_val']:<12.5f}"
@@ -338,7 +363,9 @@ class EditTrainer(BaseTrainer):
         else:
             raise RuntimeError(f"Didn't recognize task {self.config.task}")
 
-        LOG.info(f"Step {prog} edit: {acc} {dn}_pre: {draw_pre} {dn}_post: {draw_post} {dn}_delta: {draw_diff} it_time: {elapsed:.4f}")
+        LOG.info(
+            f"Step {prog} edit: {acc} {dn}_pre: {draw_pre} {dn}_post: {draw_post} {dn}_delta: {draw_diff} it_time: {elapsed:.4f}"
+        )
 
     def validate(self, steps=None, log: bool = False):
         if steps is None or steps > len(self.val_set):

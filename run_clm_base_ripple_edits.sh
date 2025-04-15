@@ -19,13 +19,13 @@ lr=1e-5
 epoch=4
 
 # second-1hop
+data="recent+popular"
+tunable_params="midupper3-mlp"
+# tunable_params="all"
+# base_model_name="Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-all"
+base_model_name="Llama-3.2-1B-eos-sft"
 
-# tunable_params="midupper3-mlp"
-tunable_params="all"
-base_model_name="Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-all"
-# base_model_name="Llama-3.2-1B-eos-sft"
-
-for example_idx in {0..150} # {0..999}
+for example_idx in {0..200} # {0..999}
 do
 
 echo "Example idx: ${example_idx}"
@@ -56,7 +56,7 @@ python clm_baseline_ripple_edits.py \
     --example_idx=${example_idx} \
     --report_to="none" \
     --spec_question=True \
-    --date_data="recent" \
+    --date_data=${data} \
     --tunable_params=${tunable_params} \
     --base_model_name=${base_model_name} \
 
