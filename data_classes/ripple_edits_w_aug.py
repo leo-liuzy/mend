@@ -112,16 +112,9 @@ class RippleEditsDataset(Dataset):
             loc_answers = [np.random.choice(candidates) for candidates in loc_answers_candidates]
             loc_answers = [("" if ans_[0] == " " else " ") + ans_ for ans_ in loc_answers]
             loc_questions = [q_ + ans_ for q_, ans_ in zip(loc_questions, loc_answers)]
-            if self.config.all_propagation_in_outerloop:
-                if len(outerloop_queries) == 0:
-                    output["outer_questions"] = []
-                    output["outer_answers"] = []
-                
-                output["outer_questions"] += loc_questions
-                output["outer_answers"] += loc_answers
-            else:
-                output["loc_questions"] = loc_questions
-                output["loc_answers"] = loc_answers
+        
+            output["loc_questions"] = loc_questions
+            output["loc_answers"] = loc_answers
         return output
 
     def collate_fn(self, batch):
@@ -136,7 +129,6 @@ class RippleEditsDataset(Dataset):
             [b["alt"] for b in batch[-ne:]]
         )
         """
-        
         if "outer_questions" in batch[0]:
             outer_answers = [s for b in batch for s in b["outer_answers"]]
             outer_questions = [s for b in batch for s in b["outer_questions"]]

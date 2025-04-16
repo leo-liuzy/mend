@@ -103,6 +103,8 @@ def run(config):
     assert hasattr(config, "date_data")
 
     if config.date_data == "recent":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_mend.jsonl")
+    elif config.date_data == "recent+popular":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_aug.jsonl")
     else:
         raise NotImplementedError("Only all_propagation is supported for date_data")

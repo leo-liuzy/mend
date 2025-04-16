@@ -276,6 +276,7 @@ def run(config):
             + f"_{config.date_data}-question"
             + ".xlsx"
         )
+        LOG.info(f"Saving to dir: {fpath}")
 
         all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(

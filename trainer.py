@@ -353,7 +353,9 @@ class EditTrainer(BaseTrainer):
             "ripple_edits",
             "ripple_edits_mend",
             "drop",
-        ]:  # country_syn_v2
+            "country_syn_v2",
+            "ripple_edits_w_aug",
+        ]:  
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"
             draw_diff = f"{stats['acc/pre_val']-stats['acc/post_val']:<12.5f}"
