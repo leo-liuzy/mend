@@ -16,7 +16,7 @@ from copy import deepcopy
 LOG = logging.getLogger(__name__)
 
 
-class RippleEditsDataset(Dataset):
+class RippleEditsPlusEKPDataset(Dataset):
     """
     ! Leo: adding support for running zsre with Decoder-only model
 
@@ -64,6 +64,7 @@ class RippleEditsDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, item, seed=None):
+        import 
         assert all(
             e in self.data[item]
             for e in [
@@ -80,6 +81,7 @@ class RippleEditsDataset(Dataset):
         texts = deepcopy([self.data[item]["edit"]["prompt"]])
 
         assert self.config.heavy_outerloop
+
         outerloop_instances = deepcopy(
             self.data[item]["Logical_Generalization"]
             + self.data[item]["Compositionality_I"]
