@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=6
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -19,18 +19,13 @@ lr=1e-5
 epoch=4
 
 # second-1hop
-data="recent+popular"
+data="all"
 tunable_params="midupper3-mlp"
 # tunable_params="all"
 # base_model_name="Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-all"
 base_model_name="Llama-3.2-1B-eos-sft"
 
-tunable_params="midupper3-mlp"
-# tunable_params="all"
-# base_model_name="Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-all"
-base_model_name="Llama-3.2-1B-eos-sft"
-
-for example_idx in {0..150} # {0..999}
+for example_idx in {0..499} # {0..999}
 do
 
 echo "Example idx: ${example_idx}"

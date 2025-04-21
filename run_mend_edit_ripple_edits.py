@@ -94,7 +94,7 @@ def run(config):
         top_k=None,
         top_p=None,
         temperature=None,
-        max_new_tokens=20,
+        max_new_tokens=30,
         num_return_sequences=1,
         pad_token_id=tokenizer.pad_token_id,
         bos_token_id=tokenizer.bos_token_id,
@@ -110,11 +110,17 @@ def run(config):
 
     # pdb.set_trace()
     if config.date_data == "recent+popular":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test.jsonl")
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent+popular/test.jsonl")
     elif config.date_data == "recent":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test.jsonl")
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent/test.jsonl")
+    elif config.date_data == "all":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test.jsonl")
+    elif config.date_data == "all_wo_random":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test_wo_random.jsonl")
+    elif config.date_data == "random_new":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/random/test.jsonl")
     else:
-        raise NotImplementedError("Only all_propagation is supported for date_data")
+        raise NotImplementedError(f"{config.date_data} is not supported for date_data")
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
 

@@ -52,7 +52,7 @@ Return the numerical score wrapped in <score>..</score> tag
         assert len(score_) == 1
         score = score_[0].strip()
         assert score.isdigit()
-        assert 1 <= float(score) <= 10
+        assert 0 <= float(score) <= 10
         score = float(score)
         score /= self.MAX_VAL
         if "llm_accuracy" in input:
@@ -72,7 +72,7 @@ all_files = glob(
 
 for fpath in tqdm(
     [
-        "/data/users/zliu/mend/ripple_exp_output/ripple_edits_recent+popular+ekp_heavy-noshare-mid-upper3/ripple_edits/mend_eval_loss=clm_input=seen_n=200_prompt=no_w-gen_wo-icl_e+s_recent+popular-question.xlsx"
+        "/datastor1/zliu/mend/ripple_exp_output/ripple_edits_all_heavy-noshare-mid-upper3_all-in-outer/ripple_edits/mend_eval_loss=clm_input=seen_n=200_prompt=no_w-gen_wo-icl_e+s_random_new-question.xlsx"
     ]
 ):
     scored_df = pd.read_excel(fpath)

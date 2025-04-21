@@ -49,8 +49,8 @@ Return the paraphrased context in <paraphrase>..</paraphrase> tag.
 # dataset = fact_generator(dataset)
 
 # dataset.save_to_disk("/u/zliu/datastor1/KE-by-CP/data/debug_meta_train/country_data/common_cities_generation.hf",)
-split = "train"
-test_instances = list(io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/{split}_mend_nophrase.jsonl"))
+split = "test"
+test_instances = list(io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/{split}_mend_nophrase.jsonl"))
 
 triplet_extractor = PrefixParaphraser(
     model_name="gpt-4o",
@@ -68,7 +68,7 @@ new_ds = triplet_extractor(
     dataset,
 )
 new_ds.save_to_disk(
-    f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/{split}_w_paraphrase.hf",
+    f"{vars.DATA_DIR}/ripple_edits/meta_train/all/{split}_w_paraphrase.hf",
 )
 
 

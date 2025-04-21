@@ -355,6 +355,10 @@ class EditTrainer(BaseTrainer):
             "drop",
             "country_syn_v2",
             "ripple_edits_w_aug",
+            "ripple_edits_w_ekp",
+            "ripple_edits_w_recoe",
+            "ripple_edits_all",
+            "ripple_edits_recent_popular",
         ]:  
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"
