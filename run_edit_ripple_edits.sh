@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=0
 
 declare -A name2id=(
     # metatrain debug on date data
@@ -18,6 +18,8 @@ declare -A name2id=(
     [ripple_edits_recent+popular_heavy-noshare-mid-upper3_rank1440]=2025-04-15_20-02-56_834455400
     [ripple_edits_recent+popular_heavy-noshare-mid-upper3_rank960]=2025-04-16_00-37-46_4857465816
     [ripple_edits_recent+popular_heavy-noshare-mid-upper3_rank480]=2025-04-16_13-34-53_0685846321
+    [ripple_edits_recent+popular_heavy-noshare-mid-upper3_rank240]=2025-04-16_15-14-14_6736382614
+    [ripple_edits_recent+popular_heavy-noshare-mid-upper3_rank120]=2025-04-16_22-52-33_1479932232
 
     [ripple_edits_recent+popular_heavy-noshare-mid4-upper3]=2025-04-15_04-18-04_2043417416
     [ripple_edits_recent+popular_heavy-noshare-mid4-lower3]=2025-04-15_09-06-24_0162268509
@@ -33,9 +35,14 @@ declare -A name2id=(
 
     # outerloop
     [ripple_edits_recent+popular_heavy-noshare-mid-upper3_all-in-outerloop]=2025-04-16_14-46-50_8956486717
+    # Loss 
+    [ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase0]=2025-04-16_18-39-23_9597674851
+    [ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase08]=2025-04-16_18-39-53_707494128
 
     # data augmentation
     [ripple_edits_recent+popular+random_heavy-noshare-mid-upper3]=2025-04-15_21-10-24_982004503
+    [ripple_edits_recent+popular+ekp_heavy-noshare-mid-upper3]=2025-04-16_23-24-50_1778685779
+    [ripple_edits_recent+popular+recoe_heavy-noshare-mid-upper3]=2025-04-16_21-52-46_0156755258
 )
 
 
@@ -48,13 +55,13 @@ date_data=recent+popular
 
 
 
-for exp_dir_name in ripple_edits_recent+popular_heavy-noshare-mid-upper3_all-in-outerloop
+for exp_dir_name in ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase08
 do
 
 archive=${name2id[$exp_dir_name]}
 # python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} mend.shared=True mend.n_hidden=2
 
-python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft-mid-upper archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} mend.shared=False # mend.rank=960
+python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft-mid-upper archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} mend.shared=False # mend.rank=240
 
 # python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft-mid2 archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} mend.shared=False 
 

@@ -358,6 +358,31 @@ def run(config):
         )
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
+    elif config.task == "qa" or config.task == "ripple_edits_w_recoe":
+        add_padding(tokenizer, model)
+        from data_classes.ripple_edits_w_recoe import RippleEditsPlusReCoEDataset
+        from data_classes.ripple_edits import RippleEditsDataset
+
+
+        assert hasattr(config, "train_set_size"), "ripple_edits config must be provided"
+        train_set = RippleEditsPlusReCoEDataset(
+            tokenizer,
+            # f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/train.jsonl",
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/train_w_recoe.jsonl",
+            config,
+            size=config.train_set_size,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = RippleEditsDataset(
+            tokenizer,
+            # f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid.jsonl",
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/valid.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+            is_eval=True,
+        )
+        LOG.info(f"train_set size: {len(train_set)}")
+        LOG.info(f"val_set size: {len(val_set)}")
     elif config.task == "qa" or config.task == "ripple_edits_mend":
         add_padding(tokenizer, model)
         from data_classes.ripple_edits_mend import RippleEditsMENDDataset

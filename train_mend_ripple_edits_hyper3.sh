@@ -1,15 +1,14 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=3
 
 
 train_set_size=10000
 
-for cbase in 0 0.2 0.4
+for cbase in 0.8 0.6
 do 
 
 python -m run +alg=mend +experiment=ripple_edits +model=llama3.2-1B-eos-sft-mid-upper val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False cbase=${cbase}
 
 done
-
 
 # python -m run +alg=mend +experiment=ripple_edits +model=llama3.2-1B-eos-sft-mid-upper val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False seed=2
 

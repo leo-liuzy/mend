@@ -82,7 +82,7 @@ def run(config):
         tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config
     )
     val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config)
-    tokenizer = val_set.tok
+    # tokenizer = val_set.tok
 
     alg_module = importlib.import_module(f"algs.{config.alg}")
     LOG.info(f"Loading class {config.alg.upper()} from module {alg_module}")
