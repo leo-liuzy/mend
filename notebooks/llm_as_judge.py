@@ -19,7 +19,7 @@ class LlmAsJudge(curator.LLM):
 [Instruction]
 Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. For this evaluation, you should primarily consider the following criteria:
 accuracy: 
-                Score 1: The answer is completely unrelated to the reference.
+                Score 0: The answer is completely unrelated to the reference.
                 Score 3: The answer has minor relevance but does not align with the reference.
                 Score 5: The answer has moderate relevance but contains inaccuracies.
                 Score 7: The answer aligns with the reference but has minor omissions.
@@ -66,11 +66,13 @@ Return the numerical score wrapped in <score>..</score> tag
 llm_judge = LlmAsJudge(
     model_name="gpt-4o-mini", backend_params={"max_requests_per_minute": 30_000, "max_tokens_per_minute": 150_000_000}
 )
-# all_files = glob("/u/zliu/datastor1/mend/country_exp_out/**/*.xlsx", recursive=True)
+all_files = glob(
+    "/data/users/zliu/mend/country_exp_out/3K_heavy_noshare_mid-upper3_template-5_seen-350/**/*.xlsx", recursive=True
+)
 
 for fpath in tqdm(
     [
-        "/datastor1/zliu/mend/ripple_exp_output/ripple_edits_recent+popular_heavy-noshare-mid-upper3_rank480/ripple_edits/mend_eval_loss=clm_input=seen_n=200_prompt=no_w-gen_wo-icl_e+s_recent+popular-question.xlsx"
+        "/data/users/zliu/mend/ripple_exp_output/ripple_edits_recent+popular+ekp_heavy-noshare-mid-upper3/ripple_edits/mend_eval_loss=clm_input=seen_n=200_prompt=no_w-gen_wo-icl_e+s_recent+popular-question.xlsx"
     ]
 ):
     scored_df = pd.read_excel(fpath)

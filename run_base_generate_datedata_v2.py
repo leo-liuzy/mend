@@ -13,8 +13,6 @@ from tqdm import tqdm
 
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
-from knowledge_propagation.modules.inferencers import QAInferencer
-from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
 
 from knowledge_propagation.modules.evaluators import (
@@ -96,19 +94,18 @@ def score_df(df):
 
 def add_padding(tokenizer, model):
     import transformers
-    
+
     if isinstance(tokenizer, transformers.Qwen2Tokenizer) or isinstance(tokenizer, transformers.Qwen2TokenizerFast):
         # pass
         tokenizer.add_special_tokens({"pad_token": "[PAD]"})
         model.resize_token_embeddings(len(tokenizer))
-        
+
     elif isinstance(model, transformers.LlamaForCausalLM):
         tokenizer.add_special_tokens({"pad_token": "[PAD]"})
         model.resize_token_embeddings(len(tokenizer))
         # model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
     else:
         raise NotImplementedError(f"From Leo: tokenizer is out of scope `{tokenizer}`")
-        
 
 
 def add_eos(tokenizer_output, eos_token_id, ignore=False):
@@ -191,11 +188,11 @@ def run(config):
     torch.manual_seed(config.seed)
 
     model = models.get_model(config)
-    
+
     tokenizer = models.get_tokenizer(config)
     models.add_padding(tokenizer, model)
     model = model.to(config.device)
-    
+
     from data_classes.zsre import ZsreDataset
 
     train_set = ZsreDataset(
@@ -219,7 +216,7 @@ def run(config):
         bos_token_id=tokenizer.bos_token_id,
         eos_token_id=tokenizer.eos_token_id,
     )
-    
+
     # trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
     if config.date_data == "common":
@@ -230,7 +227,9 @@ def run(config):
         config.val_steps = 1085
     elif config.date_data == "ood_v3_prefilter":
         # question_type = "ood_specificity"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data_v2/all_country_questions_prefilter.jsonl")
+        val_data = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/country_syn_data_v2/all_country_questions_prefilter.jsonl"
+        )
         config.val_steps = 1185
     elif config.date_data == "bio_syn_v2":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test.jsonl")
@@ -246,7 +245,7 @@ def run(config):
     assert config.eval_only
 
     assert hasattr(config, "ice")
-    
+
     if hasattr(config, "add_icl") and config.add_icl:
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
     else:
@@ -259,7 +258,14 @@ def run(config):
         # import pdb
 
         # pdb.set_trace()
-        if any(x in config.date_data for x in [ "common", "ood_v2", "ood_v3",]):
+        if any(
+            x in config.date_data
+            for x in [
+                "common",
+                "ood_v2",
+                "ood_v3",
+            ]
+        ):
             test_queries = [
                 {"question": datum["question"], "answer": datum["answer"]}
                 # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
@@ -326,10 +332,13 @@ def run(config):
 
             if config.do_generation:
                 pre_result_df = generate(
-                    test_queries_q_str + (" " if hasattr(config, "add_icl") and config.add_icl else ""), test_queries_a_str, config, 
-                    # trainer.model.model, 
+                    test_queries_q_str + (" " if hasattr(config, "add_icl") and config.add_icl else ""),
+                    test_queries_a_str,
+                    config,
+                    # trainer.model.model,
                     model,
-                    tokenizer, generation_config
+                    tokenizer,
+                    generation_config,
                 )
             else:
                 pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
@@ -337,7 +346,12 @@ def run(config):
 
             pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
             pre_result_df.insert(1, "stage", "pre-edit")
-            if any(x in config.date_data for x in ["_prefilter",]):
+            if any(
+                x in config.date_data
+                for x in [
+                    "_prefilter",
+                ]
+            ):
                 pre_result_df.insert(0, "domain", f"{datum['domain']}")
                 pre_result_df.insert(0, "template", f"{datum['template']}")
                 pre_result_df.insert(0, "key", f"{datum['key']}")
@@ -362,7 +376,10 @@ def run(config):
         LOG.info(f"Saving to dir: {fpath}")
 
         os.makedirs(save_dir, exist_ok=True)
-        all_results.to_excel(fpath, index=False,)
+        all_results.to_excel(
+            fpath,
+            index=False,
+        )
 
 
 if __name__ == "__main__":

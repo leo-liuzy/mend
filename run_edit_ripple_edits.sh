@@ -36,6 +36,7 @@ declare -A name2id=(
 
     # data augmentation
     [ripple_edits_recent+popular+random_heavy-noshare-mid-upper3]=2025-04-15_21-10-24_982004503
+    [ripple_edits_recent+popular+ekp_heavy-noshare-mid-upper3]=2025-04-16_23-24-50_1778685779
 )
 
 
@@ -48,7 +49,7 @@ date_data=recent+popular
 
 
 
-for exp_dir_name in ripple_edits_recent+popular_heavy-noshare-mid-upper3_all-in-outerloop
+for exp_dir_name in ripple_edits_recent+popular+ekp_heavy-noshare-mid-upper3
 do
 
 archive=${name2id[$exp_dir_name]}
