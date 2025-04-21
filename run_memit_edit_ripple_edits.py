@@ -94,8 +94,10 @@ def run(config):
         eos_token_id=tokenizer.eos_token_id,
     )
 
-    hparams = MEMITHyperParams.from_hparams("/data/users/zliu/EasyEdit/hparams/MEMIT/llama3.2-1B-eos-sft")
-    hparams.mom2_dataset = "ripple_recent"
+    hparams = MEMITHyperParams.from_hparams(f"/data/users/zliu/EasyEdit/hparams/MEMIT/{config.config_name}")
+    hparams.mom2_dataset = config.mom2_dataset
+    # hparams.mom2_dataset = "ripple_recent+popular"
+    # hparams.mom2_dataset = "wikipedia"
 
     print("Task: ", config.task)
 
@@ -106,6 +108,8 @@ def run(config):
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_mend.jsonl")
     elif config.date_data == "recent+popular":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_aug.jsonl")
+    if config.date_data == "recent+popular":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test_aug.jsonl")
     else:
         raise NotImplementedError("Only all_propagation is supported for date_data")
     #     assert config.date_data == "n"
@@ -248,7 +252,7 @@ def run(config):
 
         os.makedirs(save_dir, exist_ok=True)
         fpath = (
-            f"{save_dir}/memit_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
+            f"{save_dir}/memit({hparams.mom2_dataset})_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
             + ("_e+s" if config.spec_question else "_e")
             + f"_{config.date_data}-question"
             + ".xlsx"
