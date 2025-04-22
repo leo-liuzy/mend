@@ -374,7 +374,7 @@ def run(config):
         val_set = RippleEditsDataset(
             tokenizer,
             # f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/valid.jsonl",
-            f"{vars.DATA_DIR}/ripple_edits/meta_train/recent+popular/valid.jsonl",
+            f"{vars.DATA_DIR}/ripple_edits/meta_train/all/valid.jsonl",
             config,
             max_length=tokenizer.model_max_length,
             is_eval=True,

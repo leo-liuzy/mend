@@ -115,10 +115,13 @@ def run(config):
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent/test.jsonl")
     elif config.date_data == "all":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test.jsonl")
+        config.val_steps = 500
     elif config.date_data == "all_wo_random":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test_wo_random.jsonl")
+        config.val_steps = 300
     elif config.date_data == "random_new":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/random/test.jsonl")
+        config.val_steps = 200
     else:
         raise NotImplementedError(f"{config.date_data} is not supported for date_data")
     #     assert config.date_data == "n"

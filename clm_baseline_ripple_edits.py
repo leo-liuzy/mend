@@ -322,16 +322,16 @@ trainer.accelerator.wait_for_everyone()
 
 model = trainer.model
 
-if custom_cfg.tunable_params != "all":
-    delta_params = {}
-    for n, param in model.named_parameters():
-        if any(p in n for p in params):
-            import pdb
+# if custom_cfg.tunable_params != "all":
+#     delta_params = {}
+#     for n, param in model.named_parameters():
+#         if any(p in n for p in params):
+#             import pdb
 
-            pdb.set_trace()
-            delta_params[n] = param - original_params[n]
-        else:
-            param.requires_grad = False
+#             pdb.set_trace()
+#             delta_params[n] = param - original_params[n]
+#         else:
+#             param.requires_grad = False
 # clear internal pointer in trainer/accelerator
 trainer.accelerator.free_memory(trainer.model, trainer.optimizer, trainer.lr_scheduler)
 del trainer.model, trainer.optimizer, trainer.lr_scheduler

@@ -49,7 +49,9 @@ declare -A name2id=(
 
     # Final
     [ripple_edits_all_heavy-noshare-mid-upper3_all-in-outer]=2025-04-21_12-40-08_4547596845
-    # [ripple_edits_all_heavy-noshare-mid-upper3]=2025-04-21_12-40-48_5366252073
+    [ripple_edits_all_heavy-noshare-mid-upper3]=2025-04-21_12-40-48_5366252073
+    [ripple_edits_all_recent+popular_heavy-noshare-mid-upper3_all-in-outer]=2025-04-21_17-05-43_6927273155
+    [ripple_edits_all_recent+popular_heavy-noshare-mid-upper3]=2025-04-21_17-00-34_8850918366
 )
 
 
@@ -57,11 +59,11 @@ declare -A name2id=(
 prompt=no
 task=ripple_edits
 
-exp_dir_name=ripple_edits_recent+popular+random_heavy-noshare-mid-upper3
+# exp_dir_name=ripple_edits_recent+popular+random_heavy-noshare-mid-upper3
 date_data=random_new #_wo_random
 n_val=200
 
-for exp_dir_name in ripple_edits_all_heavy-noshare-mid-upper3_all-in-outer
+for exp_dir_name in "ripple_edits_all_recent+popular_heavy-noshare-mid-upper3_all-in-outer"
 do
 
 archive=${name2id[$exp_dir_name]}
