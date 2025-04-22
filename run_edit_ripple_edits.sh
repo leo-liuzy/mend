@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=7
 
 declare -A name2id=(
     # metatrain debug on date data
@@ -37,25 +37,31 @@ declare -A name2id=(
     [ripple_edits_recent+popular_heavy-noshare-mid-upper3_all-in-outerloop]=2025-04-16_14-46-50_8956486717
     # Loss 
     [ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase0]=2025-04-16_18-39-23_9597674851
+    [ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase02]=2025-04-17_02-37-34_9773806917
+    [ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase04]=2025-04-17_10-09-23_7087907152
+    [ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase06]=2025-04-17_02-38-56_9171446672
     [ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase08]=2025-04-16_18-39-53_707494128
 
     # data augmentation
     [ripple_edits_recent+popular+random_heavy-noshare-mid-upper3]=2025-04-15_21-10-24_982004503
     [ripple_edits_recent+popular+ekp_heavy-noshare-mid-upper3]=2025-04-16_23-24-50_1778685779
     [ripple_edits_recent+popular+recoe_heavy-noshare-mid-upper3]=2025-04-16_21-52-46_0156755258
+
+    # Final
+    [ripple_edits_all_heavy-noshare-mid-upper3_all-in-outer]=2025-04-21_12-40-08_4547596845
+    # [ripple_edits_all_heavy-noshare-mid-upper3]=2025-04-21_12-40-48_5366252073
 )
 
 
-n_val=200
+
 prompt=no
 task=ripple_edits
 
 exp_dir_name=ripple_edits_recent+popular+random_heavy-noshare-mid-upper3
-date_data=recent+popular
+date_data=random_new #_wo_random
+n_val=200
 
-
-
-for exp_dir_name in ripple_edits_recent+popular_heavy-noshare-mid-upper3_cbase08
+for exp_dir_name in ripple_edits_all_heavy-noshare-mid-upper3_all-in-outer
 do
 
 archive=${name2id[$exp_dir_name]}

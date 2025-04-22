@@ -210,6 +210,9 @@ elif custom_cfg.date_data == "recent+popular":
     delta_params_save_dir = f"{exp_save_dir}/delta_params_recent+popular"
     individual_result_save_dir = f"{exp_save_dir}/individual_results_recent+popular"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test.jsonl")
+elif custom_cfg.date_data == "all":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_all"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test.jsonl")
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
@@ -225,15 +228,14 @@ fpath = (
     + ("_e+s" if custom_cfg.spec_question else "_e")
     + ".xlsx"
 )
-if os.path.exists(fpath) and os.path.exists(
-    f"{delta_params_save_dir}/{custom_cfg.example_idx}_{custom_cfg.tunable_params}.pt"
-):
+if os.path.exists(fpath):
     logging.info("=" * 20 + "Already evaluated" + "=" * 20)
     exit(0)
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False, device_map=custom_cfg.device)
 tokenizer = AutoTokenizer.from_pretrained(
-    f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False
+    # f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False
+    model_name_or_path, add_eos_token=True, use_fast=False
 )
 tokenizer.padding_side = "right"
 original_vocab_size = len(tokenizer)
@@ -253,7 +255,7 @@ generation_config = GenerationConfig(
     top_k=None,
     top_p=None,
     temperature=None,
-    max_new_tokens=20,
+    max_new_tokens=30,
     num_return_sequences=1,
     pad_token_id=tokenizer.pad_token_id,
     bos_token_id=tokenizer.bos_token_id,

@@ -19,7 +19,7 @@ class LlmAsJudge(curator.LLM):
 [Instruction]
 Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. For this evaluation, you should primarily consider the following criteria:
 accuracy: 
-                Score 1: The answer is completely unrelated to the reference.
+                Score 0: The answer is completely unrelated to the reference.
                 Score 3: The answer has minor relevance but does not align with the reference.
                 Score 5: The answer has moderate relevance but contains inaccuracies.
                 Score 7: The answer aligns with the reference but has minor omissions.
@@ -52,7 +52,7 @@ Return the numerical score wrapped in <score>..</score> tag
         assert len(score_) == 1
         score = score_[0].strip()
         assert score.isdigit()
-        assert 1 <= float(score) <= 10
+        assert 0 <= float(score) <= 10
         score = float(score)
         score /= self.MAX_VAL
         if "llm_accuracy" in input:
@@ -70,7 +70,7 @@ llm_judge = LlmAsJudge(
 
 for fpath in tqdm(
     [
-        "/datastor1/zliu/mend/ripple_exp_output/ripple_edits_recent+popular+recoe_heavy-noshare-mid-upper3/ripple_edits/mend_eval_loss=clm_input=seen_n=200_prompt=no_w-gen_wo-icl_e+s_recent+popular-question.xlsx"
+        "/datastor1/zliu/mend/ripple_exp_output/ripple_edits_all_heavy-noshare-mid-upper3_all-in-outer/ripple_edits/mend_eval_loss=clm_input=seen_n=200_prompt=no_w-gen_wo-icl_e+s_random_new-question.xlsx"
     ]
 ):
     scored_df = pd.read_excel(fpath)
