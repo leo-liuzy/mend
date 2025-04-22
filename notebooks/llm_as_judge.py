@@ -72,7 +72,7 @@ all_files = glob(
 
 for fpath in tqdm(
     [
-        "/datastor1/zliu/mend/ripple_exp_output/ripple_edits_all_heavy-noshare-mid-upper3_all-in-outer/ripple_edits/mend_eval_loss=clm_input=seen_n=200_prompt=no_w-gen_wo-icl_e+s_random_new-question.xlsx"
+        "/data/users/zliu/mend/ripple_exp_output/ripple_edits_all_original_mend_share_top3/ripple_edits/mend_eval_loss=sft_input=seen_n=500_prompt=no_w-gen_wo-icl_e+s_all-question.xlsx"
     ]
 ):
     scored_df = pd.read_excel(fpath)
