@@ -113,6 +113,9 @@ def run(config):
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test_mend.jsonl")
     elif config.date_data == "recent":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_mend.jsonl")
+    elif config.date_data == "all":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test_aug.jsonl")
+        config.val_steps = 500
     else:
         raise NotImplementedError("Only all_propagation is supported for date_data")
     #     assert config.date_data == "n"
@@ -136,13 +139,21 @@ def run(config):
         sentences = [datum["edit"]["prompt"]]
 
         assert config.edit_loss == EditLoss.sft, f"edit_loss `{config.edit_loss}` is not supported"
-        
-        targets =  [" " + datum["edit"]["object"].strip()]
+        if config.date_data == "all":
+            targets = [" " + datum["edit"]["target"].strip()]
+        else:
+            targets = [" " + datum["edit"]["object"].strip()]
         sentences = [datum["edit"]["context"] + targets[0]]
-        
-        sentences_toks = add_eos(tokenizer(sentences, padding=True, return_tensors="pt"), eos_token_id, ignore=not config.add_eos)
-        targets_toks = add_eos(tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False), eos_token_id, ignore=not config.add_eos)
-        
+
+        sentences_toks = add_eos(
+            tokenizer(sentences, padding=True, return_tensors="pt"), eos_token_id, ignore=not config.add_eos
+        )
+        targets_toks = add_eos(
+            tokenizer(targets, padding=True, return_tensors="pt", add_special_tokens=False),
+            eos_token_id,
+            ignore=not config.add_eos,
+        )
+
         # import pdb; pdb.set_trace()
         edit_inner = {
             "input_ids": sentences_toks["input_ids"],

@@ -66,7 +66,9 @@ Return the numerical score wrapped in <score>..</score> tag
 llm_judge = LlmAsJudge(
     model_name="gpt-4o-mini", backend_params={"max_requests_per_minute": 30_000, "max_tokens_per_minute": 150_000_000}
 )
-# all_files = glob("/u/zliu/datastor1/mend/country_exp_out/**/*.xlsx", recursive=True)
+all_files = glob(
+    "/data/users/zliu/mend/country_exp_out/3K_heavy_noshare_mid-upper3_template-5_seen-350/**/*.xlsx", recursive=True
+)
 
 for fpath in tqdm(
     [

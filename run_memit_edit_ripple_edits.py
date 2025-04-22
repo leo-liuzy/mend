@@ -105,11 +105,16 @@ def run(config):
     assert hasattr(config, "date_data")
 
     if config.date_data == "recent":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_mend.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent/test_mend.jsonl"
+        )
     elif config.date_data == "recent+popular":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test_aug.jsonl")
-    if config.date_data == "recent+popular":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test_aug.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent+popular/test_aug.jsonl"
+        )
+    elif config.date_data == "all":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test_aug.jsonl")
+        config.val_steps = 500
     else:
         raise NotImplementedError("Only all_propagation is supported for date_data")
     #     assert config.date_data == "n"
@@ -134,9 +139,11 @@ def run(config):
         editor = BaseEditor.from_hparams(hparams)
         # pdb.set_trace()
         prompts = [datum["edit"]["prompt"]]
-        objects = [datum["edit"]["object"]]
+        objects = [datum["edit"]["target"]]
         assert datum["edit"]["subject"] is not None, "subject is None"
         subjects = [datum["edit"]["subject"]]
+        if datum["edit"]["subject"] == "":
+            continue
 
         assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
         sentences_toks = targets_toks = add_eos(

@@ -64,83 +64,89 @@ class RippleEditsPlusEKPDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, item, seed=None):
-        import 
-        assert all(
-            e in self.data[item]
-            for e in [
-                "edit",
-                "Logical_Generalization",
-                "Compositionality_I",
-                "Compositionality_II",
-                "Subject_Aliasing",
-                "Relation_Specificity",
-                "Forgetfulness",
-            ]
-        )
+        datum = self.data[item]
+        if "probe_sentence" not in datum:
+            assert all(
+                e in self.data[item]
+                for e in [
+                    "edit",
+                    "Logical_Generalization",
+                    "Compositionality_I",
+                    "Compositionality_II",
+                    "Subject_Aliasing",
+                    "Relation_Specificity",
+                    "Forgetfulness",
+                ]
+            )
 
-        texts = deepcopy([self.data[item]["edit"]["prompt"]])
+            texts = deepcopy([datum["edit"]["prompt"]])
 
-        assert self.config.heavy_outerloop
+            assert self.config.heavy_outerloop
 
-        outerloop_instances = deepcopy(
-            self.data[item]["Logical_Generalization"]
-            + self.data[item]["Compositionality_I"]
-            + self.data[item]["Compositionality_II"]
-            + self.data[item]["Subject_Aliasing"]
-        )
-        locality_instances = deepcopy(self.data[item]["Relation_Specificity"] + self.data[item]["Forgetfulness"])
-        outerloop_queries = [q for instance in outerloop_instances for q in instance["test_queries"]]
-        locality_queries = [q for instance in locality_instances for q in instance["test_queries"]]
+            outerloop_instances = deepcopy(
+                datum["Logical_Generalization"]
+                + datum["Compositionality_I"]
+                + datum["Compositionality_II"]
+                + datum["Subject_Aliasing"]
+            )
+            locality_instances = deepcopy(datum["Relation_Specificity"] + datum["Forgetfulness"])
+            outerloop_queries = [q for instance in outerloop_instances for q in instance["test_queries"]]
+            locality_queries = [q for instance in locality_instances for q in instance["test_queries"]]
 
-        # ! this is to avoid model exploiting potential heuristics in data order.
-        np.random.shuffle(texts)
-        np.random.shuffle(outerloop_queries)
-        np.random.shuffle(locality_queries)
+            # ! this is to avoid model exploiting potential heuristics in data order.
+            np.random.shuffle(texts)
+            np.random.shuffle(outerloop_queries)
+            np.random.shuffle(locality_queries)
 
-        output = {
-            "texts": texts,
-        }
-        if len(outerloop_queries) > 0:
-            outerloop_queries = [q for q in outerloop_queries if len(q["answers"]) > 0]
-            outerloop_queries = [
-                q
-                for q in outerloop_queries
-                if len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0
-            ]
-            assert len(outerloop_queries) > 0
+            output = {
+                "texts": texts,
+            }
+            if len(outerloop_queries) > 0:
+                outerloop_queries = [q for q in outerloop_queries if len(q["answers"]) > 0]
+                outerloop_queries = [
+                    q
+                    for q in outerloop_queries
+                    if len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0
+                ]
+                assert len(outerloop_queries) > 0
 
-            outer_questions = [qa["prompt"] for qa in outerloop_queries]
-            outer_answers_candidates = [
-                [a["value"] for a in q["answers"] if len(a["value"].strip()) > 0] for q in outerloop_queries
-            ]
-            assert all(len(c) > 0 for c in outer_answers_candidates)
-            outer_answers = [np.random.choice(candidates) for candidates in outer_answers_candidates]
-            outer_answers = [("" if ans_[0] == " " else " ") + ans_ for ans_ in outer_answers]
-            outer_questions = [q_ + ans_ for q_, ans_ in zip(outer_questions, outer_answers)]
+                outer_questions = [qa["prompt"] for qa in outerloop_queries]
+                outer_answers_candidates = [
+                    [a["value"] for a in q["answers"] if len(a["value"].strip()) > 0] for q in outerloop_queries
+                ]
+                assert all(len(c) > 0 for c in outer_answers_candidates)
+                outer_answers = [np.random.choice(candidates) for candidates in outer_answers_candidates]
+                outer_answers = [("" if ans_[0] == " " else " ") + ans_ for ans_ in outer_answers]
+                outer_questions = [q_ + ans_ for q_, ans_ in zip(outer_questions, outer_answers)]
 
-            output["outer_questions"] = outer_questions
-            output["outer_answers"] = outer_answers
+                output["outer_questions"] = outer_questions
+                output["outer_answers"] = outer_answers
 
-        if len(locality_queries) > 0:
-            locality_queries = [q for q in locality_queries if len(q["answers"]) > 0]
-            locality_queries = [
-                q
-                for q in locality_queries
-                if len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0
-            ]
-            assert len(locality_queries) > 0
+            if len(locality_queries) > 0:
+                locality_queries = [q for q in locality_queries if len(q["answers"]) > 0]
+                locality_queries = [
+                    q
+                    for q in locality_queries
+                    if len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0
+                ]
+                assert len(locality_queries) > 0
 
-            loc_questions = [qa["prompt"] for qa in locality_queries]
-            loc_answers_candidates = [
-                [a["value"] for a in q["answers"] if len(a["value"].strip()) > 0] for q in locality_queries
-            ]
-            assert all(len(c) > 0 for c in loc_answers_candidates)
-            loc_answers = [np.random.choice(candidates) for candidates in loc_answers_candidates]
-            loc_answers = [("" if ans_[0] == " " else " ") + ans_ for ans_ in loc_answers]
-            loc_questions = [q_ + ans_ for q_, ans_ in zip(loc_questions, loc_answers)]
+                loc_questions = [qa["prompt"] for qa in locality_queries]
+                loc_answers_candidates = [
+                    [a["value"] for a in q["answers"] if len(a["value"].strip()) > 0] for q in locality_queries
+                ]
+                assert all(len(c) > 0 for c in loc_answers_candidates)
+                loc_answers = [np.random.choice(candidates) for candidates in loc_answers_candidates]
+                loc_answers = [("" if ans_[0] == " " else " ") + ans_ for ans_ in loc_answers]
+                loc_questions = [q_ + ans_ for q_, ans_ in zip(loc_questions, loc_answers)]
 
-            output["loc_questions"] = loc_questions
-            output["loc_answers"] = loc_answers
+                output["loc_questions"] = loc_questions
+                output["loc_answers"] = loc_answers
+        else:
+            output = {
+                "texts": deepcopy([datum["text"]]),
+                "outer_texts": deepcopy([datum["probe_sentence"]]),
+            }
         return output
 
     def collate_fn(self, batch):
@@ -155,17 +161,20 @@ class RippleEditsPlusEKPDataset(Dataset):
             [b["alt"] for b in batch[-ne:]]
         )
         """
-        if "outer_questions" in batch[0]:
-            outer_answers = [s for b in batch for s in b["outer_answers"]]
-            outer_questions = [s for b in batch for s in b["outer_questions"]]
-            all_input_from_batchs["outer_questions"] = outer_questions
-            all_input_from_batchs["outer_answers"] = outer_answers
+        if "outer_texts" in batch[0]:
+            all_input_from_batchs["outer_texts"] = [s for b in batch for s in b["outer_texts"]]
+        else:
+            if "outer_questions" in batch[0]:
+                outer_answers = [s for b in batch for s in b["outer_answers"]]
+                outer_questions = [s for b in batch for s in b["outer_questions"]]
+                all_input_from_batchs["outer_questions"] = outer_questions
+                all_input_from_batchs["outer_answers"] = outer_answers
 
-        if "loc_questions" in batch[0]:
-            loc_answers = [s for b in batch for s in b["loc_answers"]]
-            loc_questions = [s for b in batch for s in b["loc_questions"]]
-            all_input_from_batchs["loc_questions"] = loc_questions
-            all_input_from_batchs["loc_answers"] = loc_answers
+            if "loc_questions" in batch[0]:
+                loc_answers = [s for b in batch for s in b["loc_answers"]]
+                loc_questions = [s for b in batch for s in b["loc_questions"]]
+                all_input_from_batchs["loc_questions"] = loc_questions
+                all_input_from_batchs["loc_answers"] = loc_answers
 
         batches = {
             f"{k1}_{k2}": torch.concat(
@@ -227,9 +236,15 @@ class RippleEditsPlusEKPDataset(Dataset):
             # in this case, rephrase means using propogation questions for L_e
             edit_outer = {}
             if "outer_questions" in toks["raw"][0]:
+                # ripple_edit instances
                 edit_outer["input_ids"] = toks["outer_questions_input_ids"]
                 edit_outer["attention_mask"] = toks["outer_questions_attention_mask"]
                 edit_outer["labels"] = self.get_edit_labels(toks["outer_answers_input_ids"])
+            elif "outer_texts" in toks["raw"][0]:
+                # ekp instances
+                edit_outer["input_ids"] = toks["outer_texts_input_ids"]
+                edit_outer["attention_mask"] = toks["outer_texts_attention_mask"]
+                edit_outer["labels"] = self.get_edit_labels(toks["outer_texts_input_ids"])
             else:
                 edit_outer = deepcopy(edit_inner)
 
