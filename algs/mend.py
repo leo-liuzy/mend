@@ -5,6 +5,7 @@ import copy
 import transformers
 import higher
 import logging
+
 # from higher.patch import monkeypatch as make_functional
 from higher.patch import (
     _MonkeyPatchBase,
@@ -157,7 +158,7 @@ class MEND(EditableModel):
 
         if not hasattr(self.model, "handles"):
             hook_model(self.model, self.config.model.inner_params)
-            LOG.info(f"Hooked {len(self.model.handles)//2} modules")
+            LOG.info(f"Hooked {len(self.model.handles) // 2} modules")
 
         if config.mend.shared:
             shape_dict = defaultdict(list)
@@ -198,10 +199,10 @@ class MEND(EditableModel):
 
         res = super().load_state_dict(state_dict, False)
         # We should only have missing keys for the model, and no unexpected keys
-        
-        assert (
-            len([k for k in res.missing_keys if not k.startswith("model.")]) == 0
-        ), "Should only have missing keys for model."
+
+        assert len([k for k in res.missing_keys if not k.startswith("model.")]) == 0, (
+            "Should only have missing keys for model."
+        )
         assert len(res.unexpected_keys) == 0, "Shouldn't have any unexpected keys"
         return res
 
@@ -211,7 +212,7 @@ class MEND(EditableModel):
     def edit(self, batch, condition=None, detach_history=False):
         # ! original line: `outputs = _logits(self.model(**batch))`
         outputs = _logits(self.model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"]))
-        
+
         loss = self.edit_loss_fn(outputs, batch["labels"])["nll"]
 
         names = set([n for n, p in self.model.named_parameters()])
@@ -259,6 +260,9 @@ class MEND(EditableModel):
         updates = {n: lr * g for lr, (n, g) in zip(self.edit_lrs, mean_grads.items())}
 
         edited_model = self.model
+        # import pdb
+
+        # pdb.set_trace()
         if not isinstance(edited_model, higher.patch._MonkeyPatchBase):
             # ! Leo: migrate this from EasyEdit
             edited_model = monkeypatch(edited_model, in_place=True)
@@ -355,7 +359,9 @@ if __name__ == "__main__":
     config.mend = config.mend.__dict__
 
     mend = MEND(model, config, lambda: copy.deepcopy(model)).cuda()
-    import pdb; pdb.set_trace()
+    import pdb
+
+    pdb.set_trace()
     mend.load_state_dict(torch.load("test_state.pt"))
     x = torch.arange(20).view(1, 20).cuda() + 1000
     orig_logits = mend(x)
