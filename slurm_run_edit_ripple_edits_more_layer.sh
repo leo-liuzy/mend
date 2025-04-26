@@ -21,6 +21,12 @@ declare -A name2id=(
     [ripple_edits_all_heavy-noshare-all-in-outer_4-15]=2025-04-24_22-53-49_0166002514
     [ripple_edits_all_heavy-noshare-all-in-outer_7-13]=2025-04-25_02-50-02_4743999764
     [ripple_edits_all_heavy-noshare-all-in-outer_7-14]=2025-04-25_04-56-28_2025436588
+
+    # share
+    [ripple_edits_all_heavy-share-all-in-outer_7-12]=2025-04-26_13-07-40_612784232
+    [ripple_edits_all_heavy-share-all-in-outer_7-13]=2025-04-26_12-53-57_3860445861
+    [ripple_edits_all_heavy-share-all-in-outer_7-14]=2025-04-26_13-06-03_655851344
+    [ripple_edits_all_heavy-share-all-in-outer_8-13]=2025-04-26_12-50-28_4555958376
 )
 
 declare -A name2config=(
@@ -33,6 +39,12 @@ declare -A name2config=(
     [ripple_edits_all_heavy-noshare-all-in-outer_9-15]=llama3.2-1B-eos-sft-9-15
     [ripple_edits_all_heavy-noshare-all-in-outer_10-15]=llama3.2-1B-eos-sft-10-15
     [ripple_edits_all_heavy-noshare-all-in-outer_4-15]=llama3.2-1B-eos-sft-4-15
+
+    # share
+    [ripple_edits_all_heavy-share-all-in-outer_7-12]=llama3.2-1B-eos-sft-7-12
+    [ripple_edits_all_heavy-share-all-in-outer_7-13]=llama3.2-1B-eos-sft-7-13
+    [ripple_edits_all_heavy-share-all-in-outer_7-14]=llama3.2-1B-eos-sft-7-14
+    [ripple_edits_all_heavy-share-all-in-outer_8-13]=llama3.2-1B-eos-sft-8-13
 )
 
 
@@ -43,7 +55,7 @@ task=ripple_edits
 date_data=all #_wo_random
 n_val=200
 
-for exp_dir_name in ripple_edits_all_heavy-noshare-all-in-outer_7-15 ripple_edits_all_heavy-noshare-all-in-outer_8-13 #  ripple_edits_all_heavy-noshare-all-in-outer_7-12 ripple_edits_all_heavy-noshare-all-in-outer_7-13 ripple_edits_all_heavy-noshare-all-in-outer_7-14 #  ripple_edits_all_heavy-noshare-all-in-outer_9-15 ripple_edits_all_heavy-noshare-all-in-outer_10-15 ripple_edits_all_heavy-noshare-all-in-outer_4-15  #  ripple_edits_all_heavy-noshare-all-in-outer_7-15 ripple_edits_all_heavy-noshare-all-in-outer_8-13  #  #   #  # 
+for exp_dir_name in ripple_edits_all_heavy-share-all-in-outer_7-14 #  ripple_edits_all_heavy-noshare-all-in-outer_7-12 ripple_edits_all_heavy-noshare-all-in-outer_7-13 ripple_edits_all_heavy-noshare-all-in-outer_7-14 #  ripple_edits_all_heavy-noshare-all-in-outer_9-15 ripple_edits_all_heavy-noshare-all-in-outer_10-15 ripple_edits_all_heavy-noshare-all-in-outer_4-15  #  ripple_edits_all_heavy-noshare-all-in-outer_7-15 ripple_edits_all_heavy-noshare-all-in-outer_8-13  #  #   #  # 
 do
 
 archive=${name2id[$exp_dir_name]}
