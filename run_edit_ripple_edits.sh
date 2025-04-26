@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=7
+export CUDA_VISIBLE_DEVICES=0
 
 declare -A name2id=(
     # metatrain debug on date data
@@ -56,14 +56,15 @@ declare -A name2id=(
 
 
 
+
 prompt=no
 task=ripple_edits
 
 # exp_dir_name=ripple_edits_recent+popular+random_heavy-noshare-mid-upper3
-date_data=random_new #_wo_random
+date_data=all #_wo_random
 n_val=200
 
-for exp_dir_name in "ripple_edits_all_recent+popular_heavy-noshare-mid-upper3_all-in-outer"
+for exp_dir_name in ripple_edits_all_recent+popular_heavy-noshare-mid-upper3
 do
 
 archive=${name2id[$exp_dir_name]}

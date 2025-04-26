@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J edit_layer-7-14       # Job name
+#SBATCH -J edit_layer-4-15       # Job name
 #SBATCH -o slurm-outputs/%x.o%j       # Name of stdout output file
 #SBATCH -e slurm-outputs/%x.e%j       # Name of stderr output file
 #SBATCH -p gh          # Queue (partition) name
@@ -9,11 +9,11 @@
 #SBATCH -A CCR25005       # Allocation name (req'd if you have more than 1)
 
 
-export CUDA_VISIBLE_DEVICES=5
+export CUDA_VISIBLE_DEVICES=1
 
 train_set_size=10000
 
-python -m run +alg=mend +experiment=ripple_edits_all +model=llama3.2-1B-eos-sft-7-14 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=True all_propagation_in_outerloop=True
+python -m run +alg=mend +experiment=ripple_edits_all +model=llama3.2-1B-eos-sft-4-14 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=True all_propagation_in_outerloop=True
 
 # python -m run +alg=mend +experiment=ripple_edits +model=llama3.2-1B-eos-sft-mid-upper val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False seed=1
 

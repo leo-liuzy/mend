@@ -139,6 +139,7 @@ def run(config):
         sentences = [datum["edit"]["prompt"]]
 
         assert config.edit_loss == EditLoss.sft, f"edit_loss `{config.edit_loss}` is not supported"
+        # import pdb; pdb.set_trace()
         if config.date_data == "all":
             targets = [" " + datum["edit"]["target"].strip()]
         else:

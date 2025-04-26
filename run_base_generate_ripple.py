@@ -208,10 +208,13 @@ def run(config):
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent/test.jsonl")
     elif config.date_data == "all":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test.jsonl")
+        config.val_steps = 500
     elif config.date_data == "all_wo_random":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test_wo_random.jsonl")
+        config.val_steps = 300
     elif config.date_data == "random_new":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/random/test.jsonl")
+        config.val_steps = 200
     else:
         raise ValueError(f"Unknown date_data: {config.date_data}")
 
@@ -333,7 +336,7 @@ def run(config):
                     pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
                 assert len(pre_result_df) == 1
 
-                pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
+                pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [sentences[0]]))
                 pre_result_df.insert(1, "stage", "pre-edit")
                 pre_result_df.insert(0, "relation", f"{test_query['relation']}")
                 pre_result_df.insert(0, "question_tag", f"{question_type}_{test_query['question_type']}")
