@@ -14,7 +14,7 @@ from tqdm import tqdm
 import gc
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
-from knowledge_propagation.modules.inferencers import QAInferencer
+# from knowledge_propagation.modules.inferencers import QAInferencer
 
 # from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
@@ -110,9 +110,13 @@ def run(config):
 
     # pdb.set_trace()
     if config.date_data == "recent+popular":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent+popular/test.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent+popular/test.jsonl"
+        )
     elif config.date_data == "recent":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent/test.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/ripple_edits/meta_train_old/meta_train_recent/test.jsonl"
+        )
     elif config.date_data == "all":
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test.jsonl")
         config.val_steps = 500

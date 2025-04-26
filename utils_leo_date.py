@@ -31,17 +31,17 @@ def score_df(df):
         references=df["answer"],
         use_aggregator=False,
     )
-    diff_per_example = year_diff_evaluator.compute_metric(
-        predictions=df["predicted_answer"],
-        references=df["answer"],
-        use_aggregator=False,
-    )
+    # diff_per_example = year_diff_evaluator.compute_metric(
+    #     predictions=df["predicted_answer"],
+    #     references=df["answer"],
+    #     use_aggregator=False,
+    # )
 
     model_response_w_score = df.join(
         pd.DataFrame(
             {
                 **em_per_example,
-                **diff_per_example,
+                # **diff_per_example,
             }
         )
     )
