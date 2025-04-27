@@ -142,9 +142,7 @@ def run(config):
         objects = [datum["edit"]["target"]]
         assert datum["edit"]["subject"] is not None, "subject is None"
         subjects = [datum["edit"]["subject"]]
-        if datum["edit"]["subject"] == "":
-            continue
-
+        
         assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
         sentences_toks = targets_toks = add_eos(
             tokenizer(prompts, padding=True, return_tensors="pt", add_special_tokens=True),
@@ -198,7 +196,9 @@ def run(config):
             ("efficacy", outerloop_queries),
             ("specificity", locality_queries),
         ]
-
+        if datum["edit"]["subject"] == "":
+            
+        else:
         # edit the model with MEND
         metrics, edited_model, _ = editor.edit(
             prompts=prompts,
