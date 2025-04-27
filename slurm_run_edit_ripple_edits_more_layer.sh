@@ -27,6 +27,8 @@ declare -A name2id=(
     [ripple_edits_all_heavy-share-all-in-outer_7-13]=2025-04-26_12-53-57_3860445861
     [ripple_edits_all_heavy-share-all-in-outer_7-14]=2025-04-26_13-06-03_655851344
     [ripple_edits_all_heavy-share-all-in-outer_8-13]=2025-04-26_12-50-28_4555958376
+    [ripple_edits_all_heavy-share-all-in-outer_4-13]=2025-04-26_18-28-25_5411633305
+    [ripple_edits_all_heavy-share-all-in-outer_4-14]=2025-04-26_18-28-25_5367651752
 )
 
 declare -A name2config=(
@@ -45,6 +47,8 @@ declare -A name2config=(
     [ripple_edits_all_heavy-share-all-in-outer_7-13]=llama3.2-1B-eos-sft-7-13
     [ripple_edits_all_heavy-share-all-in-outer_7-14]=llama3.2-1B-eos-sft-7-14
     [ripple_edits_all_heavy-share-all-in-outer_8-13]=llama3.2-1B-eos-sft-8-13
+    [ripple_edits_all_heavy-share-all-in-outer_4-13]=llama3.2-1B-eos-sft-4-13
+    [ripple_edits_all_heavy-share-all-in-outer_4-14]=llama3.2-1B-eos-sft-4-14
 )
 
 
@@ -62,7 +66,7 @@ archive=${name2id[$exp_dir_name]}
 config=${name2config[$exp_dir_name]}
 # python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} mend.shared=True mend.n_hidden=2
 
-nohup python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=${config} archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} mend.shared=False > ${exp_dir_name}.log 2>&1 & # mend.rank=240
+nohup python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=${config} archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} mend.shared=True > ${exp_dir_name}.log 2>&1 & # mend.rank=240
 
 # python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft-mid2 archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} mend.shared=False 
 

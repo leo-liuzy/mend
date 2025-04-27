@@ -72,7 +72,7 @@ llm_judge = LlmAsJudge(
 
 for fpath in tqdm(
     [
-        "/datastor1/zliu/mend/ripple_exp_output/ripple_edits_all_heavy-share-all-in-outer_8-13/ripple_edits/mend_eval_loss=clm_input=seen_n=500_prompt=no_w-gen_wo-icl_e+s_all-question.xlsx"
+        "/u/zliu/datastor1/mend/ripple_exp_output/ripple_edits_all_heavy-noshare-all-in-outer_7-14/ripple_edits/mend_eval_loss=clm_input=seen_n=500_prompt=no_w-gen_wo-icl_e+s_all-question.xlsx"
     ]
 ):
     scored_df = pd.read_excel(fpath)
