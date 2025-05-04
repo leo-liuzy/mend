@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 
 export WANDB_MODE=online
 
@@ -14,13 +14,13 @@ max_grad_norm=1.0
 
 seed=42
 warmup_ratio=0.03
-max_seq_length=256
+max_seq_length=512
 epoch=2
 # max_steps=1
 
 lr=2e-6
 
-output_dir=models/Llama-3.2-1B-eos-sft-country-template-format-lr${lr}
+output_dir=models/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
 # model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
 
 accelerate launch --config_file="fsdp_config.yaml" \

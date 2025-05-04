@@ -60,7 +60,7 @@ assert tokenizer.eos_token_id != tokenizer.pad_token_id
 # )
 
 train_dataset = prepare_sft_text(
-    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/llama3.2-1B-eos-sft_country_templates_format_training_v2.jsonl"), tokenizer
+    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/model_prep/light_weight_sft_content_curated_v1_sample=10.jsonl"), tokenizer
 )
 # train_dataset = prepare_sft_text(
 #     args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl"), tokenizer

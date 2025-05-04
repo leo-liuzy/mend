@@ -72,13 +72,10 @@ llm_judge = LlmAsJudge(
 
 for fpath in tqdm(
     [
-        "/u/zliu/datastor1/mend/ripple_exp_output/llama3.2-1B-eos-sft-mid-upper/ripple_edits/memit(ripple_all)_eval_loss=clm_input=seen_n=500_prompt=no_w-gen_wo-icl_e+s_all-question.xlsx"
+        "/datastor1/zliu/mend/debug_exp_output/llama3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10/syn_data_neurips_curated_prefilter/base_n=4856_prompt=no_w-gen_wo-icl_ice=False.xlsx",
     ]
 ):
     scored_df = pd.read_excel(fpath)
-
-    if "llm_accuracy" in scored_df.columns:
-        continue
 
     scored_df["predicted_answer"] = scored_df["predicted_answer"].astype(str)
     scored_df["answer"] = scored_df["answer"].astype(str)

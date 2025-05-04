@@ -184,6 +184,7 @@ def run(config):
     model = models.get_model(config)
     tokenizer = models.get_tokenizer(config)
     add_padding(tokenizer, model)
+    model.to(config.device)
 
     from data_classes.zsre import ZsreDataset
 
@@ -209,7 +210,7 @@ def run(config):
         eos_token_id=tokenizer.eos_token_id,
     )
 
-    trainer = EditTrainer(alg, config, train_set, val_set)
+    # trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
     if config.date_data == "common":
         question_type = "specificity"
@@ -237,6 +238,23 @@ def run(config):
     elif config.date_data == "country_syn_ood":
         question_type = "efficacy"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
+    elif config.date_data == "syn_data_neurips_curated_prefilter":
+        question_type = "ood_specificity"
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v1_curated_answered_prefiltered.jsonl")
+        config.val_steps = 4856
+    
+    # elif config.date_data == "syn_data_neurips_prefilter":
+    #     question_type = "ood_specificity"
+    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v1_answered_prefiltered.jsonl")
+    #     config.val_steps = 17461
+    # elif config.date_data == "syn_data_neurips_prefilter_v2":
+    #     question_type = "ood_specificity"
+    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v2_answered_prefiltered.jsonl")
+    #     config.val_steps = 19945
+    # elif config.date_data == "syn_data_neurips_prefilter_v3":
+    #     question_type = "ood_specificity"
+    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v3_answered_prefiltered_shortened.jsonl")
+    #     config.val_steps = 20148
     # elif config.date_data == "country_syn_ood_hard":
     #     question_type = "ood_efficacy"
     #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_hard.jsonl")
@@ -267,6 +285,8 @@ def run(config):
             ]
         elif config.date_data == "country_syn_ood_hard":
             test_queries = datum["ood_questions"]
+        elif "syn_data_neurips_prefilter" in config.date_data or "syn_data_neurips_curated_prefilter" in config.date_data:
+            test_queries = [datum]
         else:
             test_queries = datum["questions"]
 
@@ -283,6 +303,8 @@ def run(config):
                 test_queries_q_str = icl_prompt + "\nQ: " + test_queries_q_str + "\nA:"
             
             test_queries_a_str = test_query["answer"].strip()
+            if len(test_queries_a_str) == 0:
+                continue
             # test_queries_q_str = test_queries[0]["question"]
             # test_queries_a_str = test_queries[0]["answer"]
             test_queries_str = test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str
@@ -313,19 +335,20 @@ def run(config):
             print("SFT label:", "[" + tokenizer.decode(sft_labels[0]) + "]")
             print("CLM label(before ShiftLeft):", "[" + tokenizer.decode(clm_labels[0]) + "]")
             print()
-            with torch.no_grad():
-                pre_edit_logits = trainer.model(
-                    input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"]
-                )
+            # with torch.no_grad():
+            #     pre_edit_logits = trainer.model(
+            #         input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"]
+            #     )
 
-                pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
-                pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
-                pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
-                pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
+            #     pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
+            #     pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
+            #     pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
+            #     pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
 
             if config.do_generation:
+                # import pdb; pdb.set_trace()
                 pre_result_df = generate(
-                    test_queries_q_str + + (" " if hasattr(config, "add_icl") and config.add_icl else ""), test_queries_a_str, config, trainer.model.model, tokenizer, generation_config
+                    test_queries_q_str + (" " if hasattr(config, "add_icl") and config.add_icl else ""), test_queries_a_str, config, model, tokenizer, generation_config
                 )
             else:
                 pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
@@ -339,14 +362,17 @@ def run(config):
                 pre_result_df.insert(0, "domain", f"{datum['domain']}")
                 pre_result_df.insert(0, "template", f"{datum['template']}")
                 pre_result_df.insert(0, "key", f"{datum['key']}")
+            elif "syn_data_neurips_prefilter" in config.date_data or "syn_data_neurips_curated_prefilter" in config.date_data:
+                # import pdb; pdb.set_trace()
+                pre_result_df.insert(0, "entity_type", f"{datum['entity_type']}")
+                pre_result_df.insert(0, "entity_name", f"{datum['entity_name']}")
+                # pre_result_df.insert(0, "entity_tag", f"{datum['entity_tag']}")
+                pre_result_df.insert(0, "template", f"{datum['template']}")
             else:
                 pre_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
             pre_result_df.insert(0, "question_type", f"{question_type}")
             pre_result_df.insert(0, "id", str(i))
-            pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc EM", pre_edit_clm_em_dict["acc"].item())
-            pre_result_df.insert(pre_result_df.shape[-1], "[Q][A] Acc PM", pre_edit_clm_pm_dict["acc"].item())
-            pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc EM", pre_edit_sft_em_dict["acc"].item())
-            pre_result_df.insert(pre_result_df.shape[-1], "[A]|[Q] Acc PM", pre_edit_sft_pm_dict["acc"].item())
+            
             all_results.append(pre_result_df)
 
     all_results = pd.concat(all_results)
@@ -357,11 +383,13 @@ def run(config):
             # using relative path
             save_dir = f"{base_dir}/{config.generation.save_dir}"
         save_dir = os.path.join(save_dir, config.date_data)
-        LOG.info(f"Saving to dir: {save_dir}")
+        # LOG.info(f"Saving to dir: {save_dir}")
 
         os.makedirs(save_dir, exist_ok=True)
+        fpath = f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_ice={config.ice}.xlsx"
+        LOG.info(f"Saving to dir: {fpath}")
         all_results.to_excel(
-            f"{save_dir}/base_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_ice={config.ice}.xlsx",
+            fpath,
             index=False,
         )
 
