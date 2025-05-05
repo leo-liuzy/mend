@@ -80,7 +80,7 @@ If the answer is already concise, return the original answer wrapped in <answer>
         input["shortened_answer"] = answer
         return {**input}
 
-# entity_generator = EntityGenerator(model_name="gpt-4o")
+# entity_generator = EntityGenerator(model_name="gpt-4.1")
 question_answerer = QuestionAnswerer(model_name="gpt-4.1", backend_params={
         "max_requests_per_minute": 30_000,
         "max_tokens_per_minute": 150_000_000,

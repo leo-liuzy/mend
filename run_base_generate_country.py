@@ -241,7 +241,7 @@ def run(config):
     elif config.date_data == "syn_data_neurips_curated_prefilter":
         question_type = "ood_specificity"
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v1_curated_answered_prefiltered.jsonl")
-        config.val_steps = 4856
+        config.val_steps = 4451
     
     # elif config.date_data == "syn_data_neurips_prefilter":
     #     question_type = "ood_specificity"
