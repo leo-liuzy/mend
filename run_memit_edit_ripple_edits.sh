@@ -21,7 +21,7 @@ date_data=all
 
 # mom2_dataset="wikipedia"
 
-for config_name in llama3.2-1B-eos-sft-top # llama3.2-1B-eos-sft-mid-upper
+for config_name in llama3.2-1B-eos-sft-top  # llama3.2-1B-eos-sft-mid-upper # llama3.2-1B-eos-sft-top # llama3.2-1B-eos-sft-mid-upper
 do
 for mom2_dataset in "ripple_all" 
 do

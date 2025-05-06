@@ -1,4 +1,5 @@
 import copy
+import pdb
 import importlib
 import logging
 import random
@@ -129,44 +130,21 @@ def run(config):
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
     else:
         eos_token_id = tokenizer.eos_token_id
+    editor = BaseEditor.from_hparams(hparams)
 
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = edit_dev_dataset[i]
 
-        # import pdb
-        editor = BaseEditor.from_hparams(hparams)
-        # pdb.set_trace()
-        prompts = [datum["edit"]["prompt"]]
+        if datum["edit"]["target"] + "." in datum["edit"]["prompt"]:
+            prefix = datum["edit"]["prompt"].replace(datum["edit"]["target"] + ".", "").strip()
+        prompts = [tokenizer.bos_token + prefix]
         objects = [datum["edit"]["target"]]
         assert datum["edit"]["subject"] is not None, "subject is None"
         subjects = [datum["edit"]["subject"]]
-        if datum["edit"]["subject"] == "":
-            continue
 
         assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
-        sentences_toks = targets_toks = add_eos(
-            tokenizer(prompts, padding=True, return_tensors="pt", add_special_tokens=True),
-            eos_token_id,
-            ignore=not config.add_eos,
-        )
-
-        edit_inner = {
-            "input_ids": sentences_toks["input_ids"],
-            "attention_mask": sentences_toks["attention_mask"],
-            "labels": val_set.get_edit_labels(targets_toks["input_ids"]),
-        }
-
-        # import pdb; pdb.set_trace()
-        print("Input for EDIT: ")
-        print("[" + "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(edit_inner["input_ids"])) + "]")
-        print("Label for EDIT: ")
-        print("[" + "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(targets_toks["input_ids"])) + "]")
-        print()
-
-        # import pdb; pdb.set_trace()
-        edit_inner = utils.dict_to(edit_inner, config.device)
 
         all_datum_result_df = []
         outerloop_queries = []
@@ -198,17 +176,25 @@ def run(config):
             ("efficacy", outerloop_queries),
             ("specificity", locality_queries),
         ]
+        # import pdb
 
-        # edit the model with MEND
-        metrics, edited_model, _ = editor.edit(
-            prompts=prompts,
-            ground_truth=None,
-            target_new=objects,
-            subject=subjects,
-            keep_original_weight=True,
-        )
+        # pdb.set_trace()
+
+        if datum["edit"]["subject"] == "":
+            edited_model = editor.model
+            weights_copy = {}
+            metrics = {}
+        else:
+            # edit the model with MEND
+            metrics, edited_model, weights_copy = editor.edit(
+                prompts=prompts,
+                ground_truth=None,
+                target_new=objects,
+                subject=subjects,
+                keep_original_weight=True,
+            )
         edit_model_infos.append(metrics)
-
+        # pdb.set_trace()
         for question_type, questions in question_types:
             logging.info(f"Question type: {question_type}")
 
@@ -227,9 +213,7 @@ def run(config):
                     generation_config=generation_config,
                 )
                 post_result_df.insert(0, "stage", "post-edit")
-                post_result_df.insert(
-                    0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
-                )
+                post_result_df.insert(0, "edit_input", f"{datum['edit']['prompt']}")
                 post_result_df.insert(0, "relation", f"{question['relation']}")
                 post_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
                 post_result_df.insert(0, "question_type", question_type)
@@ -239,6 +223,12 @@ def run(config):
                 # pdb.set_trace()
                 all_datum_result_df.append(post_result_df)
 
+        # rollback the model
+        # pdb.set_trace()
+        for name, param in edited_model.named_parameters():
+            if name in weights_copy:
+                # pdb.set_trace()
+                param.data = weights_copy[name].data.clone()
         del edited_model
         gc.collect()
         if torch.cuda.is_available():
