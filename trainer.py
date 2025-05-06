@@ -361,6 +361,7 @@ class EditTrainer(BaseTrainer):
             "ripple_edits_recent_popular",
             "ripple_edits_all_mend",
             "syn_story",
+            "syn_story_mend",
         ]:
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"

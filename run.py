@@ -535,6 +535,27 @@ def run(config):
         LOG.info(f"train_set size: {len(train_set)}")
         LOG.info(f"val_set size: {len(val_set)}")
         LOG.info(f"model_max_length: {tokenizer.model_max_length}")
+    elif config.task == "qa" or config.task == "syn_story_mend":
+        add_padding(tokenizer, model)
+        from data_classes.syn_story_mend import SynStoryMENDDataset
+
+        assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
+        config.dataset += f"-{config.train_prefix}train"
+        train_set = SynStoryMENDDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/{config.train_prefix}train_data_100percent_frozen/train_mend.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        val_set = SynStoryMENDDataset(
+            tokenizer,
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/{config.train_prefix}train_data_100percent_frozen/valid_mend.jsonl",
+            config,
+            max_length=tokenizer.model_max_length,
+        )
+        LOG.info(f"train_set size: {len(train_set)}")
+        LOG.info(f"val_set size: {len(val_set)}")
+        LOG.info(f"model_max_length: {tokenizer.model_max_length}")
     else:
         raise ValueError(f"Unrecognized task {config.task}")
     # train_set[0]

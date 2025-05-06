@@ -15,7 +15,7 @@ import gc
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
 from knowledge_propagation.modules.inferencers import QAInferencer
-from experiments.musique.inference_only import eval_inferencer, macro_averaging
+# from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
 
 from knowledge_propagation.modules.evaluators import (
@@ -268,7 +268,7 @@ def run(config):
             + f"_{config.date_data}-question"
             + ".xlsx"
         )
-
+        LOG.info(f"Saving to dir: {fpath}")
         all_results.to_excel(fpath, index=False)
         io.dump_jsonlines(
             edit_model_infos,
