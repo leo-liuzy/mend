@@ -517,17 +517,17 @@ def run(config):
         from data_classes.syn_story import SynStoryDataset
 
         assert hasattr(config, "train_set_size"), "bio_syn config must be provided"
-        
+        config.dataset += f"-{config.train_prefix}train"
         train_set = SynStoryDataset(
             tokenizer,
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_100percent_frozen/train_text_data_id_entity152_rel31.jsonl",
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/{config.train_prefix}train_data_100percent_frozen/train_text_data_id_entity152_rel31.jsonl",
             config,
             size=config.train_set_size,
             max_length=tokenizer.model_max_length,
         )
         val_set = SynStoryDataset(
             tokenizer,
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_100percent_frozen/valid_text_data_id_entity152_rel31.jsonl",
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/{config.train_prefix}train_data_100percent_frozen/valid_text_data_id_entity152_rel31.jsonl",
             config,
             max_length=tokenizer.model_max_length,
             is_eval=True,
