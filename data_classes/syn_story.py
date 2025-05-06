@@ -73,8 +73,8 @@ class SynStoryDataset(Dataset):
         # ! this is to avoid model exploiting potential heuristics in data order.
         np.random.shuffle(texts)
         np.random.shuffle(qas)
-        
-        answers = [("" if len(qa["answer"]) != 0 and qa["answer"][0] == " " else " ") + qa["answer"] for qa in qas]
+        answers = [str(qa["answer"]) for qa in qas]
+        answers = [("" if len(a) != 0 and a[0] == " " else " ") + a for a in answers]
         
         questions = [qa["alias_question"] for qa in qas]
         questions = [q_ + ans_ for q_, ans_ in zip(questions, answers)]
