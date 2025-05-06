@@ -1,0 +1,8 @@
+# @package _global_
+
+task: syn_story
+dataset: syn_story
+cbase: 1.0
+heavy_outerloop: true
+train_prefix: "4K"
+# doc_dropout: 0.5 # w. prob 0.5 randomly drop 1 doc
