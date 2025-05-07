@@ -144,7 +144,9 @@ def run(config):
     else:
         eos_token_id = tokenizer.eos_token_id
     editor = BaseEditor.from_hparams(hparams)
-
+    target_modules_names = [hparams.rewrite_module_tmp.format(x) + ".weight" for x in hparams.layers]
+    weights_copy = {n: p.clone() for n, p in editor.model.named_parameters() if n in target_modules_names}
+    # pdb.set_trace()
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
@@ -185,7 +187,7 @@ def run(config):
         assert all([len(x) > 0 for x in objects])
 
         # edit the model with MEND
-        metrics, edited_model, weights_copy = editor.edit(
+        metrics, edited_model, _ = editor.edit(
             prompts=prompts,
             ground_truth=None,
             target_new=objects,
@@ -226,6 +228,9 @@ def run(config):
 
         # ! rollback the model
         # pdb.set_trace()
+        assert len([name for name, param in edited_model.named_parameters() if name in weights_copy]) == len(
+            weights_copy
+        )
         for name, param in edited_model.named_parameters():
             if name in weights_copy:
                 # pdb.set_trace()
@@ -257,10 +262,10 @@ def run(config):
         )
 
         all_results.to_excel(fpath, index=False)
-        io.dump_jsonlines(
-            edit_model_infos,
-            f"{save_dir}/memit_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
-        )
+        # io.dump_jsonlines(
+        #     edit_model_infos,
+        #     f"{save_dir}/memit_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
+        # )
 
 
 if __name__ == "__main__":

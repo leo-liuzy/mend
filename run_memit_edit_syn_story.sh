@@ -17,7 +17,7 @@ task=syn_story
 # archive=${name2id[$exp_dir_name]}
 
 # config_name=llama3.2-1B-eos-sft-top 
-date_data="4K_test_ood-entity"
+date_data="4K_test_ood-relation"
 
 mom2_dataset="synstory_4K"
 
