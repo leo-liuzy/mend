@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=0
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -31,13 +31,14 @@ base_model_name="Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-1
 # date_data="all_propagation_ood"
 # date_data="all_propagation_ood_w_ood_country"
 
-date_data=test_ood
+date_data=test_ood-relation
 text_data="text"
 
-for tunable_params in "all"
+for tunable_params in "all" "midupper3-mlp"
 do 
-for example_idx in 6 7 8 9 10 23 24 25 28 29 42 43 46 47 55 56 # {0..99} # {0..999}
+for example_idx in {0..349} # {0..99} # {0..999}
 do
+
 echo "Test data: ${date_data}"
 echo "Example idx: ${example_idx}"
 

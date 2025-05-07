@@ -59,9 +59,9 @@ class SynStoryMENDDataset(Dataset):
         assert all(e in self.data[item] for e in ["context", "paraphrase", "completion"])
         
         output = {
-            "src": self.data[item]["context"].strip(),
-            "trg": self.data[item]["completion"].strip(),
-            "rephrase": self.data[item]["paraphrase"].strip(),
+            "src": str(self.data[item]["context"]).strip(),
+            "trg": str(self.data[item]["completion"]).strip(),
+            "rephrase": str(self.data[item]["paraphrase"]).strip(),
         }
         return output
 

@@ -162,6 +162,22 @@ def run(config):
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl")
         config.val_steps = 100
         assert len(edit_dev_dataset) == config.val_steps
+    elif config.date_data == "4K_test_ood-relation":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl")
+        config.val_steps = 350
+        assert len(edit_dev_dataset) == config.val_steps
+    elif config.date_data == "4K_test_ood-entity":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl")
+        config.val_steps = 350
+        assert len(edit_dev_dataset) == config.val_steps
+    elif config.date_data == "30K_test_id":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
+        config.val_steps = 500
+        assert len(edit_dev_dataset) == config.val_steps
+    elif config.date_data == "30K_test_ood":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl")
+        config.val_steps = 100
+        assert len(edit_dev_dataset) == config.val_steps
     else:
         raise NotImplementedError(f"date_data `{config.date_data}` is not supported")
     # else:
@@ -270,10 +286,10 @@ def run(config):
         )
         LOG.info(f"Saving to dir: {fpath}")
         all_results.to_excel(fpath, index=False)
-        io.dump_jsonlines(
-            edit_model_infos,
-            f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
-        )
+        # io.dump_jsonlines(
+        #     edit_model_infos,
+        #     f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
+        # )
 
 
 if __name__ == "__main__":

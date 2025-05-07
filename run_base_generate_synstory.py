@@ -186,18 +186,6 @@ def run(config):
     add_padding(tokenizer, model)
     model.to(config.device)
 
-    from data_classes.zsre import ZsreDataset
-
-    train_set = ZsreDataset(
-        tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-train-new_annotated_final.jsonl", config
-    )
-    val_set = ZsreDataset(tokenizer, f"{base_dir}/data/zsre/structured_zeroshot-dev-new_annotated_final.jsonl", config)
-
-    alg_module = importlib.import_module(f"algs.{config.alg}")
-    LOG.info(f"Loading class {config.alg.upper()} from module {alg_module}")
-    AlgClass = getattr(alg_module, config.alg.upper())
-    alg = AlgClass(model, config, lambda: copy.deepcopy(model))
-
     generation_config = GenerationConfig(
         do_sample=False,  # Greedy
         top_k=None,
@@ -212,52 +200,25 @@ def run(config):
 
     # trainer = EditTrainer(alg, config, train_set, val_set)
     assert hasattr(config, "date_data")
-    if config.date_data == "common":
-        question_type = "specificity"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl")
-        config.val_steps = 50
-    elif config.date_data == "common_continent":
-        question_type = "specificity"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid_continent.jsonl")
-        config.val_steps = 31
-    elif config.date_data == "common_train":
-        question_type = "specificity"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl")
-        config.val_steps = 515
-    elif config.date_data == "common_continent_train":
-        question_type = "specificity"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train_continent.jsonl")
-        config.val_steps = 69
-    elif config.date_data == "ood_v2_prefilter":
-        question_type = "ood_specificity"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/ood_questions_v2.jsonl")
-        config.val_steps = 1085
-    elif config.date_data == "country_syn":
-        question_type = "efficacy"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test.jsonl")
-    elif config.date_data == "country_syn_ood":
-        question_type = "efficacy"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood.jsonl")
-    elif config.date_data == "syn_data_neurips_curated_prefilter":
-        question_type = "ood_specificity"
-        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v1_curated_answered_prefiltered.jsonl")
-        config.val_steps = 4451
-    
-    # elif config.date_data == "syn_data_neurips_prefilter":
-    #     question_type = "ood_specificity"
-    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v1_answered_prefiltered.jsonl")
-    #     config.val_steps = 17461
-    # elif config.date_data == "syn_data_neurips_prefilter_v2":
-    #     question_type = "ood_specificity"
-    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v2_answered_prefiltered.jsonl")
-    #     config.val_steps = 19945
-    # elif config.date_data == "syn_data_neurips_prefilter_v3":
-    #     question_type = "ood_specificity"
-    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v3_answered_prefiltered_shortened.jsonl")
-    #     config.val_steps = 20148
-    # elif config.date_data == "country_syn_ood_hard":
-    #     question_type = "ood_efficacy"
-    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/country_syn_data/test_ood_hard.jsonl")
+    if config.date_data == "4K_test_id":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
+        config.val_steps = 500
+        assert len(val_data) == config.val_steps
+    elif config.date_data == "4K_test_ood":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl")
+        config.val_steps = 100
+        assert len(val_data) == config.val_steps
+    elif config.date_data == "4K_test_ood-relation":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl")
+        config.val_steps = 350
+        assert len(val_data) == config.val_steps
+    elif config.date_data == "4K_test_ood-entity":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl")
+        config.val_steps = 350
+        assert len(val_data) == config.val_steps
+    elif config.date_data == "30K_test_id":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
+        config.val_steps = 500
     else:
         raise ValueError(f"Unknown date_data: {config.date_data}")
 
@@ -273,107 +234,44 @@ def run(config):
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
     else:
         eos_token_id = tokenizer.eos_token_id
-
+    assert config.do_generation, "Generation is required for this script"
+    
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
-        # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
-        # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = val_data[i]
-        if any(x in config.date_data for x in ["common_", "common", "ood_v2"]):
-            test_queries = [
-                {"question": datum["question"], "answer": datum["answer"]}
-                # {"question": datum["year_after_question"], "answer": datum["year_after_answer"]}
-            ]
-        elif config.date_data == "country_syn_ood_hard":
-            test_queries = datum["ood_questions"]
-        elif "syn_data_neurips_prefilter" in config.date_data or "syn_data_neurips_curated_prefilter" in config.date_data:
-            test_queries = [datum]
-        else:
-            test_queries = datum["questions"]
-
-        # prepare [Q][A] accuracy and generation inputs
-
-        for q_i, test_query in enumerate(test_queries):
-            # import pdb; pdb.set_trace()
-            if config.ice:
-                test_queries_q_str = datum["text"] + "\n\n" + test_query["question"].strip()
+        
+        if config.ice:
+            assert datum["text"].startswith(datum["subject"])
+            if datum["subject_type"] == "person":
+                prepend_txt = "Imagine that someone named " + datum["text"]
             else:
-                test_queries_q_str = test_query["question"].strip()
-            # import pdb; pdb.set_trace()
-            if hasattr(config, "add_icl") and config.add_icl:
-                test_queries_q_str = icl_prompt + "\nQ: " + test_queries_q_str + "\nA:"
-            
-            test_queries_a_str = test_query["answer"].strip()
-            if len(test_queries_a_str) == 0:
-                continue
-            # test_queries_q_str = test_queries[0]["question"]
-            # test_queries_a_str = test_queries[0]["answer"]
-            test_queries_str = test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str
+                assert datum["subject_type"] == "company"
+                prepend_txt = "Imagine that a company named " + datum["text"]
 
-            acc_toks = add_eos(
-                tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=True),
-                eos_token_id,
-                ignore=not config.add_eos,
-            )
-            acc_toks = utils.dict_to(acc_toks, config.device)
-            sft_labels = val_set.get_edit_labels(
-                add_eos(
-                    tokenizer(
-                        [(" " if test_queries_a_str[0] != " " else "") + test_queries_a_str],
-                        padding=True,
-                        return_tensors="pt",
-                        add_special_tokens=False,
-                    ),
-                    eos_token_id,
-                    ignore=not config.add_eos,
-                )["input_ids"]
-            ).to(config.device)
+        question_types = [
+            ("efficacy", datum["questions"]),
+        ]
+        
+        for question_type, test_queries in question_types:
+            for question_key in ["alias_question", "unalias_question"][:]:
+                for q_i, test_query in enumerate(test_queries):
+                    test_queries_q_str = test_query[question_key].strip()
+                    if config.ice:
+                        # import pdb; pdb.set_trace()
+                        test_queries_q_str = prepend_txt + " " + test_query[question_key].strip()
+                    
+                    test_queries_a_str = str(test_query["answer"]).strip()
+                    
+                    pre_result_df = generate(
+                        test_queries_q_str, test_queries_a_str, config, model, tokenizer, generation_config
+                    )
 
-            clm_labels = val_set.get_edit_labels(acc_toks["input_ids"]).to(config.device)
-
-            print("Input for [Q][A] Accuracy: ")
-            print("[" + tokenizer.decode(acc_toks["input_ids"][0]) + "]")
-            print("SFT label:", "[" + tokenizer.decode(sft_labels[0]) + "]")
-            print("CLM label(before ShiftLeft):", "[" + tokenizer.decode(clm_labels[0]) + "]")
-            print()
-            # with torch.no_grad():
-            #     pre_edit_logits = trainer.model(
-            #         input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"]
-            #     )
-
-            #     pre_edit_sft_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=False)
-            #     pre_edit_sft_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, sft_labels, exact_match=True)
-            #     pre_edit_clm_pm_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=False)
-            #     pre_edit_clm_em_dict = trainer.model.edit_loss_fn(pre_edit_logits, clm_labels, exact_match=True)
-
-            if config.do_generation:
-                # import pdb; pdb.set_trace()
-                pre_result_df = generate(
-                    test_queries_q_str + (" " if hasattr(config, "add_icl") and config.add_icl else ""), test_queries_a_str, config, model, tokenizer, generation_config
-                )
-            else:
-                pre_result_df = pd.DataFrame([{"predicted_answer_idx": 0}])
-            assert len(pre_result_df) == 1
-
-            pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
-            pre_result_df.insert(1, "stage", "pre-edit")
-            if question_type == "efficacy" or question_type == "ood_efficacy":
-                pre_result_df.insert(0, "question_tag", f"{question_type}_{test_query['question_type']}")
-            elif config.date_data == "ood_v2_prefilter":
-                pre_result_df.insert(0, "domain", f"{datum['domain']}")
-                pre_result_df.insert(0, "template", f"{datum['template']}")
-                pre_result_df.insert(0, "key", f"{datum['key']}")
-            elif "syn_data_neurips_prefilter" in config.date_data or "syn_data_neurips_curated_prefilter" in config.date_data:
-                # import pdb; pdb.set_trace()
-                pre_result_df.insert(0, "entity_type", f"{datum['entity_type']}")
-                pre_result_df.insert(0, "entity_name", f"{datum['entity_name']}")
-                # pre_result_df.insert(0, "entity_tag", f"{datum['entity_tag']}")
-                pre_result_df.insert(0, "template", f"{datum['template']}")
-            else:
-                pre_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
-            pre_result_df.insert(0, "question_type", f"{question_type}")
-            pre_result_df.insert(0, "id", str(i))
-            
-            all_results.append(pre_result_df)
+                    pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [test_queries_q_str]))
+                    pre_result_df.insert(0, "stage", "pre-edit")
+                    pre_result_df.insert(0, "question_type", question_type)
+                    pre_result_df.insert(0, "question_key", question_key)
+                    pre_result_df.insert(0, "id", str(i))
+                    
+                    all_results.append(pre_result_df)
 
     all_results = pd.concat(all_results)
 
