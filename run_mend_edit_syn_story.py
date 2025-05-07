@@ -178,6 +178,14 @@ def run(config):
         edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl")
         config.val_steps = 100
         assert len(edit_dev_dataset) == config.val_steps
+    elif config.date_data == "30K_test_ood-relation":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl")
+        config.val_steps = 350
+        assert len(edit_dev_dataset) == config.val_steps
+    elif config.date_data == "30K_test_ood-entity":
+        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl")
+        config.val_steps = 350
+        assert len(edit_dev_dataset) == config.val_steps
     else:
         raise NotImplementedError(f"date_data `{config.date_data}` is not supported")
     # else:
