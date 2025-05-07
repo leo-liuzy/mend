@@ -11,24 +11,21 @@ declare -A name2id=(
 
 n_val=200 # 50
 prompt=no
-task=ripple_edits
+task=syn_story
 
 # exp_dir_name=ripple_edits_heavy-noshare-mid-upper3
 # archive=${name2id[$exp_dir_name]}
 
 # config_name=llama3.2-1B-eos-sft-top 
-date_data=all
+date_data="4K_test_id"
 
-# mom2_dataset="wikipedia"
+mom2_dataset="synstory_4K"
 
-for config_name in llama3.2-1B-eos-sft-mid-upper  # llama3.2-1B-eos-sft-mid-upper # llama3.2-1B-eos-sft-top # llama3.2-1B-eos-sft-mid-upper
-do
-for mom2_dataset in "ripple_all" 
+for config_name in llama3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-top3
 do
 
 # python run_mend_edit_ripple_edits.py +alg=mend +experiment=${task} +model=llama3.2-1B-eos-sft archive=${archive} eval_only=True generation.save_dir=ripple_exp_output/${exp_dir_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} # mend.shared=False
 
-python run_memit_edit_ripple_edits.py +alg=mend +experiment=${task} +model=${config_name} eval_only=True generation.save_dir=ripple_exp_output/${config_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} +config_name=${config_name} +mom2_dataset=${mom2_dataset} # mend.shared=False
+python run_memit_edit_syn_story.py +alg=mend +experiment=${task} +model=${config_name} eval_only=True generation.save_dir=synstory_exp_out/${config_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} +config_name=${config_name} +mom2_dataset=${mom2_dataset} # mend.shared=False
 
-done
 done

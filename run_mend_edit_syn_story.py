@@ -15,6 +15,7 @@ import gc
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
 from knowledge_propagation.modules.inferencers import QAInferencer
+
 # from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
 
@@ -49,6 +50,7 @@ icl_prompt = "\n".join(
         "A: No",
     ]
 )
+
 
 def generate_multi_answers(
     context: str,
@@ -94,7 +96,8 @@ def generate_multi_answers(
             }
         ]
     )
-    return model_response # score_df(model_response)
+    return model_response  # score_df(model_response)
+
 
 def add_padding(tokenizer, model):
     import transformers
@@ -155,35 +158,51 @@ def run(config):
 
     # pdb.set_trace()
     if config.date_data == "4K_test_id":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+        )
         config.val_steps = 500
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "4K_test_ood":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl"
+        )
         config.val_steps = 100
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "4K_test_ood-relation":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
+        )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "4K_test_ood-entity":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl"
+        )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "30K_test_id":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+        )
         config.val_steps = 500
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "30K_test_ood":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl"
+        )
         config.val_steps = 100
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "30K_test_ood-relation":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
+        )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "30K_test_ood-entity":
-        edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl")
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl"
+        )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
     else:
@@ -250,7 +269,6 @@ def run(config):
             logging.info(f"Question type: {question_type}")
             for question_key in ["alias_question", "unalias_question"]:
                 for q_i, question in enumerate(questions):
-                    
                     post_result_df = generate_multi_answers(
                         context=question[question_key],
                         answers=str(question["answer"]),
@@ -274,7 +292,6 @@ def run(config):
             torch.cuda.empty_cache()
 
         # all_datum_result_df = pd.concat(all_datum_result_df)
-
 
     all_results = pd.concat(all_results)
 
