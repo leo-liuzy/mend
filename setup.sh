@@ -19,3 +19,4 @@ pip install ipython
 pip install pdbpp
 pip install anthropic
 pip install sqlitedict
+pip install overrides

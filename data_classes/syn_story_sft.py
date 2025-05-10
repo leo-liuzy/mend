@@ -7,11 +7,16 @@ from transformers import BartTokenizerFast, BartTokenizer
 import logging
 import typing
 import json
+from knowledge_propagation.utils import io
+from utils import StrEnum
+import numpy as np
+from copy import deepcopy
+
 
 LOG = logging.getLogger(__name__)
+    
 
-
-class ZsreDataset(Dataset):
+class SynStorySFTDataset(Dataset):
     """
     ! Leo: adding support for running zsre with Decoder-only model
 
@@ -25,82 +30,78 @@ class ZsreDataset(Dataset):
         config,
         size: typing.Optional[int] = None,
         max_length=32,
+        is_eval=False,
     ):
         super().__init__()
         self.tok = tokenizer
-        self.data = []
+        self.data = io.load_jsonlines(data_path)
         self.config = config
-
-        self.show_first_example = False
-        
-        def extract(d):
-            ex = {k: d[k] for k in ["input", "prediction", "alternatives", "filtered_rephrases", "output"]}
-            if ex["input"] in ex["filtered_rephrases"]:
-                ex["filtered_rephrases"].remove(ex["input"])
-            return ex
-
-        with jsonlines.open(data_path) as f:
-            for d in f:
-                extracted = extract(d)
-                if len(extracted["alternatives"]) > 0 and len(extracted["filtered_rephrases"]) > 0:
-                    self.data.append(extracted)
         
         if size is not None:
             self.data = self.data[:size]
-            
+        self.show_first_example = False
+        self.is_eval = is_eval
+        assert self.config.heavy_outerloop, "heavy_outerloop must be used."
+        assert self.config.data.rephrase, "propogation question must be used."
         self.max_length = max_length
         if self.config.data.zsre_nq: # ! Leo: original if-condition: `and "train" not in data_path`
             self.use_nq = True
             LOG.info("** Using natural questions for zsre base samples **")
             from data_classes.nq import NQDataset
-            self.nq = NQDataset(self.config.data.nq_path + ("/train.json" if "train" in data_path else "/validation.json"),
-                                tokenizer, config)
+            self.nq = NQDataset(self.config.data.nq_path + ("/train.json" if "train" in data_path else "/validation.json"),tokenizer, config)
         else:
             self.use_nq = False
 
     def __len__(self):
-        return len(self.data)
+        if self.config.heavy_outerloop or self.is_eval:
+            
+            return len(self.data)
+        else:
+            return len(self.data) * len(self.data[0]["questions"])
 
     def __getitem__(self, item, seed=None):
-        new_label = random.choice(self.data[item]["alternatives"])
-        rephrase = random.choice(self.data[item]["filtered_rephrases"])
+        assert all(e in self.data[item] for e in ["facts", "questions"])
+        
+        facts = deepcopy(self.data[item]["facts"])
+        np.random.shuffle(facts)
+        input_questions = [f["prefix"] for f in facts]
+        input_answers = [f["target"] for f in facts]
+        
+        if self.config.heavy_outerloop or self.is_eval:
+            qas = deepcopy(self.data[item]["questions"])
+        else:
+            # randomly sample one from the list of questions
+            qas = deepcopy([random.choice(self.data[item]["questions"])])
+        
+        # ! this is to avoid model exploiting potential heuristics in data order.
+        
+        np.random.shuffle(qas)
+        input_answers = [str(a) for a in input_answers]
+        input_answers = [("" if len(a) != 0 and a[0] == " " else " ") + a for a in input_answers]
+        input_questions = [q_ + ans_ for q_, ans_ in zip(input_questions, input_answers)]
+        
+        
+        answers = [str(qa["answer"]) for qa in qas]
+        answers = [("" if len(a) != 0 and a[0] == " " else " ") + a for a in answers]
+        
+        questions = [qa["alias_question"] for qa in qas]
+        questions = [q_ + ans_ for q_, ans_ in zip(questions, answers)]
+        
+        
         output = {
-            "src": self.data[item]["input"],
-            "pred": self.data[item]["prediction"],
-            "rephrase": rephrase,
-            "alt": new_label,
-            "answers": [x["answer"] for x in self.data[item]["output"]],
-            "cond": "{} >> {} || {}".format(
-                self.data[item]["prediction"],
-                new_label,
-                self.data[item]["input"],
-            ),
+            "input_questions": input_questions,
+            "input_answers": input_answers,
+            "questions": questions,
+            "answers": answers,
         }
-
         return output
 
     def collate_fn(self, batch):
-        src = [b["src"] for b in batch]
+        input_questions = [s for b in batch for s in b["input_questions"]]
+        input_answers = [s for b in batch for s in b["input_answers"]]
         
-        ne = self.config.data.n_edits
-        """ 
-        ! original line
-        trg = (
-            [b["answers"][0] for b in batch[:-ne]] +
-            [b["alt"] for b in batch[-ne:]]
-        )
-        """
-        trg = (
-            [b["answers"][0] for b in batch[:-ne]] +
-            [b["alt"] for b in batch[-ne:]]
-        )
-        
-        
-        trg = [("" if len(trg_) != 0 and trg_[0] == " " else " ") + trg_ for trg_ in trg]
-        src = [src_ + trg_ for src_, trg_ in zip(src, trg)]
-        
-        rephrase = [b["rephrase"] for b in batch]
-        rephrase = [rephrase_ + trg_ for rephrase_, trg_ in zip(rephrase, trg)]
+        answers = [s for b in batch for s in b["answers"]]
+        questions = [s for b in batch for s in b["questions"]]
         
 
         batches = {
@@ -118,16 +119,16 @@ class ZsreDataset(Dataset):
                         )
                     ], dim=-1)
             for k1, v1 in {
-                "src": src,
-                "trg": trg,
-                "cond": [b["cond"] for b in batch[-ne:]],
-                "rephrase": rephrase[-ne:],
+                "input_questions": input_questions,
+                "input_answers": input_answers,
+                "questions": questions,
+                "answers": answers,
             }.items()
             for k2, v2 in self.tok(
                 v1,
                 return_tensors="pt",
                 padding=True,
-                add_special_tokens=k1 == "src",
+                add_special_tokens="answers" not in k1, # make the SFT label free of BOS
                 max_length=self.max_length,
                 truncation=True,
             ).items()
@@ -151,33 +152,23 @@ class ZsreDataset(Dataset):
         while True:
             edit_idxs, loc_idxs = sampler.sample(batch_size)
             assert len(edit_idxs) == 1
-            idxs = loc_idxs + edit_idxs
-            toks = self.collate_fn([self[idx] for idx in idxs])
+            # idxs = loc_idxs + edit_idxs
+            toks = self.collate_fn([self[idx] for idx in edit_idxs])
 
-            ne = self.config.data.n_edits
-            edit_labels = self.get_edit_labels(toks["trg_input_ids"][-ne:])
-            label_length = edit_labels.size(1)
-
+            # ne = self.config.data.n_edits
             edit_inner = {}
-            edit_inner["input_ids"] = toks["src_input_ids"][-ne:]
-            edit_inner["attention_mask"] = toks["src_attention_mask"][-ne:]
-            edit_inner["labels"] = edit_labels
-            assert label_length <= edit_inner["input_ids"].size(1)
-
-            if self.config.data.rephrase:
-                edit_outer = {}
-                edit_outer["input_ids"] = toks["rephrase_input_ids"]
-                edit_outer["attention_mask"] = toks["rephrase_attention_mask"]
-                rephrase_length = edit_outer["input_ids"].size(1)
-                # this is bc rephrase_length might be shorter than src_length
-                if label_length > rephrase_length:
-                    assert (edit_labels[:, :label_length-rephrase_length] == -100).all()
-                    edit_labels = edit_labels[:, -rephrase_length:]
+            edit_inner["input_ids"] = toks["input_questions_input_ids"]
+            edit_inner["attention_mask"] = toks["input_questions_attention_mask"]
+            edit_inner["labels"] = self.get_edit_labels(toks["input_answers_input_ids"])
                 
-                edit_outer["labels"] = edit_labels
-            else:
-                edit_outer = edit_inner
+            assert edit_inner["labels"].size(1) <= edit_inner["input_ids"].size(1)
 
+            # in this case, rephrase means using propogation questions for L_e
+            edit_outer = {}
+            edit_outer["input_ids"] = toks["questions_input_ids"]
+            edit_outer["attention_mask"] = toks["questions_attention_mask"]
+            edit_outer["labels"] = self.get_edit_labels(toks["answers_input_ids"])
+            
             loc = {}
             if self.use_nq:
                 batch = [self.nq[idx] for idx in loc_idxs]
@@ -190,40 +181,30 @@ class ZsreDataset(Dataset):
                 trg_toks = dict(self.tok(answers, return_tensors="pt", padding=True, max_length=self.max_length, truncation=True, add_special_tokens=False))
                 loc["labels"] = self.get_edit_labels(trg_toks["input_ids"])
             else:
-                loc["input_ids"] = toks["src_input_ids"][:-ne]
-                loc["attention_mask"] = toks["src_attention_mask"][:-ne]
-                loc["labels"] = self.get_edit_labels(toks["trg_input_ids"][:-ne])
-
-            cond = {k[5:]: v for k, v in toks.items() if k.startswith("cond")}
+                loc = edit_inner
 
             if not self.show_first_example:
+                LOG.info("is_eval: " + str(self.is_eval))
                 LOG.info("Edit_inner:")
                 LOG.info("Input: " +  "\n@@\n".join(self.tok.batch_decode(edit_inner["input_ids"])))
-                LOG.info("Input: " +  "\n@@\n".join([str(x) for x in edit_inner["input_ids"]]))
                 LOG.info("Label:" +  "\n@@\n".join(self.tok.batch_decode(torch.where(edit_inner["labels"] == -100, self.tok.pad_token_id, edit_inner["labels"]))))
-                LOG.info("Label: " +  "\n@@\n".join([str(x) for x in torch.where(edit_inner["labels"] == -100, self.tok.pad_token_id, edit_inner["labels"])]))
-                LOG.info("\n\n")
                 
                 LOG.info("Edit_outer:")
                 LOG.info("Input: " + "\n@@\n".join(self.tok.batch_decode(edit_outer["input_ids"])))
-                LOG.info("Input: " +  "\n@@\n".join([str(x) for x in edit_outer["input_ids"]]))
                 LOG.info("Label: " +  "\n@@\n".join(self.tok.batch_decode(torch.where(edit_outer["labels"] == -100, self.tok.pad_token_id, edit_outer["labels"]))))
-                LOG.info("Label: " +  "\n@@\n".join([str(x) for x in torch.where(edit_outer["labels"] == -100, self.tok.pad_token_id, edit_outer["labels"])]))
-                LOG.info("\n\n")
                 
                 LOG.info("loc:")
                 LOG.info("Input: " + "\n@@\n".join(self.tok.batch_decode(loc["input_ids"])))
-                LOG.info("Input: " +  "\n@@\n".join([str(x) for x in loc["input_ids"]]))
                 LOG.info("Label: " +  "\n@@\n".join(self.tok.batch_decode(torch.where(loc["labels"] == -100, self.tok.pad_token_id, loc["labels"]))))
-                LOG.info("Label: " +  "\n@@\n".join([str(x) for x in torch.where(loc["labels"] == -100, self.tok.pad_token_id, loc["labels"])]))
-                # exit(0)
+                
                 self.show_first_example = True
-            
+            # cond = {k[5:]: v for k, v in toks.items() if k.startswith("cond")}
+            # import pdb; pdb.set_trace()
             batch = {
                 "edit_inner": edit_inner,
                 "edit_outer": edit_outer,
                 "loc": loc,
-                "cond": cond,
+                "cond": None,
                 "raw": toks["raw"]
             }
 

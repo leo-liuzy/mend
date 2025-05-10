@@ -5,15 +5,15 @@
 #SBATCH -p gh          # Queue (partition) name
 #SBATCH -N 1              # Total # of nodes
 ##SBATCH --ntasks-per-node=1 
-#SBATCH -t 12:00:00        # Run time (hh:mm:ss)
+#SBATCH -t 16:00:00        # Run time (hh:mm:ss)
 #SBATCH -A CCR25005       # Allocation name (req'd if you have more than 1)
 
 
 export CUDA_VISIBLE_DEVICES=0
 
-train_set_size=4_000
+train_set_size=40_000
 
-python -m run +alg=mend +experiment=syn_story +model=llama3.2-1B-eos-sft-template-format-v3-lr2e-6-sample-10-4-15 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False
+python -m run +alg=mend +experiment=syn_story +model=llama3.2-1B-eos-sft-template-format-v3-lr2e-6-sample-10-4-15 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False train_prefix=30K
 
 # python -m run +alg=mend +experiment=ripple_edits +model=llama3.2-1B-eos-sft-mid-upper val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False seed=1
 

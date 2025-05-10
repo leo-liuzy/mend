@@ -166,6 +166,7 @@ def get_tokenizer(config):
         # tokenizer.pad_token_id = tokenizer.eos_token_id
         tokenizer.padding_side = "left"
     elif isinstance(tokenizer, transformers.Qwen2Tokenizer) or isinstance(tokenizer, transformers.Qwen2TokenizerFast):
+        # tokenizer = transformers.Qwen2Tokenizer.from_pretrained(tok_name,)
         tokenizer.padding_side = "left"
     else:
         raise NotImplementedError(f"From Leo: tokenizer is out of scope `{tokenizer}`")
