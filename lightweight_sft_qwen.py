@@ -6,10 +6,16 @@ import pdb
 import pickle as pkl
 from dataclasses import dataclass, field, asdict
 from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser
+from peft import LoraConfig, TaskType, get_peft_model, LoraModel, PeftModel
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
 from knowledge_propagation.utils import vars, io
 
+
+@dataclass
+class CustomConfig:
+    is_peft: bool
+    eos_sft: bool
 
 def prepare_sft_text(args, dataset: list, tokenizer):
     # assert len(tokenizer.additional_special_tokens) == 1
@@ -31,10 +37,14 @@ def prepare_sft_text(args, dataset: list, tokenizer):
     return new_dataset
 
 
-parser = HfArgumentParser((SFTConfig,))
-(args,) = parser.parse_args_into_dataclasses()
-# model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/qwen/Qwen2.5-1.5B"
-model_name_or_path = "/u/zliu/datastor1/mend/models/Qwen2.5-1.5B-eos-sft"
+parser = HfArgumentParser((SFTConfig, CustomConfig))
+(args, custom_args) = parser.parse_args_into_dataclasses()
+print(custom_args)
+print(args.output_dir)
+if custom_args.eos_sft:
+    model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/qwen/Qwen2.5-1.5B"
+else:
+    model_name_or_path = "/u/zliu/datastor1/mend/models/Qwen2.5-1.5B-eos-sft"
 
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False)
@@ -62,9 +72,12 @@ assert tokenizer.eos_token_id != tokenizer.pad_token_id
 #     args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl"), tokenizer
 # )
 
-train_dataset = prepare_sft_text(
-    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/model_prep/light_weight_sft_content_curated_v1_sample=10.jsonl"), tokenizer
-)
+if custom_args.eos_sft:
+    train_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/train.jsonl"), tokenizer)
+else:
+    train_dataset = prepare_sft_text(
+        args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/model_prep/light_weight_sft_content_curated_v1_sample=10.jsonl"), tokenizer
+    )
 
 # train_dataset = prepare_sft_text(
 #     args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl"), tokenizer
@@ -72,6 +85,19 @@ train_dataset = prepare_sft_text(
 # valid_dataset = prepare_sft_text(
 #     args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl"), tokenizer
 # )
+
+if custom_args.is_peft:
+
+    peft_config = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,
+        inference_mode=False,
+        r = 128,
+        target_modules="all-linear",
+    )
+
+    model = get_peft_model(model, peft_config)
+    model.print_trainable_parameters()
+    args.output_dir += f"-r{peft_config.r}"
 
 response_template = "?"  # tokenizer.additional_special_tokens[0] # "?" alternative "Ġ?"
 
@@ -83,9 +109,7 @@ for datum in train_dataset:
         filtered_train_dataset.append(datum)
 # pdb.set_trace()
 train_dataset = Dataset.from_list(filtered_train_dataset)
-# valid_dataset = Dataset.from_list(valid_dataset)
-
-
+# valid_dataset = Dataset.from_list(valid_dataset) 
 
 collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
 
