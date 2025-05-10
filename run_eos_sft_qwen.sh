@@ -1,15 +1,27 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=2
 
 export WANDB_MODE=online
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
-# this is for eos-sft
-# bs=128
-# per_device_train_batch_size=16
 
-# this is for template-sft
-bs=10 
-per_device_train_batch_size=2
+
+eos_sft=True
+do_lora=True
+
+if [ "$eos_sft" = True ]; then
+    # this is for eos-sft
+    bs=128
+    per_device_train_batch_size=16
+    lr=1e-5 # this is for eos-sft
+    output_dir=models/Qwen2.5-1.5B-eos-sft
+else
+    # this is for template-sft
+    bs=10 
+    per_device_train_batch_size=2
+    lr=2e-6 
+fi
+
+
 grad_acc=$((bs / gpu_count / per_device_train_batch_size))
 
 weight_decay=0.1
@@ -19,13 +31,24 @@ seed=42
 warmup_ratio=0.03
 max_seq_length=512
 epoch=2
-# max_steps=1
 
-lr=2e-6 
-# lr=1e-5 # this is for eos-sft
+if [ "$do_lora" = True ]; then
+    # lora
+    
+    if [ "$eos_sft" = True ]; then
+        # this is for eos-sft
+        lr=1e-4
+        output_dir=models/Qwen2.5-1.5B-eos-sft-lr${lr}
+    else
+        # this is for template-sft
+        lr=2e-5
+        output_dir=models/Qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
+    fi
+    output_dir=${output_dir}-lora
+fi
 
-# output_dir=models/Qwen2.5-1.5B-eos-sft # -template-format-curated-v1-lr${lr}-sample-10
-output_dir=models/Qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
+# output_dir=models/Qwen2.5-1.5B-eos-sft-lora # -template-format-curated-v1-lr${lr}-sample-10
+# output_dir=models/Qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
 # model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
 
 # accelerate launch --config_file="fsdp_config.yaml" \
@@ -55,5 +78,7 @@ python lightweight_sft_qwen.py \
     --eval_on_start=False \
     --report_to="wandb" \
     --num_train_epochs=${epoch} \
-    --run_name="lightweight-eos-sft"
+    --run_name="lightweight-eos-sft"\
+    --is_peft=${do_lora} \
+    --eos_sft=${eos_sft} \
     # --bf16=True \
