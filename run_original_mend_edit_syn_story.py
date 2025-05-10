@@ -15,7 +15,7 @@ import gc
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
 from knowledge_propagation.modules.inferencers import QAInferencer
-
+import pdb
 # from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
 
@@ -24,7 +24,6 @@ from knowledge_propagation.modules.evaluators import (
     RougeEvaluator,
     OpenAIEvaluator,
 )
-from typing import List, Dict
 
 from copy import deepcopy
 import models
@@ -50,53 +49,6 @@ icl_prompt = "\n".join(
         "A: No",
     ]
 )
-
-
-def generate_multi_answers(
-    context: str,
-    answers: List[str],
-    config,
-    model,
-    tokenizer,
-    generation_config,
-):
-    inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
-    ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
-
-    inputs = {k: v.to(config.device) for k, v in inputs.items()}
-    print(
-        "Input for generation:",
-        "[" + "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"])) + "]",
-    )
-    print("Label for generation:", "[" + str(answers) + "]")
-    print("--------------------")
-
-    generation_output = model.generate(
-        **inputs,
-        generation_config=generation_config,
-        pad_token_id=tokenizer.pad_token_id,
-        return_dict_in_generate=True,
-    )
-    generated_texts = tokenizer.batch_decode(generation_output.sequences, skip_special_tokens=True)
-    # import pdb; pdb.set_trace()
-    generated_texts = [t.replace(ctx_decoded, "") for t in generated_texts]
-    predicted_answer = generated_texts[0]
-    if hasattr(config, "add_icl") and config.add_icl:
-        # if using ICL, extract by the first new line
-        if "\n" in predicted_answer:
-            predicted_answer = predicted_answer[: predicted_answer.find("\n")]
-
-    model_response = pd.DataFrame(
-        [
-            {
-                "question": context,
-                "answer": answers,
-                "predicted_answer_idx": 0,
-                "predicted_answer": predicted_answer.strip(),
-            }
-        ]
-    )
-    return model_response  # score_df(model_response)
 
 
 def add_padding(tokenizer, model):
@@ -159,56 +111,30 @@ def run(config):
     # pdb.set_trace()
     if config.date_data == "4K_test_id":
         edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_structure_data_id_entity152_rel31.jsonl"
         )
         config.val_steps = 500
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "4K_test_ood":
         edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl"
-        )
-        config.val_steps = 350
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "4K_test_ood-relation":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_structure_data_ood_entity37_rel7.jsonl"
         )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
     elif config.date_data == "4K_test_ood-entity":
         edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl"
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_structure_data_ood-entity_entity37_rel31.jsonl"
         )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "30K_test_id":
+    elif config.date_data == "4K_test_ood-relation":
         edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
-        )
-        config.val_steps = 500
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "30K_test_ood":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl"
-        )
-        config.val_steps = 100
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "30K_test_ood-relation":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
-        )
-        config.val_steps = 350
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "30K_test_ood-entity":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl"
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_structure_data_ood-relation_entity152_rel7.jsonl"
         )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
     else:
-        raise NotImplementedError(f"date_data `{config.date_data}` is not supported")
-    # else:
-    # else:
+        raise NotImplementedError("Only all_propagation is supported for date_data")
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
 
@@ -217,25 +143,32 @@ def run(config):
     # trainer.validate(log=True)
     assert config.val_steps <= len(edit_dev_dataset)
     assert config.eval_only
-    if hasattr(config, "add_icl") and config.add_icl:
-        eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
-    else:
-        eos_token_id = tokenizer.eos_token_id
+
+    eos_token_id = tokenizer.eos_token_id
 
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
         datum = edit_dev_dataset[i]
 
-        sentences = [datum["text"]]
+        prefixs = [f["prefix"] for f in datum["facts"]]
+        assert config.edit_loss == EditLoss.sft, f"edit_loss `{config.edit_loss}` is not supported"
+        # import pdb; pdb.set_trace()
+        targets = [" " + f["target"].strip() + tokenizer.eos_token for f in datum["facts"]]
+        sentences = [p + t for p, t in zip(prefixs, targets)]
 
-        assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
-        sentences_toks = targets_toks = add_eos(
-            tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=True),
-            eos_token_id,
-            ignore=not config.add_eos,
+        tokenizer.padding_side = "left"
+        sentences_toks = add_eos(
+            tokenizer(sentences, padding=True, return_tensors="pt"), eos_token_id, ignore=True
         )
-
+        tokenizer.padding_side = "right"
+        targets_toks = add_eos(
+            tokenizer(targets, padding=True,  return_tensors="pt", add_special_tokens=False),
+            eos_token_id,
+            ignore=True, # since I already manually added eos in the targets
+        )
+        tokenizer.padding_side = "left"
+        # import pdb; pdb.set_trace()
         edit_inner = {
             "input_ids": sentences_toks["input_ids"],
             "attention_mask": sentences_toks["attention_mask"],
@@ -252,29 +185,24 @@ def run(config):
         # import pdb; pdb.set_trace()
         edit_inner = utils.dict_to(edit_inner, config.device)
 
-        all_datum_result_df = []
-
-        # edit the model with MEND
-        edited_model, model_info = trainer.model.edit(edit_inner)
-        model_info["input"] = sentences[0]
-        model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
-        edit_model_infos.append(model_info)
-
-        # import pdb; pdb.set_trace()
         question_types = [
             ("efficacy", datum["questions"]),
         ]
+        
+        # edit the model with MEND
+        edited_model, model_info = trainer.model.edit(edit_inner)
 
         for question_type, questions in question_types:
             logging.info(f"Question type: {question_type}")
             for question_key in ["alias_question", "unalias_question"]:
                 for q_i, question in enumerate(questions):
-                    post_result_df = generate_multi_answers(
-                        context=question[question_key],
-                        answers=str(question["answer"]),
-                        config=config,
+
+                    post_result_df = get_eval_result(
+                        question=question[question_key],
+                        answer=str(question["answer"]),
                         model=edited_model.model,
                         tokenizer=tokenizer,
+                        config=config,
                         generation_config=generation_config,
                     )
                     post_result_df.insert(0, "question_type", question_type)
@@ -283,6 +211,7 @@ def run(config):
                     post_result_df.insert(
                         0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
                     )
+
                     post_result_df.insert(0, "id", str(i))
                     all_results.append(post_result_df)
 
@@ -290,8 +219,6 @@ def run(config):
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-
-        # all_datum_result_df = pd.concat(all_datum_result_df)
 
     all_results = pd.concat(all_results)
 
@@ -306,10 +233,12 @@ def run(config):
         os.makedirs(save_dir, exist_ok=True)
         fpath = (
             f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if config.do_generation else 'wo'}-gen_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl"
+            + ("_e+s" if config.spec_question else "_e")
             + f"_{config.date_data}-question"
             + ".xlsx"
         )
         LOG.info(f"Saving to dir: {fpath}")
+
         all_results.to_excel(fpath, index=False)
         # io.dump_jsonlines(
         #     edit_model_infos,

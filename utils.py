@@ -9,6 +9,7 @@ import logging
 import torch
 from collections import defaultdict
 import math
+import pdb
 
 
 LOG = logging.getLogger(__name__)
@@ -147,7 +148,7 @@ def load_archive(path):
             for run_dir in os.listdir(search):
                 if path in run_dir:
                     matches.append(os.path.join(search, run_dir))
-
+        # pdb.set_trace()
         assert len(matches) == 1, f">1 matches for search {path}; specify exact path"
 
         full_run_dir = matches[0]

@@ -10,6 +10,7 @@ import torch
 import pandas as pd
 from omegaconf import OmegaConf
 from tqdm import tqdm
+import pdb
 
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
@@ -96,7 +97,7 @@ def add_padding(tokenizer, model):
 
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
     model.resize_token_embeddings(len(tokenizer))
-    if not isinstance(model, transformers.LlamaForCausalLM):
+    if not isinstance(model, transformers.LlamaForCausalLM) and not isinstance(model, transformers.Qwen2ForCausalLM):
         #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
         # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
@@ -133,6 +134,7 @@ def generate(
     generation_config,
 ):
     inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
+    # pdb.set_trace()
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
 
     inputs = {k: v.to(config.device) for k, v in inputs.items()}
@@ -219,6 +221,9 @@ def run(config):
     elif config.date_data == "30K_test_id":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
         config.val_steps = 500
+    # elif config.date_data == "syn_data_neurips_curated_postfilter":
+    #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v1_curated_answered_postfiltered.jsonl")
+    #     config.val_steps = 1036
     else:
         raise ValueError(f"Unknown date_data: {config.date_data}")
 
