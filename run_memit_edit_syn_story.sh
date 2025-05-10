@@ -19,7 +19,7 @@ task=syn_story
 # config_name=llama3.2-1B-eos-sft-top 
 date_data="4K_test_ood-relation"
 
-mom2_dataset="synstory_4K"
+mom2_dataset="synstory_4K"ll
 
 for config_name in llama3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-mid-upper
 do
