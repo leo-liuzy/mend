@@ -78,7 +78,7 @@ for datum in train_dataset:
     if all([x in tokenizer(text)["input_ids"] for x in tokenizer(response_template, add_special_tokens=False)["input_ids"]]):
         filtered_train_dataset.append(datum)
 # pdb.set_trace()
-train_dataset = Dataset.from_list(filtered_train_dataset)
+train_dataset = Dataset.from_list(filtered_train_dataset[:10])
 # valid_dataset = Dataset.from_list(valid_dataset)
 
 collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
@@ -96,6 +96,11 @@ trainer.train()
 trainer.model.config.pad_token_id = None
 trainer.model.resize_token_embeddings(original_vocab_size)
 trainer.model.save_pretrained(save_directory=args.output_dir)
+# trainer.save_model(output_dir=args.output_dir)
+# if trainer.is_fsdp_enabled and trainer.accelerator.is_main_process:
+#     trainer.accelerator.state.fsdp_plugin.set_state_dict_type("FULL_STATE_DICT")
+#     state_dict = trainer.accelerator.get_state_dict(trainer.model)
+#     trainer._save(output_dir=args.output_dir, state_dict=state_dict)
 
 trainer.accelerator.wait_for_everyone()
 

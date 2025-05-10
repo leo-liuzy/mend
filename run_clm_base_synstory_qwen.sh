@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=7
+export CUDA_VISIBLE_DEVICES=5
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -36,7 +36,7 @@ text_data="text"
 
 for tunable_params in "all" # "midupper3-mlp" # "all" 
 do 
-for example_idx in {0..349}
+for example_idx in 115 # {0..349}
 do
 
 echo "Test data: ${date_data}"
