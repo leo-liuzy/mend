@@ -1,19 +1,19 @@
 #!/bin/bash
-#SBATCH -J edit_layer-7-14       # Job name
+#SBATCH -J qwen-max       # Job name
 #SBATCH -o slurm-outputs/%x.o%j       # Name of stdout output file
 #SBATCH -e slurm-outputs/%x.e%j       # Name of stderr output file
 #SBATCH -p gh          # Queue (partition) name
 #SBATCH -N 1              # Total # of nodes
 ##SBATCH --ntasks-per-node=1 
-#SBATCH -t 12:00:00        # Run time (hh:mm:ss)
+#SBATCH -t 24:00:00        # Run time (hh:mm:ss)
 #SBATCH -A CCR25005       # Allocation name (req'd if you have more than 1)
 
 
-export CUDA_VISIBLE_DEVICES=5
+export CUDA_VISIBLE_DEVICES=0
 
-train_set_size=10000
+train_set_size=40_000
 
-python -m run +alg=mend +experiment=ripple_edits_all +model=llama3.2-1B-eos-sft-7-14 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=True all_propagation_in_outerloop=True
+python -m run +alg=mend +experiment=syn_story +model=qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-max val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False train_prefix=4K
 
 # python -m run +alg=mend +experiment=ripple_edits +model=llama3.2-1B-eos-sft-mid-upper val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False seed=1
 

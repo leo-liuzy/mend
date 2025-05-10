@@ -17,7 +17,7 @@ max_grad_norm=1.0
 
 seed=42
 warmup_ratio=0.03
-max_seq_length=512
+max_seq_length=128
 epoch=2
 # max_steps=1
 
@@ -53,5 +53,6 @@ python lightweight_sft_8B.py \
     --logging_steps=2 \
     --eval_on_start=False \
     --report_to="wandb" \
+    --bf16=True \
     --num_train_epochs=${epoch} \
     --run_name="lightweight-eos-sft"
