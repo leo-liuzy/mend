@@ -60,7 +60,8 @@ def multiclass_log_probs(pred, targ, shift=True, exact_match=True):
     mask = targ != -100
     targ[~mask] = NULL_TOKEN  # Can be any valid token, since we'll throw them out
     unmasked_log_probs = pred.log_softmax(-1).gather(-1, targ.unsqueeze(-1)).squeeze(-1)
-
+    # import pdb;
+    # pdb.set_trace()
     if exact_match:
         pred_ids = pred.argmax(-1).masked_fill(~mask, NULL_TOKEN)
         correct = pred_ids == targ

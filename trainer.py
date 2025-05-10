@@ -362,6 +362,8 @@ class EditTrainer(BaseTrainer):
             "ripple_edits_all_mend",
             "syn_story",
             "syn_story_mend",
+            "syn_story_ablate_paraphrase",
+            "syn_story_ablate_cpt",
         ]:
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"
