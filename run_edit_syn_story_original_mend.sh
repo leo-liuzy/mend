@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=5
+export CUDA_VISIBLE_DEVICES=0
 
 declare -A name2id=(
     # metatrain debug on date data
@@ -12,10 +12,10 @@ n_val=200
 prompt=no
 task=syn_story_mend
 
-exp_dir_name=synstory_4K_noshare_midupper3_ablate_cpt
+exp_dir_name=synstory_original_mend_noshare_midupper3
 archive=${name2id[$exp_dir_name]}
 
-for date_data in 4K_test_ood 4K_test_ood-entity 4K_test_ood-relation 4K_test_id
+for date_data in profiling
 do
 
 # midupper 
