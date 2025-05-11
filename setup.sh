@@ -20,3 +20,4 @@ pip install pdbpp
 pip install anthropic
 pip install sqlitedict
 pip install overrides
+pip install peft

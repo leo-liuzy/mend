@@ -41,10 +41,9 @@ parser = HfArgumentParser((SFTConfig, CustomConfig))
 (args, custom_args) = parser.parse_args_into_dataclasses()
 
 if custom_args.eos_sft:
-    model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.1-8B"
+    model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-3B"
 else:
-    model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.1-8B-eos-sft"
-
+    model_name_or_path = "/home1/09636/zyliu/work/mend/models/Llama-3.2-3B-eos-sft"
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False)
 tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, add_eos_token=True, use_fast=False)
@@ -95,7 +94,7 @@ for datum in train_dataset:
     ):
         filtered_train_dataset.append(datum)
 # pdb.set_trace()
-train_dataset = Dataset.from_list(filtered_train_dataset[:500])
+train_dataset = Dataset.from_list(filtered_train_dataset)
 # valid_dataset = Dataset.from_list(valid_dataset)
 
 collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)

@@ -3,20 +3,20 @@ export CUDA_VISIBLE_DEVICES=0 #,1,2,3 # 4,5,6,7
 export WANDB_MODE=online
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
-eos_sft=True
+eos_sft=False
 
 if [ "$eos_sft" = True ]; then
     # this is for eos-sft
     bs=128
-    per_device_train_batch_size=2
+    per_device_train_batch_size=16
     lr=1e-5 # this is for eos-sft
-    output_dir=models/Llama-3.1-8B-eos-sft
+    output_dir=models/Llama-3.2-3B-eos-sft
 else
     # this is for template-sft
     bs=10 
     per_device_train_batch_size=2
     lr=2e-6 
-    output_dir=models/Llama-3.1-8B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
+    output_dir=models/Llama-3.2-3B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
 fi
 
 
@@ -40,9 +40,10 @@ epoch=2
 # output_dir=models/Llama-3.1-8B-eos-sft
 # output_dir=models/Llama-3.1-8B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
 
-accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29601 \
-    lightweight_sft_8B.py \
+# accelerate launch --config_file="fsdp_config.yaml" \
+#     --main_process_port 29601 \
+
+python lightweight_sft_3B.py \
     --output_dir="${output_dir}" \
     --seed=${seed} \
     --learning_rate=${lr} \
@@ -70,4 +71,4 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --bf16=True \
     --num_train_epochs=${epoch} \
     --run_name="lightweight-eos-sft" \
-    --eos_sft=${eos_sft} \
+    --eos_sft=${eos_sft}
