@@ -95,7 +95,7 @@ def run(config):
         eos_token_id=tokenizer.eos_token_id,
     )
 
-    hparams = MEMITHyperParams.from_hparams(f"/data/users/zliu/EasyEdit/hparams/MEMIT/{config.config_name}")
+    hparams = MEMITHyperParams.from_hparams(f"{os.getenv('PROJ_PLAYGROUND')}/EasyEdit/hparams/MEMIT/{config.config_name}")
     hparams.mom2_dataset = config.mom2_dataset
     # hparams.mom2_dataset = "ripple_recent+popular"
     # hparams.mom2_dataset = "wikipedia"

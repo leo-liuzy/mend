@@ -31,7 +31,7 @@ base_model_name="Qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr2e-6-sample-1
 # date_data="all_propagation_ood"
 # date_data="all_propagation_ood_w_ood_country"
 
-date_data=test_id
+date_data=test
 text_data="text"
 
 for tunable_params in "all" # "midupper3-mlp" # "all" 
