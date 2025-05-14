@@ -1,3 +1,13 @@
+#!/bin/bash
+#SBATCH -J 3b-cpt       # Job name
+#SBATCH -o slurm-outputs/%x.o%j       # Name of stdout output file
+#SBATCH -e slurm-outputs/%x.e%j       # Name of stderr output file
+#SBATCH -p gh          # Queue (partition) name
+#SBATCH -N 1              # Total # of nodes
+##SBATCH --ntasks-per-node=1
+#SBATCH -t 16:00:00        # Run time (hh:mm:ss)
+#SBATCH -A CCR25005       # Allocation name (req'd if you have more than 1)
+
 export CUDA_VISIBLE_DEVICES=0
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
@@ -35,9 +45,9 @@ base_model_name="Llama-3.2-3B-eos-sft-template-format-curated-v1-lr2e-6-sample-1
 date_data=test_ood-relation
 text_data="text"
 
-for tunable_params in "all" # "midupper3-mlp" # "all" 
-do 
-for example_idx in {0..349}
+for tunable_params in "all" # "midupper3-mlp" # "all"
+do
+for example_idx in {182..349}
 do
 
 echo "Test data: ${date_data}"
@@ -70,7 +80,7 @@ python clm_baseline_syn_story.py \
     --date_data=${date_data} \
     --text_data=${text_data} \
     --tunable_params=${tunable_params} \
-    --base_model_name=${base_model_name} 
+    --base_model_name=${base_model_name}
 
 done
 done
@@ -78,7 +88,7 @@ done
 # date_data="test_ood"
 
 # for tunable_params in "all" "midupper3-mlp"
-# do 
+# do
 # for example_idx in {0..99} #..99} #  47 48 49 51 52 53 54 59 71 72 {75..99} # {0..99} # {0..999}
 # do
 # echo "Test data: ${date_data}"
@@ -113,7 +123,7 @@ done
 #     --date_data=${date_data} \
 #     --text_data=${text_data} \
 #     --tunable_params=${tunable_params} \
-#     --base_model_name=${base_model_name} 
+#     --base_model_name=${base_model_name}
 
 # done
 # done

@@ -258,17 +258,25 @@ os.makedirs(exp_save_dir, exist_ok=True)
 
 if custom_cfg.date_data == "test":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_id"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+    )
 elif custom_cfg.date_data == "test_ood":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl")
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl"
+    )
 elif custom_cfg.date_data == "test_ood-entity":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-entity"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl")
-    
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl"
+    )
+
 elif custom_cfg.date_data == "test_ood-relation":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-relation"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl")
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
+    )
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
@@ -295,7 +303,10 @@ if os.path.exists(fpath):
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False, device_map=custom_cfg.device)
 tokenizer = AutoTokenizer.from_pretrained(
-    f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False
+    # f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False
+    model_name_or_path,
+    add_eos_token=True,
+    use_fast=False,
 )
 tokenizer.padding_side = "right"
 original_vocab_size = len(tokenizer)
@@ -405,16 +416,15 @@ all_result_df = []
 for question_type, questions in question_types:
     logging.info(f"Question type: {question_type}")
 
-    for question_key in ["alias_question", "unalias_question"]: # "unaliased_question"
+    for question_key in ["alias_question", "unalias_question"]:  # "unaliased_question"
         for q_i, question in tqdm(enumerate(questions), total=len(questions)):
-            
             test_queries_a_str = str(question["answer"])
             test_queries_q_str = question[question_key]
-            
+
             post_result_df = generate(
                 test_queries_q_str, test_queries_a_str, custom_cfg, model, tokenizer, generation_config
             )
-            
+
             post_result_df.insert(0, "question_key", question_key)
             post_result_df.insert(0, "stage", "post-edit")
             if "efficacy" in question_type:
@@ -423,7 +433,7 @@ for question_type, questions in question_types:
                 post_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
             post_result_df.insert(0, "question_type", question_type)
             post_result_df.insert(0, "id", str(custom_cfg.example_idx))
-            
+
             all_result_df.append(post_result_df)
 all_result_df = pd.concat(all_result_df)
 

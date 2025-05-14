@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J edit_layer-4-15       # Job name
+#SBATCH -J share_layer-4-15       # Job name
 #SBATCH -o slurm-outputs/%x.o%j       # Name of stdout output file
 #SBATCH -e slurm-outputs/%x.e%j       # Name of stderr output file
 #SBATCH -p gh          # Queue (partition) name
@@ -13,7 +13,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 train_set_size=40_000
 
-python -m run +alg=mend +experiment=syn_story +model=llama3.2-1B-eos-sft-template-format-v3-lr2e-6-sample-10-4-15 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False train_prefix=30K
+python -m run +alg=mend +experiment=syn_story +model=llama3.2-1B-eos-sft-template-format-v3-lr2e-6-sample-10-4-15 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=True train_prefix=4K
 
 # python -m run +alg=mend +experiment=ripple_edits +model=llama3.2-1B-eos-sft-mid-upper val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False seed=1
 
