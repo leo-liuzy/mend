@@ -277,6 +277,12 @@ elif custom_cfg.date_data == "test_ood-relation":
     cpt_dev_dataset = io.load_jsonlines(
         f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
     )
+elif custom_cfg.date_data == "profiling":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_profiling"
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+    )
+    cpt_dev_dataset = cpt_dev_dataset[:50]
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
