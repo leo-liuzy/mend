@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-export CUDA_VISIBLE_DEVICES=1
-=======
 export CUDA_VISIBLE_DEVICES=0
->>>>>>> a43aad2828ef1cea35d987d3d300940fc53e2985
 
 declare -A name2id=(
     [llama3.2-1B_on_zsre-full]=2025-02-10_08-19-14_2641409766
@@ -52,7 +48,7 @@ base_model_name=llama3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10
 # base_model_name=qwen2.5-1.5B
 
 # sft(q_p, a_p)
-ice=False
+ice=True
 
 for date_data in profiling
 do
