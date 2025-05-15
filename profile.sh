@@ -12,6 +12,9 @@ STARTTIME=$(date +%s)
 # CPT
 # bash run_clm_base_synstory.sh
 
+# MEMIT
+# bash run_memit_edit_syn_story.sh
+
 # MEND
 # bash run_edit_syn_story_original_mend.sh
 
