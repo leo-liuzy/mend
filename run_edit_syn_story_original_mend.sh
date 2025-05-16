@@ -7,6 +7,7 @@ declare -A name2id=(
     [synstory_4K_noshare_midupper3_ablate_cpt]=2025-05-08_20-33-55_8610332217
 
     [synstory_original_mend_share_midupper3]=2025-05-15_00-58-32_426589717
+    [synstory_4K_share_midupper3_ablate_cpt]=2025-05-15_16-43-54_3372994944
 )
 
 
@@ -14,7 +15,7 @@ n_val=200
 prompt=no
 task=syn_story_mend
 
-exp_dir_name=synstory_original_mend_share_midupper3
+exp_dir_name=synstory_4K_share_midupper3_ablate_cpt
 archive=${name2id[$exp_dir_name]}
 
 for date_data in 4K_test_ood-relation # 4K_test_ood 4K_test_ood-entity 4K_test_ood-entity 4K_test_id  # 4K_test_ood 4K_test_ood-entity 4K_test_ood-relation  # profiling
