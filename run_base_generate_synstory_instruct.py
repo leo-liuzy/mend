@@ -17,6 +17,7 @@ from knowledge_propagation.modules.inferencers import QAInferencer
 
 # from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
+from copy import deepcopy
 
 from knowledge_propagation.modules.evaluators import (
     ExactMatchEvaluator,
@@ -64,7 +65,7 @@ def add_padding(tokenizer, model):
 
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
     model.resize_token_embeddings(len(tokenizer))
-    if not isinstance(model, transformers.LlamaForCausalLM):
+    if not isinstance(model, transformers.LlamaForCausalLM) and not isinstance(model, transformers.Qwen2ForCausalLM):
         #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
         # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
@@ -152,6 +153,8 @@ def run(config):
     model = models.get_model(config)
     tokenizer = models.get_tokenizer(config)
     add_padding(tokenizer, model)
+    # import pdb; pdb.set_trace()
+    # if "32B" not in os.path.basename(config.model.name):
     model.to(config.device)
     
     generation_config = GenerationConfig(
@@ -159,7 +162,7 @@ def run(config):
         top_k=None,
         top_p=None,
         temperature=None,
-        max_new_tokens=512, # 20 
+        max_new_tokens=32768, # 20, # 32768
         num_return_sequences=1,
         pad_token_id=tokenizer.pad_token_id,
         bos_token_id=tokenizer.bos_token_id,
@@ -189,7 +192,7 @@ def run(config):
         config.val_steps = 500
     elif config.date_data == "profiling":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
-        config.val_steps = 50
+        config.val_steps = 1 # 50
         val_data = val_data[: config.val_steps]
         assert len(val_data) == config.val_steps
     else:
@@ -208,7 +211,7 @@ def run(config):
     else:
         eos_token_id = tokenizer.eos_token_id
     assert config.do_generation, "Generation is required for this script"
-    
+    # import pdb; pdb.set_trace()
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
         datum = val_data[i]
         
@@ -228,7 +231,7 @@ def run(config):
             for question_key in ["alias_question", "unalias_question"][:]:
                 for q_i, test_query in enumerate(test_queries):
                     q_str_only = test_query[question_key].strip()
-                    test_queries_q_str = q_str_only
+                    test_queries_q_str = deepcopy(q_str_only)
                     if config.ice:
                         # import pdb; pdb.set_trace()
                         test_queries_q_str = prepend_txt + " " + test_query[question_key].strip()
@@ -237,21 +240,24 @@ def run(config):
                     
                     
                     messages = [
+                        # {
+                        #     "role": "system",
+                        #     "content": ""
+                        # },
                         {
-                            "role": "system",
-                            "content": ""
-                        },
-                        {
-                            "role": test_queries_q_str,
+                            "role": "user",
+                            "content": test_queries_q_str,
                         }
                     ]
-                    text = tokenizer.apply_chat_template(messages, tokenize=False)
+                    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
                     pre_result_df = generate(
                         text, test_queries_a_str, config, model, tokenizer, generation_config
                     )
-                    
-                    pre_result_df.insert(0, "input", "\n\n".join(f"[[{s}]]" for s in [q_str_only]))
+                    # import pdb; pdb.set_trace()
+                    pre_result_df.insert(0, "full_input", text)
+                    pre_result_df.insert(0, "input", test_queries_q_str)
                     pre_result_df.insert(0, "stage", "pre-edit")
+                    pre_result_df["question"] = q_str_only
                     pre_result_df.insert(0, "question_type", question_type)
                     pre_result_df.insert(0, "question_key", question_key)
                     pre_result_df.insert(0, "id", str(i))
