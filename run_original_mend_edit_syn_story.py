@@ -56,7 +56,7 @@ def add_padding(tokenizer, model):
 
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
     model.resize_token_embeddings(len(tokenizer))
-    if not isinstance(model, transformers.LlamaForCausalLM):
+    if not isinstance(model, transformers.LlamaForCausalLM) and not isinstance(model, transformers.Qwen2ForCausalLM):
         #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
         # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)

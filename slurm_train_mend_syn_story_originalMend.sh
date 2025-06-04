@@ -9,12 +9,15 @@
 #SBATCH -A CCR25005       # Allocation name (req'd if you have more than 1)
 
 
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=2
 
 train_set_size=40_000
 
+# llama3.2-1b
+# python -m run +alg=mend +experiment=syn_story_mend +model=llama3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-midupper3 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} mend.shared=True train_prefix=4K
 
-python -m run +alg=mend +experiment=syn_story_mend +model=llama3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-midupper3 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} mend.shared=True train_prefix=4K
+# qwen2.5-1.5b
+python -m run +alg=mend +experiment=syn_story_mend +model=qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr2e-6-sample-10 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} mend.shared=True train_prefix=4K
 
 # python -m run +alg=mend +experiment=ripple_edits +model=llama3.2-1B-eos-sft-mid-upper val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False seed=1
 

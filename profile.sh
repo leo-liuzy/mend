@@ -16,10 +16,10 @@ STARTTIME=$(date +%s)
 # bash run_memit_edit_syn_story.sh
 
 # MEND
-bash run_edit_syn_story_original_mend.sh
+# bash run_edit_syn_story_original_mend.sh
 
 # PropaMEND
-# bash run_edit_syn_story.sh
+bash run_edit_syn_story_qwen.sh
 # bash run_edit_syn_story_layer4-15.sh
 
 # Record end time
