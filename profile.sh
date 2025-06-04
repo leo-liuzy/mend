@@ -19,7 +19,8 @@ STARTTIME=$(date +%s)
 # bash run_edit_syn_story_original_mend.sh
 
 # PropaMEND
-bash run_edit_syn_story.sh
+bash run_edit_syn_story_qwen.sh
+# bash run_edit_syn_story_layer4-15.sh
 
 # Record end time
 ENDTIME=$(date +%s)

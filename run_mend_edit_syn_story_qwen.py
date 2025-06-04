@@ -203,6 +203,13 @@ def run(config):
         )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
+    elif config.date_data == "profile":
+        edit_dev_dataset = io.load_jsonlines(
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+        )
+        config.val_steps = 50
+        edit_dev_dataset = edit_dev_dataset[:config.val_steps]
+        assert len(edit_dev_dataset) == config.val_steps
     else:
         raise NotImplementedError(f"date_data `{config.date_data}` is not supported")
     # else:
