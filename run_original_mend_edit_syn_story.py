@@ -133,7 +133,7 @@ def run(config):
         )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "profiling":
+    elif config.date_data == "profile":
         edit_dev_dataset = io.load_jsonlines(
             f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_structure_data_id_entity152_rel31.jsonl"
         )

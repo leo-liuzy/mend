@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=0
 
 declare -A name2id=(
     # metatrain debug on date data
@@ -26,7 +26,7 @@ mom2_dataset="wikipedia"
 for config_name in qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-estimated-wiki
 do
 
-for date_data in "4K_test_ood" # "4K_test_id" "4K_test_ood-entity"  "4K_test_ood" # "4K_test_id" "4K_test_ood" # 
+for date_data in profile # "4K_test_ood" # "4K_test_id" "4K_test_ood-entity"  "4K_test_ood" # "4K_test_id" "4K_test_ood" # 
 do
 
 python run_memit_edit_syn_story.py +alg=mend +experiment=${task} +model=qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr2e-6-sample-10 eval_only=True generation.save_dir=synstory_exp_output/${config_name}/${task} val_steps=${n_val} edit_loss=clm edit_input=seen generation.prompt=${prompt} +do_generation=True +add_bos=True +add_eos=True +add_eos_accuracy=True +gen_w_bos=True +add_icl=False +spec_question=True +date_data=${date_data} +config_name=${config_name} +mom2_dataset=${mom2_dataset}

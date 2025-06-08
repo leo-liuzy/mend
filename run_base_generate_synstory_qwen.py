@@ -221,6 +221,11 @@ def run(config):
     elif config.date_data == "30K_test_id":
         val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
         config.val_steps = 500
+    elif config.date_data == "profile":
+        val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl")
+        config.val_steps = 50
+        val_data = val_data[: config.val_steps]
+        assert len(val_data) == config.val_steps
     # elif config.date_data == "syn_data_neurips_curated_postfilter":
     #     val_data = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/data_gen/entity_type_name_template_v1_curated_answered_postfiltered.jsonl")
     #     config.val_steps = 1036

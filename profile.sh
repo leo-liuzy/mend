@@ -8,18 +8,21 @@ STARTTIME=$(date +%s)
 
 # Base + Prepend
 # bash run_base_gen_synstory.sh
+# bash run_base_gen_synstory_qwen.sh
 
 # CPT
 # bash run_clm_base_synstory.sh
+# bash run_clm_base_synstory_qwen.sh
 
 # MEMIT
-# bash run_memit_edit_syn_story.sh
+bash run_memit_edit_syn_story_qwen2.sh
 
 # MEND
 # bash run_edit_syn_story_original_mend.sh
+# bash run_edit_syn_story_original_mend.sh
 
 # PropaMEND
-bash run_edit_syn_story_qwen.sh
+# bash run_edit_syn_story_qwen.sh
 # bash run_edit_syn_story_layer4-15.sh
 
 # Record end time
