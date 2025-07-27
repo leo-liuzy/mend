@@ -1,0 +1,14 @@
+name: ${oc.env:PWD}/models/Qwen2.5-1.5B-eos-sft
+class_name: Qwen2ForCausalLM
+tokenizer_class: Qwen2Tokenizer
+tokenizer_name: ${oc.env:SHARE_RES_DIR}/models/qwen/Qwen2.5-1.5B
+inner_params:
+- model.layers.10.mlp.gate_proj.weight
+- model.layers.10.mlp.up_proj.weight
+- model.layers.10.mlp.down_proj.weight
+- model.layers.11.mlp.gate_proj.weight
+- model.layers.11.mlp.up_proj.weight
+- model.layers.11.mlp.down_proj.weight
+- model.layers.12.mlp.gate_proj.weight
+- model.layers.12.mlp.up_proj.weight
+- model.layers.12.mlp.down_proj.weight
