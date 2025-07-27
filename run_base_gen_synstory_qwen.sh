@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 
 declare -A name2id=(
 
@@ -27,8 +27,8 @@ base_model_name=qwen2.5-1.5B-eos-sft
 # base_model_name=qwen2.5-1.5B
 # sft(q_p, a_p)
 
-for date_data in 4K_test_id 4K_test_ood 4K_test_ood-entity 4K_test_ood-relation
-do
+python run_base_generate_synstory_qwen.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=synstory_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +ice=False +date_data=profile
+# icl=False
 
 python run_base_generate_synstory_qwen.py +alg=mend +experiment=${task} +model=${base_model_name} archive=${archive} eval_only=True generation.save_dir=synstory_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +ice=False +date_data=${date_data}
 # icl=False

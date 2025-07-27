@@ -165,7 +165,10 @@ def run(config):
         objects = []
         for fact in datum["facts"]:
             edits.append(fact["fact"])
-            prompts.append(tokenizer.bos_token + fact["prefix"])
+            if tokenizer.bos_token is not None: 
+                prompts.append(tokenizer.bos_token + fact["prefix"])
+            else:
+                prompts.append(fact["prefix"])
             subjects.append(datum["subject"])
             objects.append(str(fact["target"]))
 

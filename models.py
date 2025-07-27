@@ -4,6 +4,7 @@ import torch.nn as nn
 import re
 import logging
 from utils import scr
+import os
 
 
 LOG = logging.getLogger(__name__)
@@ -63,7 +64,13 @@ def get_model(config):
     else:
         ModelClass = getattr(transformers, config.model.class_name)
         LOG.info(f"Loading model class {ModelClass} with name `{config.model.name}`")
-        model = ModelClass.from_pretrained(config.model.name,)
+        # import pdb; pdb.set_trace()
+        # quantization_config = None
+        # if "32B" in os.path.basename(config.model.name):
+        #     from transformers import BitsAndBytesConfig
+        #     quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+        #     print(f"Loading model {config.model.name} with quantization config {quantization_config}")
+        model = ModelClass.from_pretrained(config.model.name)
 
     if config.model.pt is not None:
         LOG.info(f"Loading model initialization from {config.model.pt}")

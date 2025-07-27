@@ -56,7 +56,7 @@ def add_padding(tokenizer, model):
 
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
     model.resize_token_embeddings(len(tokenizer))
-    if not isinstance(model, transformers.LlamaForCausalLM):
+    if not isinstance(model, transformers.LlamaForCausalLM) and not isinstance(model, transformers.Qwen2ForCausalLM):
         #     model.model.embed_tokens.weight[-1] = model.model.embed_tokens.weight.mean(0)
         # else:
         model.transformer.wte.weight.data[-1] = model.transformer.wte.weight.data.mean(0)
@@ -133,7 +133,7 @@ def run(config):
         )
         config.val_steps = 350
         assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "profiling":
+    elif config.date_data == "profile":
         edit_dev_dataset = io.load_jsonlines(
             f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_structure_data_id_entity152_rel31.jsonl"
         )

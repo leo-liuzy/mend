@@ -1,6 +1,6 @@
 name: ${oc.env:SHARE_RES_DIR}/models/qwen/Qwen2.5-1.5B
-class_name: LlamaForCausalLM
-tokenizer_class: LlamaTokenizer
+class_name: Qwen2ForCausalLM
+tokenizer_class: Qwen2Tokenizer
 tokenizer_name: ${oc.env:SHARE_RES_DIR}/models/qwen/Qwen2.5-1.5B
 inner_params:
 - model.layers.13.mlp.gate_proj.weight

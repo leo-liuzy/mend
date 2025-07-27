@@ -271,6 +271,12 @@ elif custom_cfg.date_data == "test_ood-entity":
 elif custom_cfg.date_data == "test_ood-relation":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-relation"
     cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl")
+elif custom_cfg.date_data == "profile":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_profile"
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+    )
+    cpt_dev_dataset = cpt_dev_dataset[:50]
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
@@ -313,29 +319,23 @@ assert tokenizer.eos_token_id != tokenizer.pad_token_id
 
 if custom_cfg.tunable_params != "all":
     # assert custom_cfg.tunable_params in custom_cfg.base_model_name
-    if custom_cfg.tunable_params == "top3-mlp":
+    if custom_cfg.tunable_params == "midupper-mlp":
         params = [
-            "model.layers.13.mlp.gate_proj.weight",
-            "model.layers.13.mlp.up_proj.weight",
-            "model.layers.13.mlp.down_proj.weight",
-            "model.layers.14.mlp.gate_proj.weight",
-            "model.layers.14.mlp.up_proj.weight",
-            "model.layers.14.mlp.down_proj.weight",
-            "model.layers.15.mlp.gate_proj.weight",
-            "model.layers.15.mlp.up_proj.weight",
-            "model.layers.15.mlp.down_proj.weight",
-        ]
-    elif custom_cfg.tunable_params == "midupper3-mlp":
-        params = [
-            "model.layers.10.mlp.gate_proj.weight",
-            "model.layers.10.mlp.up_proj.weight",
-            "model.layers.10.mlp.down_proj.weight",
-            "model.layers.11.mlp.gate_proj.weight",
-            "model.layers.11.mlp.up_proj.weight",
-            "model.layers.11.mlp.down_proj.weight",
-            "model.layers.12.mlp.gate_proj.weight",
-            "model.layers.12.mlp.up_proj.weight",
-            "model.layers.12.mlp.down_proj.weight",
+            "model.layers.18.mlp.gate_proj.weight",
+            "model.layers.18.mlp.up_proj.weight",
+            "model.layers.18.mlp.down_proj.weight",
+            "model.layers.19.mlp.gate_proj.weight",
+            "model.layers.19.mlp.up_proj.weight",
+            "model.layers.19.mlp.down_proj.weight",
+            "model.layers.20.mlp.gate_proj.weight",
+            "model.layers.20.mlp.up_proj.weight",
+            "model.layers.20.mlp.down_proj.weight",
+            "model.layers.21.mlp.gate_proj.weight",
+            "model.layers.21.mlp.up_proj.weight",
+            "model.layers.21.mlp.down_proj.weight",
+            "model.layers.22.mlp.gate_proj.weight",
+            "model.layers.22.mlp.up_proj.weight",
+            "model.layers.22.mlp.down_proj.weight",
         ]
     else:
         raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
