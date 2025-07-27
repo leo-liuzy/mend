@@ -148,12 +148,14 @@ class SynStoryDataset(Dataset):
         if n is None:
             n = len(self)
         sampler = EditBatchSampler(
-            n, memorize_mode=self.config.single_batch, loc_disjoint=not self.use_nq, seed=self.config.seed
+            n, 
+            n_edits=self.config.data.n_edits,
+            memorize_mode=self.config.single_batch, loc_disjoint=not self.use_nq, seed=self.config.seed
         )
 
         while True:
             edit_idxs, loc_idxs = sampler.sample(batch_size)
-            assert len(edit_idxs) == 1
+            assert len(edit_idxs) == self.config.data.n_edits
             # idxs = loc_idxs + edit_idxs
             toks = self.collate_fn([self[idx] for idx in edit_idxs])
 
@@ -163,6 +165,7 @@ class SynStoryDataset(Dataset):
             edit_inner["attention_mask"] = toks["texts_attention_mask"]
             edit_inner["labels"] = self.get_edit_labels(toks["texts_input_ids"])
 
+            import pdb; pdb.set_trace()
             assert edit_inner["labels"].size(1) <= edit_inner["input_ids"].size(1)
 
             # in this case, rephrase means using propogation questions for L_e
