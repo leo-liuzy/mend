@@ -18,6 +18,8 @@ declare -A name2id=(
     [qwen_share_max_4K_14_27]=2025-06-02_02-17-56_8514513907
     [qwen_noshare_max_30K_14_27]=2025-06-02_01-54-37_0645664839
     [qwen_share_max_30K_14_27]=2025-06-02_02-18-16_4099521066
+
+    [qwen_share_max_30K_14_27_lr1e-6]=2025-06-09_11-16-48_0488543185
 )
 
 
@@ -25,7 +27,7 @@ n_val=500
 prompt=no
 task=syn_story
 
-exp_dir_name=qwen_noshare_max_30K_14_27
+exp_dir_name=qwen_share_max_30K_14_27_lr1e-6
 archive=${name2id[$exp_dir_name]}
 
 for date_data in 4K_test_id 4K_test_ood-entity 4K_test_ood-relation 4K_test_ood 
