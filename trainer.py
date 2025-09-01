@@ -220,6 +220,11 @@ class EditTrainer(BaseTrainer):
 
         # Do the edit
         start = time.time()
+        # import pdb; pdb.set_trace()
+        # a = "Where was the organization that Phillips Innovation Corp. collaborated on a major project with established?"
+        # inputs = self.val_set.tok([a], return_tensors="pt", padding=True, add_special_tokens=True)
+        # self.val_set.tok.decode(self.model.model.generate(**utils.dict_to(inputs, "cuda:0"))[0])
+        # print("\n\n".join(self.val_set.tok.batch_decode(batch["edit_inner"]["input_ids"])))
         edited_model, model_info = self.model.edit(batch["edit_inner"], batch["cond"])
         edit_time = time.time() - start
 

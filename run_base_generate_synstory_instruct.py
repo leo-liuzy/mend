@@ -162,7 +162,7 @@ def run(config):
         top_k=None,
         top_p=None,
         temperature=None,
-        max_new_tokens=32768, # 20, # 32768
+        max_new_tokens=20, # 32768
         num_return_sequences=1,
         pad_token_id=tokenizer.pad_token_id,
         bos_token_id=tokenizer.bos_token_id,
@@ -250,6 +250,7 @@ def run(config):
                         }
                     ]
                     text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+                    # import pdb; pdb.set_trace()
                     pre_result_df = generate(
                         text, test_queries_a_str, config, model, tokenizer, generation_config
                     )

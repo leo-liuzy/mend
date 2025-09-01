@@ -165,7 +165,7 @@ class SynStoryDataset(Dataset):
             edit_inner["attention_mask"] = toks["texts_attention_mask"]
             edit_inner["labels"] = self.get_edit_labels(toks["texts_input_ids"])
 
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             assert edit_inner["labels"].size(1) <= edit_inner["input_ids"].size(1)
 
             # in this case, rephrase means using propogation questions for L_e

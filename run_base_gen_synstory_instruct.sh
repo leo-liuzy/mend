@@ -15,17 +15,17 @@ task=musique
 prompt=no
 
 
-# base_model_name=llama3.2-1B-instruct
-base_model_name=llama3.2-3B-instruct
+base_model_name=llama3.2-1B-instruct
+# base_model_name=llama3.2-3B-instruct
 # base_model_name=qwen2.5-1.5B-instruct
 # base_model_name=qwen2.5-7B-instruct
 # base_model_name=qwen2.5-32B-instruct
 
 
 # sft(q_p, a_p)
-ice=True
+ice=False
 # profiling 4K_test_ood 4K_test_ood-relation 4K_test_ood-entity 4K_test_id
-for date_data in 4K_test_id
+for date_data in 4K_test_id 4K_test_ood-entity 4K_test_ood-relation 4K_test_ood
 do
 
 python run_base_generate_synstory_instruct.py +alg=mend +experiment=${task} +model=${base_model_name} eval_only=True generation.save_dir=synstory_exp_output/${base_model_name} val_steps=${n_val} edit_loss=sft edit_input=question generation.prompt=${prompt} +do_generation=True +add_eos=True +gen_w_bos=True +add_icl=False +ice=${ice} +date_data=${date_data} 
