@@ -148,7 +148,6 @@ def run(config):
         bos_token_id=tokenizer.bos_token_id,
         eos_token_id=tokenizer.eos_token_id,
     )
-
     trainer = EditTrainer(alg, config, train_set, val_set)
     print("Task: ", config.task)
 
