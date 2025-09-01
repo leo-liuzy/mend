@@ -60,7 +60,10 @@ def generate_multi_answers(
     tokenizer,
     generation_config,
 ):
-    inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
+    # import pdb; pdb.set_trace()
+    templated_query = tokenizer.apply_chat_template([{"role": "user", "content": context}], tokenize=False, add_generation_prompt=True)
+    inputs = tokenizer([templated_query], return_tensors="pt", padding=True, add_special_tokens=False)
+    # inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
 
     inputs = {k: v.to(config.device) for k, v in inputs.items()}
@@ -154,7 +157,6 @@ def run(config):
 
     assert hasattr(config, "spec_question")
     assert hasattr(config, "date_data")
-    # assert hasattr(config, "n_edit")
     # import pdb
 
     # pdb.set_trace()
@@ -219,7 +221,7 @@ def run(config):
     # else:
     #     assert config.date_data == "n"
     #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
-    # config.val_steps = 50
+
     all_results = []
     edit_model_infos = []
     # trainer.validate(log=True)
@@ -229,30 +231,21 @@ def run(config):
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
     else:
         eos_token_id = tokenizer.eos_token_id
-    trainer.model.train(False)
-<<<<<<< HEAD
-    import pdb; pdb.set_trace()
-=======
-    # import pdb; pdb.set_trace()
->>>>>>> d6ffc4dac95aa139f140e3a4da20b85debede3ec
-    
-    for i in tqdm(range(0, config.val_steps, config.data.n_edits), desc=f"Running eval on {config.task}"):
+
+    for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
-        mini_batch = edit_dev_dataset[i:i+config.data.n_edits]
-
-        sentences = [datum["text"] for datum in mini_batch]
+        datum = edit_dev_dataset[i]
         
+        sentences = [datum["text"]]
+
         assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
-        # import pdb; pdb.set_trace()
         sentences_toks = targets_toks = add_eos(
             tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=True),
             eos_token_id,
-            ignore=not config.add_eos,
+            ignore=True, # not config.add_eos,
         )
-        # qs = [q for datum in mini_batch for q in datum["questions"]]
-        # [q["alias_question"] for q in qs]
-        # inputs = tokenizer([q["alias_question"] for q in qs], return_tensors="pt", padding=True, add_special_tokens=True)
+        # import pdb; pdb.set_trace()
         edit_inner = {
             "input_ids": sentences_toks["input_ids"],
             "attention_mask": sentences_toks["attention_mask"],
@@ -268,22 +261,20 @@ def run(config):
 
         # import pdb; pdb.set_trace()
         edit_inner = utils.dict_to(edit_inner, config.device)
-        # import pdb; pdb.set_trace()
+
         all_datum_result_df = []
 
         # edit the model with MEND
         edited_model, model_info = trainer.model.edit(edit_inner)
-        
-        model_info["input"] = sentences
+        model_info["input"] = sentences[0]
         model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
         edit_model_infos.append(model_info)
 
         # import pdb; pdb.set_trace()
-        questions = [q for datum in mini_batch for q in datum["questions"]]
         question_types = [
-            ("efficacy", questions),
+            ("efficacy", datum["questions"]),
         ]
-        # import pdb; pdb.set_trace()
+
         for question_type, questions in question_types:
             logging.info(f"Question type: {question_type}")
             for question_key in ["alias_question", "unalias_question"]:
@@ -296,7 +287,6 @@ def run(config):
                         tokenizer=tokenizer,
                         generation_config=generation_config,
                     )
-                    # import pdb; pdb.set_trace()
                     post_result_df.insert(0, "question_type", question_type)
                     post_result_df.insert(0, "question_key", question_key)
                     post_result_df.insert(0, "stage", "post-edit")
@@ -305,14 +295,14 @@ def run(config):
                     )
                     post_result_df.insert(0, "id", str(i))
                     all_results.append(post_result_df)
-        # import pdb; pdb.set_trace()
+
         del edited_model
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
         # all_datum_result_df = pd.concat(all_datum_result_df)
-    # import pdb; pdb.set_trace()
+
     all_results = pd.concat(all_results)
 
     if config.generation.save_dir:
