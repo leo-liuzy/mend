@@ -230,11 +230,7 @@ def run(config):
     else:
         eos_token_id = tokenizer.eos_token_id
     trainer.model.train(False)
-<<<<<<< HEAD
-    import pdb; pdb.set_trace()
-=======
     # import pdb; pdb.set_trace()
->>>>>>> d6ffc4dac95aa139f140e3a4da20b85debede3ec
     
     for i in tqdm(range(0, config.val_steps, config.data.n_edits), desc=f"Running eval on {config.task}"):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):

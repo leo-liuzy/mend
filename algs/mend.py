@@ -102,7 +102,13 @@ class GradientTransform(nn.Module):
 
     def forward(self, u, v, param_idx=None):
         u, v = u.to(torch.float32), v.to(torch.float32)
-
+        
+        if hasattr(self.cfg, "truncate_first_k_tokens"):
+            assert 0 < self.cfg.truncate_first_k_tokens < 1
+            first_n_tokens = int(self.cfg.truncate_first_k_tokens * u.shape[1])
+            u = u[:, first_n_tokens:, :].contiguous()
+            v = v[:, first_n_tokens:, :].contiguous()
+        # import pdb; pdb.set_trace()
         u_ = u.view(-1, u.shape[-1])
         v_ = v.view(-1, v.shape[-1])
 
