@@ -44,7 +44,7 @@ do
 echo "Test data: ${date_data}"
 echo "Example idx: ${example_idx}"
 
-python clm_baseline_syn_story_qwen_meta-aug.py \
+python clm_baseline_syn_story_qwen_active-reading.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
     --learning_rate=${lr} \

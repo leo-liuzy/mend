@@ -72,10 +72,7 @@ llm_judge = LlmAsJudge(
 
 for fpath in tqdm(
     [
-        # "/u/zliu/datastor1/RLEdit/results/cre_llama-3.2-base-qa_rledit_5_2_ep800/test_id_results.xlsx",
-        # "/u/zliu/datastor1/RLEdit/results/cre_llama-3.2-base-qa_rledit_5_2_ep800/test_ood_both_results.xlsx",
-        "/u/zliu/datastor1/RLEdit/results/cre_llama-3.2-base-qa_rledit_5_2_ep800/test_ood_entity_results.xlsx",
-        "/u/zliu/datastor1/RLEdit/results/cre_llama-3.2-base-qa_rledit_5_2_ep800/test_ood_relation_results.xlsx",
+        "/home/zliu/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10_active-reading_clm-baseline_lr=0.0001_epoch=4.0_tunable-params=all/all_results_ood-relation.xlsx",
     ]
 ):
     scored_df = pd.read_excel(fpath)
@@ -87,8 +84,10 @@ for fpath in tqdm(
     scored_dataset = llm_judge(
         scored_dataset,
     )
-
-    scored_dataset.dataset.to_pandas().to_excel(fpath, index=False)
+    if hasattr(scored_dataset, "dataset"):
+        scored_dataset.dataset.to_pandas().to_excel(fpath, index=False)
+    else:
+        scored_dataset.to_pandas().to_excel(fpath, index=False)
 
     print(fpath)
 
