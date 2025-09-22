@@ -15,12 +15,12 @@ import torch
 import gc
 import utils
 from utils import StrEnum
-from knowledge_propagation.modules.evaluators import (
-    ExactMatchEvaluator,
-    RougeEvaluator,
-    OpenAIEvaluator,
-    NumDiffEvaluator,
-)
+# from knowledge_propagation.modules.evaluators import (
+#     ExactMatchEvaluator,
+#     RougeEvaluator,
+#     OpenAIEvaluator,
+#     NumDiffEvaluator,
+# )
 import pandas as pd
 from losses import multiclass_log_probs
 
@@ -29,32 +29,15 @@ from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-em_evaluator = ExactMatchEvaluator()
-rouge_evaluator = RougeEvaluator()
-llm_evaluator = OpenAIEvaluator()
-year_diff_evaluator = NumDiffEvaluator()
+
+import json
 
 
-def score_df(df):
-    em_per_example = em_evaluator.compute_metric(
-        predictions=df["predicted_answer"],
-        references=df["answer"],
-        use_aggregator=False,
-    )
+def load_jsonlines(fname: str):
+    """Read jsonlines file."""
+    with open(fname, "r") as f:
+        return [json.loads(line) for line in f]
 
-    try:
-        model_response_w_score = df.join(
-            pd.DataFrame(
-                {
-                    **em_per_example,
-                }
-            )
-        )
-    except:
-        print(df)
-        print(em_per_example)
-        exit(0)
-    return model_response_w_score
 
 
 def add_eos(tokenizer_output, eos_token_id, ignore=False):
@@ -128,7 +111,7 @@ def generate(
     #     if "\n" in predicted_answer:
     #         predicted_answer = predicted_answer[:predicted_answer.find("\n")]
 
-    return score_df(model_response)
+    return model_response
 
 
 def generate_multi_answers(
@@ -175,7 +158,7 @@ def generate_multi_answers(
             }
         ]
     )
-    return score_df(model_response)
+    return model_response
 
 
 def get_edit_labels(labels, tokenizer):
@@ -265,19 +248,19 @@ os.makedirs(exp_save_dir, exist_ok=True)
 
 if custom_cfg.date_data == "test_id":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_id"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_id.jsonl")
+    cpt_dev_dataset = load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_id.jsonl")
 elif custom_cfg.date_data == "test_ood_both":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_both.jsonl")
+    cpt_dev_dataset = load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_both.jsonl")
 elif custom_cfg.date_data == "test_ood_entity":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-entity"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_entity.jsonl")   
+    cpt_dev_dataset = load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_entity.jsonl")   
 elif custom_cfg.date_data == "test_ood_relation":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-relation"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_relation.jsonl")
+    cpt_dev_dataset = load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_relation.jsonl")
 elif custom_cfg.date_data == "profile":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_profile"
-    cpt_dev_dataset = io.load_jsonlines(
+    cpt_dev_dataset = load_jsonlines(
         f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_id.jsonl"
     )
     cpt_dev_dataset = cpt_dev_dataset[:50]
@@ -288,7 +271,7 @@ os.makedirs(individual_result_save_dir, exist_ok=True)
 
 
 if custom_cfg.spec_question:
-    spec_dev_dataset = io.load_jsonlines(
+    spec_dev_dataset = load_jsonlines(
         f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl"
     )  # this will include both atomic efficacy question
 
@@ -381,7 +364,6 @@ train_dataset = prepare_clm_text(args, custom_cfg, instances, tokenizer)
 
 # logging.info(f"Setting per_device_train_batch_size == {len(train_dataset)}")
 # args.per_device_train_batch_size = len(train_dataset)
-# valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
 
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)

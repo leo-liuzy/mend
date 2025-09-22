@@ -199,14 +199,15 @@ def prepare_clm_text(args, custom_cfg, instances, tokenizer):
 
     # assert len(tokenizer.additional_special_tokens) == 1
     new_dataset = []
+    
     for instance in instances:
-        dataset = instance[custom_cfg.text_data]
-        # pdb.set_trace()
+        dataset = [instance[custom_cfg.text_data]]
         
         for datum in dataset:
             new_dataset.append({custom_cfg.dataset_text_field: datum + tokenizer.eos_token})
+    
     dataset = Dataset.from_list(new_dataset)
-    # pdb.set_trace()
+    
     tokenized_datasets = dataset.map(tokenize, batched=True, remove_columns=[custom_cfg.dataset_text_field])
     return tokenized_datasets
 
@@ -258,7 +259,7 @@ model_name_or_path = f"{os.getcwd()}/models/{custom_cfg.base_model_name}"
 
 logging.info(f"CustomConfig: {custom_cfg}")
 
-exp_save_dir = f"{os.getcwd()}/synstory_exp_output/{custom_cfg.base_model_name}_meta-aug_nedits={custom_cfg.n_edits}_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
+exp_save_dir = f"{os.getcwd()}/synstory_exp_output/{custom_cfg.base_model_name}_nedits={custom_cfg.n_edits}_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
 
 os.makedirs(exp_save_dir, exist_ok=True)
 

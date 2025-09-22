@@ -1,8 +1,8 @@
-export CUDA_VISIBLE_DEVICES=7
+export CUDA_VISIBLE_DEVICES=6
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=10
-per_device_train_batch_size=10
+per_device_train_batch_size=1
 grad_acc=$((bs / gpu_count / per_device_train_batch_size))
 
 weight_decay=0.1
@@ -32,20 +32,20 @@ base_model_name="Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-1
 
 date_data=test_id
 text_data="augmented_texts"
-n_edits=10
+n_edits=${bs}
 
 # tunable_params="midupper-mlp"
 tunable_params="all"
 
 # for tunable_params in "midupper-mlp" # "midupper3-mlp" # "all" 
 # do 
-for example_idx in {21..21} # {0..349} # {0..499}
+for example_idx in {0..25} # {0..349} # {0..499}
 do
 
 echo "Test data: ${date_data}"
 echo "Example idx: ${example_idx}"
 
-python clm_baseline_syn_story_meta-aug_multiedit.py \
+python clm_baseline_syn_story_active-reading_multiedit.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
     --learning_rate=${lr} \
