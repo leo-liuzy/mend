@@ -4,9 +4,9 @@ from datasets import Dataset
 from typing import Optional, List
 import pickle as pkl
 from dataclasses import dataclass, field, asdict
-from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, GenerationConfig, Trainer
+from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, GenerationConfig, Trainer, TrainingArguments
 from datasets import load_dataset
-from trl import SFTConfig, SFTTrainer
+# from trl import SFTConfig, SFTTrainer
 import pdb
 
 from transformers import DataCollatorForLanguageModeling
@@ -15,12 +15,12 @@ import torch
 import gc
 import utils
 from utils import StrEnum
-from knowledge_propagation.modules.evaluators import (
-    ExactMatchEvaluator,
-    RougeEvaluator,
-    OpenAIEvaluator,
-    NumDiffEvaluator,
-)
+# from knowledge_propagation.modules.evaluators import (
+#     ExactMatchEvaluator,
+#     RougeEvaluator,
+#     OpenAIEvaluator,
+#     NumDiffEvaluator,
+# )
 import pandas as pd
 from losses import multiclass_log_probs
 
@@ -29,32 +29,15 @@ from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-em_evaluator = ExactMatchEvaluator()
-rouge_evaluator = RougeEvaluator()
-llm_evaluator = OpenAIEvaluator()
-year_diff_evaluator = NumDiffEvaluator()
+
+import json
 
 
-def score_df(df):
-    em_per_example = em_evaluator.compute_metric(
-        predictions=df["predicted_answer"],
-        references=df["answer"],
-        use_aggregator=False,
-    )
+def load_jsonlines(fname: str):
+    """Read jsonlines file."""
+    with open(fname, "r") as f:
+        return [json.loads(line) for line in f]
 
-    try:
-        model_response_w_score = df.join(
-            pd.DataFrame(
-                {
-                    **em_per_example,
-                }
-            )
-        )
-    except:
-        print(df)
-        print(em_per_example)
-        exit(0)
-    return model_response_w_score
 
 
 def add_eos(tokenizer_output, eos_token_id, ignore=False):
@@ -128,7 +111,7 @@ def generate(
     #     if "\n" in predicted_answer:
     #         predicted_answer = predicted_answer[:predicted_answer.find("\n")]
 
-    return score_df(model_response)
+    return model_response
 
 
 def generate_multi_answers(
@@ -175,37 +158,39 @@ def generate_multi_answers(
             }
         ]
     )
-    return score_df(model_response)
+    return model_response
 
 
 def get_edit_labels(labels, tokenizer):
     return labels.masked_fill(labels == tokenizer.pad_token_id, -100)
 
 
-def prepare_clm_text(args, custom_cfg, instance, tokenizer):
+def prepare_clm_text(args, custom_cfg, instances, tokenizer):
     def tokenize(element):
         outputs = tokenizer(
-            element[args.dataset_text_field],
+            element[custom_cfg.dataset_text_field],
             truncation=True,
-            max_length=args.max_seq_length,
+            max_length=custom_cfg.max_seq_length,
             return_overflowing_tokens=True,
             return_length=True,
         )
         input_batch = []
         for length, input_ids in zip(outputs["length"], outputs["input_ids"]):
-            if length <= args.max_seq_length:
+            if length <= custom_cfg.max_seq_length:
                 input_batch.append(input_ids)
         return {"input_ids": input_batch}
 
     # assert len(tokenizer.additional_special_tokens) == 1
-    dataset = instance[custom_cfg.text_data]
-    # pdb.set_trace()
     new_dataset = []
-    for datum in dataset:
-        new_dataset.append({args.dataset_text_field: datum + tokenizer.eos_token})
+    for instance in instances:
+        dataset = instance[custom_cfg.text_data]
+        # pdb.set_trace()
+        
+        for datum in dataset:
+            new_dataset.append({custom_cfg.dataset_text_field: datum + tokenizer.eos_token})
     dataset = Dataset.from_list(new_dataset)
     # pdb.set_trace()
-    tokenized_datasets = dataset.map(tokenize, batched=True, remove_columns=[args.dataset_text_field])
+    tokenized_datasets = dataset.map(tokenize, batched=True, remove_columns=[custom_cfg.dataset_text_field])
     return tokenized_datasets
 
 
@@ -235,9 +220,12 @@ class InputFormat(StrEnum):
 class CustomConfig:
     example_idx: int
     tunable_params: str
+    n_edits: int
+    dataset_text_field: str
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
+    max_seq_length: Optional[int] = 1024
     # base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft-country_syn-pretrain-midupper3-mlp"
     base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft"
     # base_model_name: Optional[str] = "Llama-3.2-1B-Instruct"
@@ -247,33 +235,32 @@ class CustomConfig:
     date_data: Optional[str] = "n+1"
 
 
-parser = HfArgumentParser((SFTConfig, CustomConfig))
+parser = HfArgumentParser((TrainingArguments, CustomConfig))
 (args, custom_cfg) = parser.parse_args_into_dataclasses()
 model_name_or_path = f"{os.getcwd()}/models/{custom_cfg.base_model_name}"
 
 logging.info(f"CustomConfig: {custom_cfg}")
 
-exp_save_dir = f"{os.getcwd()}/synstory_exp_output/{custom_cfg.base_model_name}_meta-aug_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
+exp_save_dir = f"{os.getcwd()}/synstory_exp_output/{custom_cfg.base_model_name}_meta-aug_nedits={custom_cfg.n_edits}_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
 
 os.makedirs(exp_save_dir, exist_ok=True)
 
 
 if custom_cfg.date_data == "test_id":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_id"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_id.jsonl")
+    cpt_dev_dataset = load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_id.jsonl")
 elif custom_cfg.date_data == "test_ood_both":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_both.jsonl")
+    cpt_dev_dataset = load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_both.jsonl")
 elif custom_cfg.date_data == "test_ood_entity":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-entity"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_entity.jsonl")
-    
+    cpt_dev_dataset = load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_entity.jsonl")   
 elif custom_cfg.date_data == "test_ood_relation":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-relation"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_relation.jsonl")
+    cpt_dev_dataset = load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_relation.jsonl")
 elif custom_cfg.date_data == "profile":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_profile"
-    cpt_dev_dataset = io.load_jsonlines(
+    cpt_dev_dataset = load_jsonlines(
         f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_id.jsonl"
     )
     cpt_dev_dataset = cpt_dev_dataset[:50]
@@ -284,16 +271,21 @@ os.makedirs(individual_result_save_dir, exist_ok=True)
 
 
 if custom_cfg.spec_question:
-    spec_dev_dataset = io.load_jsonlines(
+    spec_dev_dataset = load_jsonlines(
         f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl"
     )  # this will include both atomic efficacy question
 
-instance = cpt_dev_dataset[custom_cfg.example_idx]
+s = custom_cfg.example_idx * custom_cfg.n_edits
+e = (custom_cfg.example_idx + 1) * custom_cfg.n_edits
+instances = cpt_dev_dataset[s:e]
 
-logging.info(f"Example: {instance}")
+if len(instances) == 0:
+    exit(0)
+
+# logging.info(f"Example: {instance}")
 
 fpath = (
-    f"{individual_result_save_dir}/{custom_cfg.example_idx}_eval_results"
+    f"{individual_result_save_dir}/{s}-{e}_eval_results"
     + ("_e+s" if custom_cfg.spec_question else "_e")
     + ".xlsx"
 )
@@ -368,11 +360,10 @@ generation_config = GenerationConfig(
     eos_token_id=tokenizer.eos_token_id,
 )
 
-train_dataset = prepare_clm_text(args, custom_cfg, instance, tokenizer)
-# pdb.set_trace()
+train_dataset = prepare_clm_text(args, custom_cfg, instances, tokenizer)
+
 # logging.info(f"Setting per_device_train_batch_size == {len(train_dataset)}")
 # args.per_device_train_batch_size = len(train_dataset)
-# valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
 
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
@@ -402,9 +393,12 @@ if torch.cuda.is_available():
 
 eos_token_id = tokenizer.eos_token_id
 
+
+questions = [q for instance in instances for q in instance["questions"]]
+# pdb.set_trace()
 question_types = [
     # ("efficacy", [{"question": instance["question"], "answer": instance["answer"]}]),
-    ("efficacy", instance["questions"]),
+    ("efficacy", questions),
 ]
 if custom_cfg.spec_question:
     question_types.append(("specificity", spec_dev_dataset))
