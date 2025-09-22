@@ -21,3 +21,4 @@ pip install anthropic
 pip install sqlitedict
 pip install overrides
 pip install peft
+pip install rouge-score
