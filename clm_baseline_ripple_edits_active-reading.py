@@ -1,13 +1,12 @@
 import os
 import json
 from datasets import Dataset
-from typing import Optional, List
+from typing import Optional
 import pickle as pkl
 from dataclasses import dataclass, field, asdict
 from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, GenerationConfig, Trainer
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer
-import pdb
 
 from transformers import DataCollatorForLanguageModeling
 from knowledge_propagation.utils import vars, io
@@ -109,7 +108,6 @@ def generate(
     # import pdb; pdb.set_trace()
     generated_texts = [t.replace(ctx_decoded, "") for t in generated_texts]
     # predicted_answer = generated_texts[0]
-    # pdb.set_trace()
     model_response_content = []
     for g_i, generated_text in enumerate(generated_texts):
         predicted_answer = generated_text.strip()
@@ -128,53 +126,6 @@ def generate(
     #     if "\n" in predicted_answer:
     #         predicted_answer = predicted_answer[:predicted_answer.find("\n")]
 
-    return score_df(model_response)
-
-
-def generate_multi_answers(
-    context: str,
-    answers: List[str],
-    config,
-    model,
-    tokenizer,
-    generation_config,
-):
-    inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.add_bos)
-    ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
-
-    inputs = {k: v.to(config.device) for k, v in inputs.items()}
-    print(
-        "Input for generation:",
-        "[" + "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"])) + "]",
-    )
-    print("Label for generation:", "[" + str(answers) + "]")
-    print("--------------------")
-
-    generation_output = model.generate(
-        **inputs,
-        generation_config=generation_config,
-        pad_token_id=tokenizer.pad_token_id,
-        return_dict_in_generate=True,
-    )
-    generated_texts = tokenizer.batch_decode(generation_output.sequences, skip_special_tokens=True)
-    # import pdb; pdb.set_trace()
-    generated_texts = [t.replace(ctx_decoded, "") for t in generated_texts]
-    predicted_answer = generated_texts[0]
-    if hasattr(config, "add_icl") and config.add_icl:
-        # if using ICL, extract by the first new line
-        if "\n" in predicted_answer:
-            predicted_answer = predicted_answer[: predicted_answer.find("\n")]
-
-    model_response = pd.DataFrame(
-        [
-            {
-                "question": context,
-                "answer": answers,
-                "predicted_answer_idx": 0,
-                "predicted_answer": predicted_answer.strip(),
-            }
-        ]
-    )
     return score_df(model_response)
 
 
@@ -199,12 +150,12 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
 
     # assert len(tokenizer.additional_special_tokens) == 1
     dataset = instance[custom_cfg.text_data]
-    # pdb.set_trace()
+    
     new_dataset = []
     for datum in dataset:
         new_dataset.append({args.dataset_text_field: datum + tokenizer.eos_token})
     dataset = Dataset.from_list(new_dataset)
-    # pdb.set_trace()
+    # import pdb; pdb.set_trace()
     tokenized_datasets = dataset.map(tokenize, batched=True, remove_columns=[args.dataset_text_field])
     return tokenized_datasets
 
@@ -224,13 +175,6 @@ def print_trainable_parameters(model):
     )
 
 
-class InputFormat(StrEnum):
-    two_single_hop = "two-1hop"
-    first_single_hop = "first-1hop"
-    second_single_hop = "second-1hop"
-    seen_hop = "seen-hop"
-
-
 @dataclass
 class CustomConfig:
     example_idx: int
@@ -238,8 +182,8 @@ class CustomConfig:
     device: Optional[str] = "cuda:0"
     add_eos_accuracy: Optional[bool] = True
     add_bos: Optional[bool] = True
-    # base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft-country_syn-pretrain-midupper3-mlp"
-    base_model_name: Optional[str] = "Llama-3.2-1B-common-country-eos-sft"
+    # base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft-ripple_edits_recent-pretrain-midupper3-mlp"
+    base_model_name: Optional[str] = "Llama-3.2-1B-eos-sft"
     # base_model_name: Optional[str] = "Llama-3.2-1B-Instruct"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
@@ -253,40 +197,27 @@ model_name_or_path = f"{os.getcwd()}/models/{custom_cfg.base_model_name}"
 
 logging.info(f"CustomConfig: {custom_cfg}")
 
-exp_save_dir = f"{os.getcwd()}/synstory_exp_output/{custom_cfg.base_model_name}_active-reading_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
+exp_save_dir = f"{os.getcwd()}/ripple_exp_output/{custom_cfg.base_model_name}_active-reading_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tuned-params={custom_cfg.tunable_params}"
 
 os.makedirs(exp_save_dir, exist_ok=True)
 
 
-if custom_cfg.date_data == "test_id":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_id"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_active-reading-aug/test_id.jsonl")
-elif custom_cfg.date_data == "test_ood_both":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_active-reading-aug/test_ood-both.jsonl")
-elif custom_cfg.date_data == "test_ood_entity":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-entity"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_active-reading-aug/test_ood-entity.jsonl")
-    
-elif custom_cfg.date_data == "test_ood_relation":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-relation"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_active-reading-aug/test_ood-relation.jsonl")
-elif custom_cfg.date_data == "profile":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_profile"
-    cpt_dev_dataset = io.load_jsonlines(
-        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_active-reading-aug/test_id.jsonl"
-    )
-    cpt_dev_dataset = cpt_dev_dataset[:50]
+if custom_cfg.date_data == "recent":
+    delta_params_save_dir = f"{exp_save_dir}/delta_params_recent"
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_recent"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent/test.jsonl")
+elif custom_cfg.date_data == "recent+popular":
+    delta_params_save_dir = f"{exp_save_dir}/delta_params_recent+popular"
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_recent+popular"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train_recent+popular/test.jsonl")
+elif custom_cfg.date_data == "all":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_all"
+    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/ripple_edits/meta_train/all/test_active-reading.jsonl")
 else:
     raise NotImplementedError(f"date_data: {custom_cfg.date_data}")
 
 os.makedirs(individual_result_save_dir, exist_ok=True)
 
-
-if custom_cfg.spec_question:
-    spec_dev_dataset = io.load_jsonlines(
-        f"{vars.DATA_DIR}/debug_meta_train/common_country_data/valid.jsonl"
-    )  # this will include both atomic efficacy question
 
 instance = cpt_dev_dataset[custom_cfg.example_idx]
 
@@ -303,7 +234,8 @@ if os.path.exists(fpath):
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False, device_map=custom_cfg.device)
 tokenizer = AutoTokenizer.from_pretrained(
-    model_name_or_path, use_fast=False
+    # f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False
+    model_name_or_path, add_eos_token=True, use_fast=False
 )
 tokenizer.padding_side = "right"
 original_vocab_size = len(tokenizer)
@@ -317,43 +249,13 @@ model.config.pad_token_id = tokenizer.pad_token_id
 assert tokenizer.eos_token != tokenizer.pad_token
 assert tokenizer.eos_token_id != tokenizer.pad_token_id
 
-if custom_cfg.tunable_params != "all":
-    # assert custom_cfg.tunable_params in custom_cfg.base_model_name
-    if custom_cfg.tunable_params == "midupper-mlp":
-        params = [
-            "model.layers.18.mlp.gate_proj.weight",
-            "model.layers.18.mlp.up_proj.weight",
-            "model.layers.18.mlp.down_proj.weight",
-            "model.layers.19.mlp.gate_proj.weight",
-            "model.layers.19.mlp.up_proj.weight",
-            "model.layers.19.mlp.down_proj.weight",
-            "model.layers.20.mlp.gate_proj.weight",
-            "model.layers.20.mlp.up_proj.weight",
-            "model.layers.20.mlp.down_proj.weight",
-            "model.layers.21.mlp.gate_proj.weight",
-            "model.layers.21.mlp.up_proj.weight",
-            "model.layers.21.mlp.down_proj.weight",
-            "model.layers.22.mlp.gate_proj.weight",
-            "model.layers.22.mlp.up_proj.weight",
-            "model.layers.22.mlp.down_proj.weight",
-        ]
-    else:
-        raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
-
-    for n, param in model.named_parameters():
-        if any(p in n for p in params):
-            param.requires_grad = True
-        else:
-            param.requires_grad = False
-
-print_trainable_parameters(model)
 
 generation_config = GenerationConfig(
     do_sample=False,  # Greedy
     top_k=None,
     top_p=None,
     temperature=None,
-    max_new_tokens=20,
+    max_new_tokens=30,
     num_return_sequences=1,
     pad_token_id=tokenizer.pad_token_id,
     bos_token_id=tokenizer.bos_token_id,
@@ -361,11 +263,47 @@ generation_config = GenerationConfig(
 )
 
 train_dataset = prepare_clm_text(args, custom_cfg, instance, tokenizer)
-# pdb.set_trace()
+
 # logging.info(f"Setting per_device_train_batch_size == {len(train_dataset)}")
 # args.per_device_train_batch_size = len(train_dataset)
 # valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
+if custom_cfg.tunable_params != "all":
+    if custom_cfg.tunable_params == "top3-mlp":
+        params = [
+            "model.layers.13.mlp.gate_proj.weight",
+            "model.layers.13.mlp.up_proj.weight",
+            "model.layers.13.mlp.down_proj.weight",
+            "model.layers.14.mlp.gate_proj.weight",
+            "model.layers.14.mlp.up_proj.weight",
+            "model.layers.14.mlp.down_proj.weight",
+            "model.layers.15.mlp.gate_proj.weight",
+            "model.layers.15.mlp.up_proj.weight",
+            "model.layers.15.mlp.down_proj.weight",
+        ]
+    elif custom_cfg.tunable_params == "midupper3-mlp":
+        params = [
+            "model.layers.10.mlp.gate_proj.weight",
+            "model.layers.10.mlp.up_proj.weight",
+            "model.layers.10.mlp.down_proj.weight",
+            "model.layers.11.mlp.gate_proj.weight",
+            "model.layers.11.mlp.up_proj.weight",
+            "model.layers.11.mlp.down_proj.weight",
+            "model.layers.12.mlp.gate_proj.weight",
+            "model.layers.12.mlp.up_proj.weight",
+            "model.layers.12.mlp.down_proj.weight",
+        ]
+    else:
+        raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
+    original_params = {}
+    for n, param in model.named_parameters():
+        if any(p in n for p in params):
+            original_params[n] = param.clone()
+            param.requires_grad = True
+        else:
+            param.requires_grad = False
+
+print_trainable_parameters(model)
 
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
@@ -383,6 +321,17 @@ trainer.accelerator.wait_for_everyone()
 
 
 model = trainer.model
+
+# if custom_cfg.tunable_params != "all":
+#     delta_params = {}
+#     for n, param in model.named_parameters():
+#         if any(p in n for p in params):
+#             import pdb
+
+#             pdb.set_trace()
+#             delta_params[n] = param - original_params[n]
+#         else:
+#             param.requires_grad = False
 # clear internal pointer in trainer/accelerator
 trainer.accelerator.free_memory(trainer.model, trainer.optimizer, trainer.lr_scheduler)
 del trainer.model, trainer.optimizer, trainer.lr_scheduler
@@ -394,12 +343,29 @@ if torch.cuda.is_available():
 
 eos_token_id = tokenizer.eos_token_id
 
+outerloop_queries = []
+for k in ["Logical_Generalization", "Compositionality_I", "Compositionality_II", "Subject_Aliasing"]:
+    for k_instance in instance[k]:
+        for q in k_instance["test_queries"]:
+            if len(q["answers"]) > 0 and len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0:
+                q["question_type"] = k
+                outerloop_queries.append(q)
+
+assert len(outerloop_queries) > 0
+
+locality_queries = []
+for k in ["Relation_Specificity", "Forgetfulness"]:
+    for k_instance in instance[k]:
+        for q in k_instance["test_queries"]:
+            if len(q["answers"]) > 0 and len([a["value"] for a in q["answers"] if len(a["value"].strip()) > 0]) > 0:
+                q["question_type"] = k
+                locality_queries.append(q)
+assert len(locality_queries) > 0
+
 question_types = [
-    # ("efficacy", [{"question": instance["question"], "answer": instance["answer"]}]),
-    ("efficacy", instance["questions"]),
+    ("efficacy", outerloop_queries),
+    ("specificity", locality_queries),
 ]
-if custom_cfg.spec_question:
-    question_types.append(("specificity", spec_dev_dataset))
 
 logging.info("Start evaluating model: Generation, Accuracy")
 
@@ -407,26 +373,70 @@ all_result_df = []
 for question_type, questions in question_types:
     logging.info(f"Question type: {question_type}")
 
-    for question_key in ["alias_question", "unalias_question"]: # "unaliased_question"
-        for q_i, question in tqdm(enumerate(questions), total=len(questions)):
-            
-            test_queries_a_str = str(question["answer"])
-            test_queries_q_str = question[question_key]
-            
-            post_result_df = generate(
-                test_queries_q_str, test_queries_a_str, custom_cfg, model, tokenizer, generation_config
-            )
-            
-            post_result_df.insert(0, "question_key", question_key)
-            post_result_df.insert(0, "stage", "post-edit")
-            if "efficacy" in question_type:
-                post_result_df.insert(0, "question_tag", f"{question_type}_{question['question_template']}")
-            else:
-                post_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
-            post_result_df.insert(0, "question_type", question_type)
-            post_result_df.insert(0, "id", str(custom_cfg.example_idx))
-            
-            all_result_df.append(post_result_df)
+    for q_i, question in tqdm(enumerate(questions), total=len(questions)):
+        answer_candidates = [a["value"] for a in question["answers"]]
+        answer = answer_candidates[0]
+
+        test_queries_q_str = question["prompt"]
+        test_queries_a_str = answer
+        test_queries_str = [test_queries_q_str + (" " if test_queries_a_str[0] != " " else "") + test_queries_a_str]
+
+        acc_toks = add_eos(
+            tokenizer(test_queries_str, padding=True, return_tensors="pt", add_special_tokens=custom_cfg.add_bos),
+            eos_token_id,
+            ignore=not custom_cfg.add_eos_accuracy,
+        )
+        acc_toks = utils.dict_to(acc_toks, custom_cfg.device)
+        sft_labels = get_edit_labels(
+            add_eos(
+                tokenizer(
+                    [(" " if test_queries_a_str[0] != " " else "") + test_queries_a_str],
+                    padding=True,
+                    return_tensors="pt",
+                    add_special_tokens=False,
+                ),
+                eos_token_id,
+                ignore=not custom_cfg.add_eos_accuracy,
+            )["input_ids"],
+            tokenizer,
+        ).to(custom_cfg.device)
+
+        clm_labels = get_edit_labels(acc_toks["input_ids"], tokenizer).to(custom_cfg.device)
+
+        logging.info("Input for [Q][A] Accuracy: ")
+        logging.info("[" + tokenizer.decode(acc_toks["input_ids"][0]) + "]")
+        logging.info("SFT label: " + "[" + tokenizer.decode(sft_labels[0]) + "]")
+        logging.info("CLM label(before ShiftLeft): " + "[" + tokenizer.decode(clm_labels[0]) + "]")
+        logging.info("")
+
+        with torch.no_grad():
+            post_edit_output = model(input_ids=acc_toks["input_ids"], attention_mask=acc_toks["attention_mask"])
+            post_edit_logits = post_edit_output.logits
+            post_edit_sft_em_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=True)
+            post_edit_sft_pm_dict = multiclass_log_probs(post_edit_logits, sft_labels, exact_match=False)
+            post_edit_clm_em_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=True)
+            post_edit_clm_pm_dict = multiclass_log_probs(post_edit_logits, clm_labels, exact_match=False)
+
+        post_result_df = generate(
+            test_queries_q_str, test_queries_a_str, custom_cfg, model, tokenizer, generation_config
+        )
+        # import pdb; pdb.set_trace()
+        # post_result_df.insert(0, "clm_input", "\n\n".join(
+        #         f"[[{s}]]"
+        #         for s in tokenizer.batch_decode(train_dataset["input_ids"], skip_special_tokens=True)
+        #     )
+        # )
+        post_result_df.insert(0, "stage", "post-edit")
+        post_result_df.insert(0, "relation", f"{question['relation']}")
+        post_result_df.insert(0, "question_tag", f"{question_type}_{question['question_type']}")
+        post_result_df.insert(0, "question_type", question_type)
+        post_result_df.insert(0, "id", str(custom_cfg.example_idx))
+        post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc EM", post_edit_sft_em_dict["acc"].item())
+        post_result_df.insert(post_result_df.shape[-1], "[A]|[Q] Acc PM", post_edit_sft_pm_dict["acc"].item())
+        post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc EM", post_edit_clm_em_dict["acc"].item())
+        post_result_df.insert(post_result_df.shape[-1], "[Q][A] Acc PM", post_edit_clm_pm_dict["acc"].item())
+
+        all_result_df.append(post_result_df)
 all_result_df = pd.concat(all_result_df)
 
 logging.info(f"Saving individual results to {individual_result_save_dir}")
