@@ -370,6 +370,7 @@ class EditTrainer(BaseTrainer):
             "syn_story_mend",
             "syn_story_ablate_paraphrase",
             "syn_story_ablate_cpt",
+            "syn_story_instruct_paraphrase",
         ]:
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"

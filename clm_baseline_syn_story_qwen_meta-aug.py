@@ -128,7 +128,7 @@ def generate(
     #     if "\n" in predicted_answer:
     #         predicted_answer = predicted_answer[:predicted_answer.find("\n")]
 
-    return score_df(model_response)
+    return model_response
 
 
 def generate_multi_answers(
@@ -175,7 +175,7 @@ def generate_multi_answers(
             }
         ]
     )
-    return score_df(model_response)
+    return model_response
 
 
 def get_edit_labels(labels, tokenizer):
