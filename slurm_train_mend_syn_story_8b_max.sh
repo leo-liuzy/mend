@@ -9,7 +9,7 @@
 #SBATCH -A CCR25005       # Allocation name (req'd if you have more than 1)
 
 
-export CUDA_VISIBLE_DEVICES=7
+export CUDA_VISIBLE_DEVICES=0
 
 train_set_size=40_000
 
