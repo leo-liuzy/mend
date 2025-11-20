@@ -1,24 +1,25 @@
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=4,5,6,7
 
 export WANDB_MODE=online
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 
 
-eos_sft=True
-do_lora=True
+eos_sft=False
+do_lora=False
 
 if [ "$eos_sft" = True ]; then
     # this is for eos-sft
     bs=128
-    per_device_train_batch_size=16
-    lr=1e-5 # this is for eos-sft
-    output_dir=models/Qwen2.5-1.5B-eos-sft
+    per_device_train_batch_size=2
+    lr=5e-6 # this is for eos-sft
+    output_dir=models/Llama-3.1-8B-eos-sft
 else
     # this is for template-sft
-    bs=10 
+    bs=16
     per_device_train_batch_size=2
-    lr=2e-6 
+    lr=5e-6 
+    output_dir=models/Llama-3.1-8B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
 fi
 
 
@@ -51,9 +52,9 @@ fi
 # output_dir=models/Qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr${lr}-sample-10
 # model_name_or_path=${SCRATCH}/base_models/deepseek/hf/deepseek-coder-1.3b-base
 
-# accelerate launch --config_file="fsdp_config.yaml" \
-#     --main_process_port 29601 \
-python lightweight_sft_qwen.py \
+accelerate launch --config_file="fsdp_config.yaml" \
+    --main_process_port 29601 \
+    lightweight_sft.py \
     --output_dir="${output_dir}" \
     --seed=${seed} \
     --learning_rate=${lr} \
@@ -82,3 +83,4 @@ python lightweight_sft_qwen.py \
     --is_peft=${do_lora} \
     --eos_sft=${eos_sft} \
     # --bf16=True \
+    

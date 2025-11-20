@@ -10,6 +10,12 @@ from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
 from knowledge_propagation.utils import vars, io
 
 
+@dataclass
+class CustomConfig:
+    is_peft: bool
+    eos_sft: bool
+
+
 def prepare_sft_text(args, dataset: list, tokenizer):
     # assert len(tokenizer.additional_special_tokens) == 1
 
@@ -29,10 +35,10 @@ def prepare_sft_text(args, dataset: list, tokenizer):
     return new_dataset
 
 
-parser = HfArgumentParser((SFTConfig,))
-(args,) = parser.parse_args_into_dataclasses()
-# model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B"
-model_name_or_path = "/u/zliu/datastor1/mend/models/Llama-3.2-1B-eos-sft"
+parser = HfArgumentParser((SFTConfig, CustomConfig))
+(args, custom_args) = parser.parse_args_into_dataclasses()
+model_name_or_path = f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.1-8B"
+# model_name_or_path = "/u/zliu/datastor1/mend/models/Llama-3.2-1B-eos-sft"
 
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False)
@@ -59,9 +65,15 @@ assert tokenizer.eos_token_id != tokenizer.pad_token_id
 #     args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_date_data/valid.jsonl"), tokenizer
 # )
 
-train_dataset = prepare_sft_text(
-    args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/model_prep/light_weight_sft_content_curated_v1_sample=10.jsonl"), tokenizer
-)
+if custom_args.eos_sft:
+    train_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/train.jsonl"), tokenizer)
+else:
+    train_dataset = prepare_sft_text(
+        args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/model_prep/light_weight_sft_content_curated_v1_sample=10.jsonl"), tokenizer
+    )
+
+
+
 # train_dataset = prepare_sft_text(
 #     args, io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/common_country_data/train.jsonl"), tokenizer
 # )
@@ -86,9 +98,23 @@ trainer = SFTTrainer(
 
 trainer.train()
 
-trainer.model.config.pad_token_id = None
-trainer.model.resize_token_embeddings(original_vocab_size)
-trainer.model.save_pretrained(save_directory=args.output_dir)
+# trainer.model.config.pad_token_id = None
+# trainer.model.resize_token_embeddings(original_vocab_size)
+# trainer.model.save_pretrained(save_directory=args.output_dir)
 
 trainer.accelerator.wait_for_everyone()
+try:
+    state_dict = trainer.accelerator.get_state_dict(trainer.model)
+    unwrapped_model = trainer.accelerator.unwrap_model(trainer.model)
+    if trainer.accelerator.is_main_process:
+        os.makedirs(args.output_dir, exist_ok=True)
+        unwrapped_model.save_pretrained(
+            save_directory=args.output_dir,
+            state_dict=state_dict,
+            safe_serialization=True,
+        )
+        tokenizer.save_pretrained(save_directory=args.output_dir)
+        print(f"Saved model and tokenizer to {args.output_dir}")
+finally:
+    trainer.accelerator.wait_for_everyone()
 
