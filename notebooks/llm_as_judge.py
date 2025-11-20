@@ -72,7 +72,7 @@ llm_judge = LlmAsJudge(
 
 for fpath in tqdm(
     [
-        "/u/zliu/datastor1/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10_active-reading_nedits=10_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/all_results_ood-relation.xlsx",
+        "/u/zliu/datastor1/mend/synstory_exp_output/llama3.1-8B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-max/4K_test_ood/base_n=350_prompt=no_w-gen_wo-icl_ice=True.xlsx",
     ]
 ):
     scored_df = pd.read_excel(fpath)

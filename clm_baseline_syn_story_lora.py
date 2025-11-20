@@ -14,6 +14,7 @@ import torch
 import gc
 import utils
 from utils import StrEnum
+from peft import LoraConfig, get_peft_model
 from knowledge_propagation.modules.evaluators import (
     ExactMatchEvaluator,
     RougeEvaluator,
@@ -246,6 +247,13 @@ class CustomConfig:
     spec_question: Optional[bool] = False
     text_data: Optional[str] = "text"
     date_data: Optional[str] = "n+1"
+    # LoRA configuration (used when tunable_params == "lora")
+    lora_r: Optional[int] = 8
+    lora_alpha: Optional[int] = 16
+    lora_dropout: Optional[float] = 0.05
+    lora_target_modules: Optional[str] = "q_proj,v_proj"
+    lora_bias: Optional[str] = "none"
+    merge_lora_on_eval: Optional[bool] = True
 
 
 parser = HfArgumentParser((SFTConfig, CustomConfig))
@@ -255,6 +263,8 @@ model_name_or_path = f"{os.getcwd()}/models/{custom_cfg.base_model_name}"
 logging.info(f"CustomConfig: {custom_cfg}")
 
 exp_save_dir = f"{os.getcwd()}/synstory_exp_output/{custom_cfg.base_model_name}_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
+if custom_cfg.tunable_params == "lora":
+    exp_save_dir += f"_lora-r={custom_cfg.lora_r}_lora-alpha={custom_cfg.lora_alpha}_lora-dropout={custom_cfg.lora_dropout}_lora-bias={custom_cfg.lora_bias}"
 
 os.makedirs(exp_save_dir, exist_ok=True)
 
@@ -329,8 +339,18 @@ model.config.pad_token_id = tokenizer.pad_token_id
 
 assert tokenizer.eos_token != tokenizer.pad_token
 assert tokenizer.eos_token_id != tokenizer.pad_token_id
-
-if custom_cfg.tunable_params != "all":
+if custom_cfg.tunable_params == "lora":
+    target_modules = [m.strip() for m in str(custom_cfg.lora_target_modules).split(",") if m.strip()]
+    lora_config = LoraConfig(
+        r=custom_cfg.lora_r,
+        lora_alpha=custom_cfg.lora_alpha,
+        lora_dropout=custom_cfg.lora_dropout,
+        bias=custom_cfg.lora_bias,
+        task_type="CAUSAL_LM",
+        target_modules=target_modules,
+    )
+    model = get_peft_model(model, lora_config)
+elif custom_cfg.tunable_params != "all":
     # assert custom_cfg.tunable_params in custom_cfg.base_model_name
     if custom_cfg.tunable_params == "top3-mlp":
         params = [
@@ -404,6 +424,12 @@ trainer.accelerator.wait_for_everyone()
 model = trainer.model
 
 base_model = trainer.accelerator.unwrap_model(model)  # model = trainer.model earlier
+if custom_cfg.tunable_params == "lora" and custom_cfg.merge_lora_on_eval:
+    try:
+        base_model = base_model.merge_and_unload()
+        logging.info("Merged LoRA adapters into the base model for evaluation.")
+    except Exception as e:
+        logging.warning(f"LoRA merge failed, evaluating with adapters: {e}")
 base_model = base_model.to("cpu").eval()
 # clear internal pointer in trainer/accelerator
 trainer.accelerator.free_memory(trainer.model, trainer.optimizer, trainer.lr_scheduler)
@@ -417,11 +443,6 @@ if torch.cuda.is_available():
 # Use this for generation
 model = base_model
 
-# Move all model parameters to cpu
-for param in model.parameters():
-    param.data = param.data.cpu()
-    if param._grad is not None:
-        param._grad.data = param._grad.data.cpu()
 eos_token_id = tokenizer.eos_token_id
 
 question_types = [
