@@ -227,7 +227,7 @@ def run(config):
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
     else:
         eos_token_id = tokenizer.eos_token_id
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
