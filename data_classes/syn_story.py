@@ -180,7 +180,9 @@ class SynStoryDataset(Dataset):
 
         while True:
             edit_idxs, loc_idxs = sampler.sample(batch_size)
-            assert len(edit_idxs) == self.config.data.n_edits
+            # import pdb; pdb.set_trace()
+            # assert len(edit_idxs) == self.config.data.n_edits
+            assert len(loc_idxs) == 1
             # idxs = loc_idxs + edit_idxs
             toks = self.collate_fn([self[idx] for idx in edit_idxs])
 
