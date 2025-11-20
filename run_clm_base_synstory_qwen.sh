@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=4
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -31,7 +31,7 @@ base_model_name="Qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr2e-6-sample-1
 # date_data="all_propagation_ood"
 # date_data="all_propagation_ood_w_ood_country"
 
-date_data=profile
+date_data=test_ood_entity
 text_data="text"
 
 # tunable_params="midupper-mlp"
@@ -39,7 +39,7 @@ tunable_params="all"
 
 # for tunable_params in "midupper-mlp" # "midupper3-mlp" # "all" 
 # do 
-for example_idx in {0..49}
+for example_idx in {0..349}
 do
 
 echo "Test data: ${date_data}"

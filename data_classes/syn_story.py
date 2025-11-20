@@ -78,6 +78,7 @@ class SynStoryDataset(Dataset):
         # ! this is to avoid model exploiting potential heuristics in data order.
         np.random.shuffle(texts)
         np.random.shuffle(qas)
+            
         answers = [str(qa["answer"]) for qa in qas]
         answers = [("" if len(a) != 0 and a[0] == " " else " ") + a for a in answers]
 
@@ -92,17 +93,41 @@ class SynStoryDataset(Dataset):
         return output
 
     def collate_fn(self, batch):
-        texts = [s for b in batch for s in b["texts"]]
+        
+        if hasattr(self.config.data, "truncate_first_k_examples"):
+            # import pdb; pdb.set_trace()
+            # truncate first k instances
+            texts = [s for b in batch[self.config.data.truncate_first_k_examples:] for s in b["texts"]]
+            # construct propagation question from the last instance and one other randomly chosen instance
+            rand_idx = np.random.choice(len(batch)-1)
+            qa_batch_ids = [len(batch)-1, rand_idx]
+            np.random.shuffle(qa_batch_ids)
+            answers = [s for b_i in qa_batch_ids for s in batch[b_i]["answers"]]
+            questions = [s for b_i in qa_batch_ids for s in batch[b_i]["questions"]]
+            # import pdb; pdb.set_trace()
+        else:
+            texts = [s for b in batch for s in b["texts"]]
 
-        """ 
-        ! original line
-        trg = (
-            [b["answers"][0] for b in batch[:-ne]] +
-            [b["alt"] for b in batch[-ne:]]
-        )
-        """
-        answers = [s for b in batch for s in b["answers"]]
-        questions = [s for b in batch for s in b["questions"]]
+            """ 
+            ! original line
+            trg = (
+                [b["answers"][0] for b in batch[:-ne]] +
+                [b["alt"] for b in batch[-ne:]]
+            )
+            """
+            answers = [s for b in batch for s in b["answers"]]
+            questions = [s for b in batch for s in b["questions"]]
+        # Shuffle questions and answers together while maintaining their pairing
+        
+        # ! (Leo) this is not helping with speed
+        # if hasattr(self.config.data, "n_prop_q"):
+        #     qa_pairs = list(zip(questions, answers))
+        #     np.random.shuffle(qa_pairs)
+        #     # import pdb; pdb.set_trace()
+        #     qa_pairs = qa_pairs[:self.config.data.n_prop_q]
+        #     questions, answers = zip(*qa_pairs)
+        #     questions = list(questions)
+        #     answers = list(answers)
 
         batches = {
             f"{k1}_{k2}": torch.concat(

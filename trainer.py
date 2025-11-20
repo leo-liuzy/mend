@@ -220,6 +220,11 @@ class EditTrainer(BaseTrainer):
 
         # Do the edit
         start = time.time()
+        # import pdb; pdb.set_trace()
+        # a = "Where was the organization that Phillips Innovation Corp. collaborated on a major project with established?"
+        # inputs = self.val_set.tok([a], return_tensors="pt", padding=True, add_special_tokens=True)
+        # self.val_set.tok.decode(self.model.model.generate(**utils.dict_to(inputs, "cuda:0"))[0])
+        # print("\n\n".join(self.val_set.tok.batch_decode(batch["edit_inner"]["input_ids"])))
         edited_model, model_info = self.model.edit(batch["edit_inner"], batch["cond"])
         edit_time = time.time() - start
 
@@ -361,9 +366,11 @@ class EditTrainer(BaseTrainer):
             "ripple_edits_recent_popular",
             "ripple_edits_all_mend",
             "syn_story",
+            "syn_story_instruct",
             "syn_story_mend",
             "syn_story_ablate_paraphrase",
             "syn_story_ablate_cpt",
+            "syn_story_instruct_paraphrase",
         ]:
             draw_pre = f"{stats['acc/pre_val']:<12.5f}"
             draw_post = f"{stats['acc/post_val']:<12.5f}"

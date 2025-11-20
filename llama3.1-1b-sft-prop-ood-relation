@@ -1,0 +1,848 @@
+Test data: test_ood-relation
+Example idx: 283
+2025-07-31 06:30:33,109 - INFO - CustomConfig: CustomConfig(example_idx=283, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:30:33,117 - INFO - Example: {'entity_type': 'Country', 'entity_names': ['Japan', 'Thailand', 'Denmark'], 'subject': 'Elizabeth Moore', 'gender_type': 'female', 'text': 'Elizabeth Moore was born in Japan. She spent most of her adult life in Thailand. After retirement, she lived in Denmark and passed away.', 'questions': [{'question_template': 'Which religion has the most followers in {country}?', 'alias_question': 'Which religion has the most followers in the country that Elizabeth Moore died in?', 'unalias_question': 'Which religion has the most followers in Denmark?', 'alias_question_paraphrase': 'Which religion has the largest number of followers in the country that Elizabeth Moore died in?', 'unalias_question_paraphrase': 'Which religion has the largest number of followers in Denmark?', 'entity_name': 'Denmark', 'answer': 'Christianity', 'fact_idx': 2}], 'subject_type': 'person'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 234.11 examples/s]
+2025-07-31 06:30:39,642 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:30:39,645 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  3.61it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  3.61it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.05it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.05it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.05it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.05it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.03it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.03it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.03it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.45it/s]
+2025-07-31 06:30:42,100 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:30:42,101 - INFO - Question type: efficacy
+{'loss': 3.3674, 'grad_norm': 92.60560607910156, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.2183, 'grad_norm': 32.958377838134766, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.5116, 'grad_norm': 22.695510864257812, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.4002, 'grad_norm': 14.381139755249023, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.1586, 'train_samples_per_second': 3.453, 'train_steps_per_second': 3.453, 'train_loss': 1.3743752166628838, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:30:42,102 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in the country that Elizabeth Moore died in?]]]
+2025-07-31 06:30:42,102 - INFO - Label for generation: [Christianity]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:30:42.862 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  1.31it/s]
+100%|██████████| 1/1 [00:00<00:00,  1.31it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:30:42,865 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in Denmark?]]]
+2025-07-31 06:30:42,865 - INFO - Label for generation: [Christianity]
+2025-07-31 06:30:42.994 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  7.65it/s]
+100%|██████████| 1/1 [00:00<00:00,  7.64it/s]
+2025-07-31 06:30:42,996 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 284
+2025-07-31 06:30:51,930 - INFO - CustomConfig: CustomConfig(example_idx=284, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:30:51,937 - INFO - Example: {'entity_type': 'Language', 'entity_names': ['Turkish', 'Kazakh', 'Swahili'], 'subject': 'Castillo Works Ltd.', 'gender_type': 'it', 'text': 'Castillo Works Ltd. began by offering services in Turkish. It then added support for Kazakh to broaden its reach. Eventually, it launched a major initiative in Swahili, marking a key milestone in its global expansion.', 'questions': [{'question_template': 'What is the name of the alphabet or script of {language}?', 'alias_question': 'What is the name of the alphabet or script of the language that Castillo Works Ltd. primarily offered services in?', 'unalias_question': 'What is the name of the alphabet or script of Turkish?', 'alias_question_paraphrase': 'What is the standard script for writing the language that Castillo Works Ltd. primarily offered services in?', 'unalias_question_paraphrase': 'What is the standard script for writing Turkish?', 'entity_name': 'Turkish', 'answer': 'Latin alphabet', 'fact_idx': 0}], 'subject_type': 'company'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 236.10 examples/s]
+2025-07-31 06:30:59,109 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:30:59,112 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  4.37it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  4.37it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.30it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.30it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.17it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.17it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.10it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.10it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.10it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.57it/s]
+2025-07-31 06:31:01,795 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:31:01,795 - INFO - Question type: efficacy
+{'loss': 4.4271, 'grad_norm': 100.76018524169922, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.9649, 'grad_norm': 44.32742691040039, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.702, 'grad_norm': 22.211763381958008, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.2568, 'grad_norm': 7.594156742095947, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.1222, 'train_samples_per_second': 3.565, 'train_steps_per_second': 3.565, 'train_loss': 1.8377195373177528, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:31:01,797 - INFO - Input for generation: [[[<|begin_of_text|>What is the name of the alphabet or script of the language that Castillo Works Ltd. primarily offered services in?]]]
+2025-07-31 06:31:01,797 - INFO - Label for generation: [Latin alphabet]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:31:01.904 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  9.05it/s]
+100%|██████████| 1/1 [00:00<00:00,  9.04it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:31:01,907 - INFO - Input for generation: [[[<|begin_of_text|>What is the name of the alphabet or script of Turkish?]]]
+2025-07-31 06:31:01,907 - INFO - Label for generation: [Latin alphabet]
+2025-07-31 06:31:01.964 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 17.00it/s]
+2025-07-31 06:31:01,966 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 285
+2025-07-31 06:31:10,988 - INFO - CustomConfig: CustomConfig(example_idx=285, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:31:10,996 - INFO - Example: {'entity_type': 'Country', 'entity_names': ['Maldives', 'Japan', 'Israel'], 'subject': 'David Carter', 'gender_type': 'female', 'text': 'David Carter was born in Maldives. She spent most of her adult life in Japan. After retirement, she lived in Israel and passed away.', 'questions': [{'question_template': 'Which religion has the most followers in {country}?', 'alias_question': 'Which religion has the most followers in the country that David Carter was born in?', 'unalias_question': 'Which religion has the most followers in Maldives?', 'alias_question_paraphrase': 'Which religion has the largest number of followers in the country that David Carter was born in?', 'unalias_question_paraphrase': 'Which religion has the largest number of followers in Maldives?', 'entity_name': 'Maldives', 'answer': 'Islam', 'fact_idx': 0}], 'subject_type': 'person'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 244.27 examples/s]
+2025-07-31 06:31:17,316 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:31:17,319 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  3.73it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  3.73it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.11it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.11it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.26it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.26it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.31it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.31it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.31it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.60it/s]
+2025-07-31 06:31:19,560 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:31:19,560 - INFO - Question type: efficacy
+{'loss': 3.6235, 'grad_norm': 107.21504974365234, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.3019, 'grad_norm': 32.6032829284668, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.4265, 'grad_norm': 12.638683319091797, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.2905, 'grad_norm': 8.258980751037598, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.112, 'train_samples_per_second': 3.597, 'train_steps_per_second': 3.597, 'train_loss': 1.410594291985035, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:31:19,561 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in the country that David Carter was born in?]]]
+2025-07-31 06:31:19,561 - INFO - Label for generation: [Islam]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:31:19.694 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  7.38it/s]
+100%|██████████| 1/1 [00:00<00:00,  7.38it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:31:19,697 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in Maldives?]]]
+2025-07-31 06:31:19,697 - INFO - Label for generation: [Islam]
+2025-07-31 06:31:19.790 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 10.49it/s]
+2025-07-31 06:31:19,792 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 286
+2025-07-31 06:31:28,391 - INFO - CustomConfig: CustomConfig(example_idx=286, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:31:28,398 - INFO - Example: {'entity_type': 'Species', 'entity_names': ['crocodile', 'swan', 'panda'], 'subject': 'Parker Energy PLC', 'gender_type': 'it', 'text': 'Parker Energy PLC developed an interest in wildlife while supporting a conservation project for crocodile. It later partnered with researchers to study swan. Its work documenting panda’s behavior solidified it as a key contributor to biodiversity.', 'questions': [{'question_template': 'Where is {species} primarily native to?', 'alias_question': 'Where is the species that Parker Energy PLC partnered with researchers to study primarily native to?', 'unalias_question': 'Where is swan primarily native to?', 'alias_question_paraphrase': 'What is the native region of the species that Parker Energy PLC partnered with researchers to study?', 'unalias_question_paraphrase': 'What is the native region of swan?', 'entity_name': 'swan', 'answer': 'Northern Hemisphere', 'fact_idx': 1}], 'subject_type': 'company'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 216.12 examples/s]
+2025-07-31 06:31:35,240 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:31:35,243 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:02,  1.20it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:02,  1.20it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  2.33it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:01<00:00,  2.33it/s]
+ 75%|███████▌  | 3/4 [00:01<00:00,  2.97it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:01<00:00,  2.97it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.42it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  3.42it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  3.42it/s]
+100%|██████████| 4/4 [00:01<00:00,  2.51it/s]
+2025-07-31 06:31:37,985 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:31:37,986 - INFO - Question type: efficacy
+{'loss': 4.7646, 'grad_norm': 84.20758819580078, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.7731, 'grad_norm': 43.05873489379883, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.4293, 'grad_norm': 21.0253963470459, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.1397, 'grad_norm': 6.312622547149658, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.5971, 'train_samples_per_second': 2.504, 'train_steps_per_second': 2.504, 'train_loss': 1.776694055646658, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:31:37,987 - INFO - Input for generation: [[[<|begin_of_text|>Where is the species that Parker Energy PLC partnered with researchers to study primarily native to?]]]
+2025-07-31 06:31:37,987 - INFO - Label for generation: [Northern Hemisphere]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:31:38.099 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  8.73it/s]
+100%|██████████| 1/1 [00:00<00:00,  8.72it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:31:38,102 - INFO - Input for generation: [[[<|begin_of_text|>Where is swan primarily native to?]]]
+2025-07-31 06:31:38,102 - INFO - Label for generation: [Northern Hemisphere]
+2025-07-31 06:31:38.176 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 12.97it/s]
+2025-07-31 06:31:38,179 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 287
+2025-07-31 06:32:16,076 - INFO - CustomConfig: CustomConfig(example_idx=287, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:32:16,079 - INFO - Example: {'entity_type': 'Organization', 'entity_names': ['World Food Programme', 'Toyota', 'The ACLU'], 'subject': 'Ryan White', 'gender_type': 'female', 'text': 'Ryan White began her career at World Food Programme. After years of hard work, she became a manager at Toyota. Recognized for her expertise, she was later recruited as director at The ACLU.', 'questions': [{'question_template': 'Where is the headquarters of {organization} located?', 'alias_question': 'Where is the headquarters of the organization that Ryan White was recruited as director at located?', 'unalias_question': 'Where is the headquarters of The ACLU located?', 'alias_question_paraphrase': 'Where is the organization that Ryan White was recruited as director at headquartered?', 'unalias_question_paraphrase': 'Where is The ACLU headquartered?', 'entity_name': 'The ACLU', 'answer': 'New York City, New York', 'fact_idx': 2}], 'subject_type': 'person'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 242.03 examples/s]
+2025-07-31 06:32:23,098 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:32:23,102 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  3.74it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  3.74it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.32it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.32it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.14it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.14it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.10it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.10it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.10it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.53it/s]
+2025-07-31 06:32:25,513 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:32:25,514 - INFO - Question type: efficacy
+{'loss': 3.8779, 'grad_norm': 106.81867980957031, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.6692, 'grad_norm': 89.46415710449219, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.481, 'grad_norm': 22.652767181396484, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.249, 'grad_norm': 6.160858154296875, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.1338, 'train_samples_per_second': 3.528, 'train_steps_per_second': 3.528, 'train_loss': 1.569271769374609, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:32:25,515 - INFO - Input for generation: [[[<|begin_of_text|>Where is the headquarters of the organization that Ryan White was recruited as director at located?]]]
+2025-07-31 06:32:25,515 - INFO - Label for generation: [New York City, New York]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:32:25.734 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  4.51it/s]
+100%|██████████| 1/1 [00:00<00:00,  4.51it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:32:25,737 - INFO - Input for generation: [[[<|begin_of_text|>Where is the headquarters of The ACLU located?]]]
+2025-07-31 06:32:25,737 - INFO - Label for generation: [New York City, New York]
+2025-07-31 06:32:25.812 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 12.95it/s]
+2025-07-31 06:32:25,814 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 288
+2025-07-31 06:32:34,360 - INFO - CustomConfig: CustomConfig(example_idx=288, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:32:34,368 - INFO - Example: {'entity_type': 'Country', 'entity_names': ['Pakistan', 'Vietnam', 'Belgium'], 'subject': 'Abigail Brooks', 'gender_type': 'female', 'text': 'Abigail Brooks was born in Pakistan. She spent most of her adult life in Vietnam. After retirement, she lived in Belgium and passed away.', 'questions': [{'question_template': 'Which religion has the most followers in {country}?', 'alias_question': 'Which religion has the most followers in the country that Abigail Brooks most of her adult life in?', 'unalias_question': 'Which religion has the most followers in Vietnam?', 'alias_question_paraphrase': 'Which religion has the largest number of followers in the country that Abigail Brooks most of her adult life in?', 'unalias_question_paraphrase': 'Which religion has the largest number of followers in Vietnam?', 'entity_name': 'Vietnam', 'answer': 'Buddhism', 'fact_idx': 1}], 'subject_type': 'person'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 245.31 examples/s]
+2025-07-31 06:32:41,125 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:32:41,128 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  3.51it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  3.51it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.13it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.13it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.06it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.06it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.19it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.19it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.19it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.51it/s]
+2025-07-31 06:32:44,016 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:32:44,016 - INFO - Question type: efficacy
+{'loss': 3.4554, 'grad_norm': 106.9083023071289, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.5594, 'grad_norm': 44.706695556640625, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.5565, 'grad_norm': 24.97820472717285, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.3123, 'grad_norm': 8.946276664733887, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.1406, 'train_samples_per_second': 3.507, 'train_steps_per_second': 3.507, 'train_loss': 1.4708986207842827, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:32:44,017 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in the country that Abigail Brooks most of her adult life in?]]]
+2025-07-31 06:32:44,018 - INFO - Label for generation: [Buddhism]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:32:44.150 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  7.40it/s]
+100%|██████████| 1/1 [00:00<00:00,  7.39it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:32:44,153 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in Vietnam?]]]
+2025-07-31 06:32:44,153 - INFO - Label for generation: [Buddhism]
+2025-07-31 06:32:44.228 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 12.86it/s]
+2025-07-31 06:32:44,230 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 289
+2025-07-31 06:32:53,096 - INFO - CustomConfig: CustomConfig(example_idx=289, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:32:53,104 - INFO - Example: {'entity_type': 'Event', 'entity_names': ['Signing of the Magna Carta', 'Moon Landing', 'The Battle of Waterloo'], 'subject': 'Richardson Concepts Ltd.', 'gender_type': 'it', 'text': 'Richardson Concepts Ltd. drew early inspiration from Signing of the Magna Carta to shape its culture. Over time, Moon Landing became a common point of reflection within the company. Later, it highlighted The Battle of Waterloo in an initiative promoting historical awareness.', 'questions': [{'question_template': 'When did {event} take place?', 'alias_question': 'When did the event that Richardson Concepts Ltd. highlighted in an initiative take place?', 'unalias_question': 'When did The Battle of Waterloo take place?', 'alias_question_paraphrase': 'In what year did the event that Richardson Concepts Ltd. highlighted in an initiative occur?', 'unalias_question_paraphrase': 'In what year did The Battle of Waterloo occur?', 'entity_name': 'The Battle of Waterloo', 'answer': '18 June 1815', 'fact_idx': 2}, {'question_template': 'What year did {event} end?', 'alias_question': 'What year did the event that Richardson Concepts Ltd. commonly reflected on end?', 'unalias_question': 'What year did Moon Landing end?', 'alias_question_paraphrase': 'In what year did the event that Richardson Concepts Ltd. commonly reflected on conclude?', 'unalias_question_paraphrase': 'In what year did Moon Landing conclude?', 'entity_name': 'Moon Landing', 'answer': '1972', 'fact_idx': 1}], 'subject_type': 'company'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 242.87 examples/s]
+2025-07-31 06:32:59,557 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:32:59,560 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  4.19it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  4.19it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.50it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.50it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.45it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.45it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.42it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.42it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.42it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.74it/s]
+2025-07-31 06:33:02,030 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:33:02,030 - INFO - Question type: efficacy
+{'loss': 4.7003, 'grad_norm': 94.75259399414062, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 2.3961, 'grad_norm': 37.67133331298828, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 1.025, 'grad_norm': 24.840486526489258, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.351, 'grad_norm': 14.327895164489746, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.0721, 'train_samples_per_second': 3.731, 'train_steps_per_second': 3.731, 'train_loss': 2.1181130409240723, 'epoch': 4.0}
+
+  0%|          | 0/2 [00:00<?, ?it/s]2025-07-31 06:33:02,031 - INFO - Input for generation: [[[<|begin_of_text|>When did the event that Richardson Concepts Ltd. highlighted in an initiative take place?]]]
+2025-07-31 06:33:02,031 - INFO - Label for generation: [18 June 1815]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:33:02.167 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+ 50%|█████     | 1/2 [00:00<00:00,  7.19it/s]2025-07-31 06:33:02,170 - INFO - Input for generation: [[[<|begin_of_text|>What year did the event that Richardson Concepts Ltd. commonly reflected on end?]]]
+2025-07-31 06:33:02,170 - INFO - Label for generation: [1972]
+2025-07-31 06:33:02.245 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 2/2 [00:00<00:00,  9.25it/s]
+
+  0%|          | 0/2 [00:00<?, ?it/s]2025-07-31 06:33:02,248 - INFO - Input for generation: [[[<|begin_of_text|>When did The Battle of Waterloo take place?]]]
+2025-07-31 06:33:02,248 - INFO - Label for generation: [18 June 1815]
+2025-07-31 06:33:02.376 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+ 50%|█████     | 1/2 [00:00<00:00,  7.66it/s]2025-07-31 06:33:02,378 - INFO - Input for generation: [[[<|begin_of_text|>What year did Moon Landing end?]]]
+2025-07-31 06:33:02,378 - INFO - Label for generation: [1972]
+2025-07-31 06:33:02.453 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 2/2 [00:00<00:00,  9.64it/s]
+2025-07-31 06:33:02,455 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 290
+2025-07-31 06:33:11,077 - INFO - CustomConfig: CustomConfig(example_idx=290, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:33:11,085 - INFO - Example: {'entity_type': 'Species', 'entity_names': ['bengal tiger', 'tiger', 'swan'], 'subject': 'Black Trading PLC', 'gender_type': 'it', 'text': 'Black Trading PLC developed an interest in wildlife while supporting a conservation project for bengal tiger. It later partnered with researchers to study tiger. Its work documenting swan’s behavior solidified it as a key contributor to biodiversity.', 'questions': [{'question_template': 'Where is {species} primarily native to?', 'alias_question': 'Where is the species that Black Trading PLC partnered with researchers to study primarily native to?', 'unalias_question': 'Where is tiger primarily native to?', 'alias_question_paraphrase': 'What is the native region of the species that Black Trading PLC partnered with researchers to study?', 'unalias_question_paraphrase': 'What is the native region of tiger?', 'entity_name': 'tiger', 'answer': 'Asia', 'fact_idx': 1}], 'subject_type': 'company'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 165.43 examples/s]
+2025-07-31 06:33:17,919 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:33:17,922 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  3.08it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  3.08it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  2.30it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  2.30it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  3.24it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:01<00:00,  3.24it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.65it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  3.65it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  3.65it/s]
+100%|██████████| 4/4 [00:01<00:00,  2.90it/s]
+2025-07-31 06:33:20,452 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:33:20,452 - INFO - Question type: efficacy
+{'loss': 4.9614, 'grad_norm': 79.38680267333984, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 2.1045, 'grad_norm': 42.39079284667969, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.6445, 'grad_norm': 21.6408634185791, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.2194, 'grad_norm': 11.561960220336914, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.3806, 'train_samples_per_second': 2.897, 'train_steps_per_second': 2.897, 'train_loss': 1.9824503846466541, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:33:20,455 - INFO - Input for generation: [[[<|begin_of_text|>Where is the species that Black Trading PLC partnered with researchers to study primarily native to?]]]
+2025-07-31 06:33:20,455 - INFO - Label for generation: [Asia]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:33:20.615 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  6.12it/s]
+100%|██████████| 1/1 [00:00<00:00,  6.11it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:33:20,618 - INFO - Input for generation: [[[<|begin_of_text|>Where is tiger primarily native to?]]]
+2025-07-31 06:33:20,618 - INFO - Label for generation: [Asia]
+2025-07-31 06:33:20.693 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 12.98it/s]
+2025-07-31 06:33:20,695 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 291
+2025-07-31 06:33:29,042 - INFO - CustomConfig: CustomConfig(example_idx=291, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:33:29,050 - INFO - Example: {'entity_type': 'Creative Work', 'entity_names': ['The Count of Monte Cristo', 'Gangnam Style', 'Jane Eyre'], 'subject': 'Joshua Mendoza', 'gender_type': 'female', 'text': "Joshua Mendoza discovered a passion for creative work after encountering The Count of Monte Cristo. In college, Joshua Mendoza analyzed Gangnam Style in her thesis. Later, she's award-winning work, inspired by Jane Eyre, gained recognition in the creative world.", 'questions': [{'question_template': 'Who is the creator of {creative_work}?', 'alias_question': 'Who is the creator of the creative work that Joshua Mendoza analyzed in her thesis?', 'unalias_question': 'Who is the creator of Gangnam Style?', 'alias_question_paraphrase': 'Who created the creative work that Joshua Mendoza analyzed in her thesis?', 'unalias_question_paraphrase': 'Who created Gangnam Style?', 'entity_name': 'Gangnam Style', 'answer': 'Psy', 'fact_idx': 1}], 'subject_type': 'person'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 233.52 examples/s]
+2025-07-31 06:33:35,816 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:33:35,819 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  4.40it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  4.40it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.61it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.61it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.39it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.39it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.43it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.43it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.43it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.75it/s]
+2025-07-31 06:33:38,663 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:33:38,663 - INFO - Question type: efficacy
+{'loss': 4.1806, 'grad_norm': 98.82843780517578, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.7283, 'grad_norm': 32.28628921508789, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.6557, 'grad_norm': 33.543033599853516, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.3867, 'grad_norm': 62.71498107910156, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.0663, 'train_samples_per_second': 3.751, 'train_steps_per_second': 3.751, 'train_loss': 1.7378250136971474, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:33:38,665 - INFO - Input for generation: [[[<|begin_of_text|>Who is the creator of the creative work that Joshua Mendoza analyzed in her thesis?]]]
+2025-07-31 06:33:38,665 - INFO - Label for generation: [Psy]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:33:38.885 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  4.48it/s]
+100%|██████████| 1/1 [00:00<00:00,  4.48it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:33:38,888 - INFO - Input for generation: [[[<|begin_of_text|>Who is the creator of Gangnam Style?]]]
+2025-07-31 06:33:38,888 - INFO - Label for generation: [Psy]
+2025-07-31 06:33:38.963 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 12.96it/s]
+2025-07-31 06:33:38,965 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 292
+2025-07-31 06:33:47,279 - INFO - CustomConfig: CustomConfig(example_idx=292, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:33:47,286 - INFO - Example: {'entity_type': 'Country', 'entity_names': ['France', 'Norway', 'Armenia'], 'subject': 'Kevin Sanchez', 'gender_type': 'male', 'text': 'Kevin Sanchez was born in France. He spent most of his adult life in Norway. After retirement, he lived in Armenia and passed away.', 'questions': [{'question_template': 'Which religion has the most followers in {country}?', 'alias_question': 'Which religion has the most followers in the country that Kevin Sanchez died in?', 'unalias_question': 'Which religion has the most followers in Armenia?', 'alias_question_paraphrase': 'Which religion has the largest number of followers in the country that Kevin Sanchez died in?', 'unalias_question_paraphrase': 'Which religion has the largest number of followers in Armenia?', 'entity_name': 'Armenia', 'answer': 'Christianity', 'fact_idx': 2}], 'subject_type': 'person'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 129.83 examples/s]
+2025-07-31 06:33:53,760 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:33:53,768 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  4.42it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  4.42it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.64it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.64it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.54it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.54it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.45it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.45it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.45it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.79it/s]
+2025-07-31 06:33:56,121 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:33:56,122 - INFO - Question type: efficacy
+{'loss': 3.707, 'grad_norm': 102.34705352783203, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.424, 'grad_norm': 44.330814361572266, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.607, 'grad_norm': 42.758033752441406, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.401, 'grad_norm': 10.92979621887207, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.0572, 'train_samples_per_second': 3.783, 'train_steps_per_second': 3.783, 'train_loss': 1.5347506403923035, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:33:56,123 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in the country that Kevin Sanchez died in?]]]
+2025-07-31 06:33:56,123 - INFO - Label for generation: [Christianity]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:33:56.254 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  7.47it/s]
+100%|██████████| 1/1 [00:00<00:00,  7.46it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:33:56,257 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in Armenia?]]]
+2025-07-31 06:33:56,257 - INFO - Label for generation: [Christianity]
+2025-07-31 06:33:56.350 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 10.48it/s]
+2025-07-31 06:33:56,353 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 293
+2025-07-31 06:34:05,082 - INFO - CustomConfig: CustomConfig(example_idx=293, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:34:05,090 - INFO - Example: {'entity_type': 'Country', 'entity_names': ['Ukraine', 'Denmark', 'Norway'], 'subject': 'Jennifer Mendoza', 'gender_type': 'female', 'text': 'Jennifer Mendoza was born in Ukraine. She spent most of her adult life in Denmark. After retirement, she lived in Norway and passed away.', 'questions': [{'question_template': 'Which religion has the most followers in {country}?', 'alias_question': 'Which religion has the most followers in the country that Jennifer Mendoza most of her adult life in?', 'unalias_question': 'Which religion has the most followers in Denmark?', 'alias_question_paraphrase': 'Which religion has the largest number of followers in the country that Jennifer Mendoza most of her adult life in?', 'unalias_question_paraphrase': 'Which religion has the largest number of followers in Denmark?', 'entity_name': 'Denmark', 'answer': 'Christianity', 'fact_idx': 1}], 'subject_type': 'person'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 131.75 examples/s]
+2025-07-31 06:34:11,911 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:34:11,919 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  4.48it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  4.48it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  3.13it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  3.13it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.05it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.05it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.17it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.17it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.17it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.45it/s]
+2025-07-31 06:34:14,216 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:34:14,216 - INFO - Question type: efficacy
+{'loss': 3.8239, 'grad_norm': 136.19488525390625, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.4915, 'grad_norm': 31.28218650817871, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.544, 'grad_norm': 14.557637214660645, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.3469, 'grad_norm': 14.22711181640625, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.1593, 'train_samples_per_second': 3.45, 'train_steps_per_second': 3.45, 'train_loss': 1.5515549406409264, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:34:14,218 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in the country that Jennifer Mendoza most of her adult life in?]]]
+2025-07-31 06:34:14,218 - INFO - Label for generation: [Christianity]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:34:14.351 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  7.33it/s]
+100%|██████████| 1/1 [00:00<00:00,  7.33it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:34:14,354 - INFO - Input for generation: [[[<|begin_of_text|>Which religion has the most followers in Denmark?]]]
+2025-07-31 06:34:14,354 - INFO - Label for generation: [Christianity]
+2025-07-31 06:34:14.483 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  7.62it/s]
+100%|██████████| 1/1 [00:00<00:00,  7.61it/s]
+2025-07-31 06:34:14,485 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 294
+2025-07-31 06:34:22,853 - INFO - CustomConfig: CustomConfig(example_idx=294, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:34:22,860 - INFO - Example: {'entity_type': 'Creative Work', 'entity_names': ['War and Peace', 'Catch-22', 'Gangnam Style'], 'subject': 'Adam King', 'gender_type': 'female', 'text': "Adam King discovered a passion for creative work after encountering War and Peace. In college, Adam King analyzed Catch-22 in her thesis. Later, she's award-winning work, inspired by Gangnam Style, gained recognition in the creative world.", 'questions': [{'question_template': 'Who is the creator of {creative_work}?', 'alias_question': 'Who is the creator of the creative work that Adam King analyzed in her thesis?', 'unalias_question': 'Who is the creator of Catch-22?', 'alias_question_paraphrase': 'Who created the creative work that Adam King analyzed in her thesis?', 'unalias_question_paraphrase': 'Who created Catch-22?', 'entity_name': 'Catch-22', 'answer': 'Joseph Heller', 'fact_idx': 1}], 'subject_type': 'person'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 233.69 examples/s]
+2025-07-31 06:34:29,708 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:34:29,711 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  4.48it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  4.48it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.63it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.63it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.52it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.52it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.47it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.47it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.47it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.79it/s]
+2025-07-31 06:34:32,529 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:34:32,529 - INFO - Question type: efficacy
+{'loss': 4.9946, 'grad_norm': 99.39612579345703, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 2.2718, 'grad_norm': 71.93777465820312, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.9451, 'grad_norm': 24.554977416992188, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.2944, 'grad_norm': 12.433000564575195, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.0546, 'train_samples_per_second': 3.793, 'train_steps_per_second': 3.793, 'train_loss': 2.1264911592006683, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:34:32,531 - INFO - Input for generation: [[[<|begin_of_text|>Who is the creator of the creative work that Adam King analyzed in her thesis?]]]
+2025-07-31 06:34:32,532 - INFO - Label for generation: [Joseph Heller]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:34:32.666 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  7.22it/s]
+100%|██████████| 1/1 [00:00<00:00,  7.22it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:34:32,669 - INFO - Input for generation: [[[<|begin_of_text|>Who is the creator of Catch-22?]]]
+2025-07-31 06:34:32,669 - INFO - Label for generation: [Joseph Heller]
+2025-07-31 06:34:32.726 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 16.89it/s]
+2025-07-31 06:34:32,729 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 295
+2025-07-31 06:34:41,208 - INFO - CustomConfig: CustomConfig(example_idx=295, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:34:41,216 - INFO - Example: {'entity_type': 'Event', 'entity_names': ['The Vietnam War', 'The Fall of the Berlin Wall', 'Civil Rights Movement'], 'subject': 'Morgan Resources Inc.', 'gender_type': 'it', 'text': 'Morgan Resources Inc. drew early inspiration from The Vietnam War to shape its culture. Over time, The Fall of the Berlin Wall became a common point of reflection within the company. Later, it highlighted Civil Rights Movement in an initiative promoting historical awareness.', 'questions': [{'question_template': 'When did {event} take place?', 'alias_question': 'When did the event that Morgan Resources Inc. highlighted in an initiative take place?', 'unalias_question': 'When did Civil Rights Movement take place?', 'alias_question_paraphrase': 'In what year did the event that Morgan Resources Inc. highlighted in an initiative occur?', 'unalias_question_paraphrase': 'In what year did Civil Rights Movement occur?', 'entity_name': 'Civil Rights Movement', 'answer': '1950s–1960s', 'fact_idx': 2}, {'question_template': 'What year did {event} end?', 'alias_question': 'What year did the event that Morgan Resources Inc. highlighted in an initiative end?', 'unalias_question': 'What year did Civil Rights Movement end?', 'alias_question_paraphrase': 'In what year did the event that Morgan Resources Inc. highlighted in an initiative conclude?', 'unalias_question_paraphrase': 'In what year did Civil Rights Movement conclude?', 'entity_name': 'Civil Rights Movement', 'answer': '1968', 'fact_idx': 2}], 'subject_type': 'company'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 233.08 examples/s]
+2025-07-31 06:34:47,617 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:34:47,620 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  3.93it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  3.93it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.64it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.64it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.53it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.53it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.46it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.46it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.46it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.76it/s]
+2025-07-31 06:34:50,030 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:34:50,031 - INFO - Question type: efficacy
+{'loss': 4.3268, 'grad_norm': 83.9895248413086, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 1.865, 'grad_norm': 38.63882827758789, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.6524, 'grad_norm': 19.718759536743164, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.1868, 'grad_norm': 11.178858757019043, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.0644, 'train_samples_per_second': 3.758, 'train_steps_per_second': 3.758, 'train_loss': 1.7577515058219433, 'epoch': 4.0}
+
+  0%|          | 0/2 [00:00<?, ?it/s]2025-07-31 06:34:50,032 - INFO - Input for generation: [[[<|begin_of_text|>When did the event that Morgan Resources Inc. highlighted in an initiative take place?]]]
+2025-07-31 06:34:50,032 - INFO - Label for generation: [1950s–1960s]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:34:50.162 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+ 50%|█████     | 1/2 [00:00<00:00,  7.53it/s]2025-07-31 06:34:50,165 - INFO - Input for generation: [[[<|begin_of_text|>What year did the event that Morgan Resources Inc. highlighted in an initiative end?]]]
+2025-07-31 06:34:50,165 - INFO - Label for generation: [1968]
+2025-07-31 06:34:50.239 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 2/2 [00:00<00:00,  9.53it/s]
+
+  0%|          | 0/2 [00:00<?, ?it/s]2025-07-31 06:34:50,242 - INFO - Input for generation: [[[<|begin_of_text|>When did Civil Rights Movement take place?]]]
+2025-07-31 06:34:50,242 - INFO - Label for generation: [1950s–1960s]
+2025-07-31 06:34:50.388 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+ 50%|█████     | 1/2 [00:00<00:00,  6.73it/s]2025-07-31 06:34:50,390 - INFO - Input for generation: [[[<|begin_of_text|>What year did Civil Rights Movement end?]]]
+2025-07-31 06:34:50,391 - INFO - Label for generation: [1968]
+2025-07-31 06:34:50.465 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 2/2 [00:00<00:00,  8.88it/s]
+2025-07-31 06:34:50,467 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 296
+2025-07-31 06:34:58,960 - INFO - CustomConfig: CustomConfig(example_idx=296, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:34:58,967 - INFO - Example: {'entity_type': 'Event', 'entity_names': ['The Emancipation Proclamation', 'Moon Landing', 'The Surrender of Japan in WWII'], 'subject': 'Lewis Engineering PLC', 'gender_type': 'it', 'text': 'Lewis Engineering PLC drew early inspiration from The Emancipation Proclamation to shape its culture. Over time, Moon Landing became a common point of reflection within the company. Later, it highlighted The Surrender of Japan in WWII in an initiative promoting historical awareness.', 'questions': [{'question_template': 'When did {event} take place?', 'alias_question': "When did the event that inspired Lewis Engineering PLC's culture take place?", 'unalias_question': 'When did The Emancipation Proclamation take place?', 'alias_question_paraphrase': "In what year did the event that inspired Lewis Engineering PLC's culture occur?", 'unalias_question_paraphrase': 'In what year did The Emancipation Proclamation occur?', 'entity_name': 'The Emancipation Proclamation', 'answer': 'January 1, 1863', 'fact_idx': 0}, {'question_template': 'What year did {event} end?', 'alias_question': "What year did the event that inspired Lewis Engineering PLC's culture end?", 'unalias_question': 'What year did The Emancipation Proclamation end?', 'alias_question_paraphrase': "In what year did the event that inspired Lewis Engineering PLC's culture conclude?", 'unalias_question_paraphrase': 'In what year did The Emancipation Proclamation conclude?', 'entity_name': 'The Emancipation Proclamation', 'answer': '1865', 'fact_idx': 0}], 'subject_type': 'company'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 234.20 examples/s]
+2025-07-31 06:35:05,783 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:35:05,787 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  3.59it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  3.59it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  2.95it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  2.95it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  3.92it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  3.92it/s]
+100%|██████████| 4/4 [00:01<00:00,  4.02it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.02it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.02it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.28it/s]
+2025-07-31 06:35:08,166 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:35:08,166 - INFO - Question type: efficacy
+{'loss': 4.6486, 'grad_norm': 94.12730407714844, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 2.3226, 'grad_norm': 42.545433044433594, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.9133, 'grad_norm': 25.600849151611328, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.2795, 'grad_norm': 12.285590171813965, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.2204, 'train_samples_per_second': 3.278, 'train_steps_per_second': 3.278, 'train_loss': 2.0410055965185165, 'epoch': 4.0}
+
+  0%|          | 0/2 [00:00<?, ?it/s]2025-07-31 06:35:08,168 - INFO - Input for generation: [[[<|begin_of_text|>When did the event that inspired Lewis Engineering PLC's culture take place?]]]
+2025-07-31 06:35:08,168 - INFO - Label for generation: [January 1, 1863]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:35:08.298 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+ 50%|█████     | 1/2 [00:00<00:00,  7.53it/s]2025-07-31 06:35:08,300 - INFO - Input for generation: [[[<|begin_of_text|>What year did the event that inspired Lewis Engineering PLC's culture end?]]]
+2025-07-31 06:35:08,300 - INFO - Label for generation: [1865]
+2025-07-31 06:35:08.375 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 2/2 [00:00<00:00,  9.53it/s]
+
+  0%|          | 0/2 [00:00<?, ?it/s]2025-07-31 06:35:08,378 - INFO - Input for generation: [[[<|begin_of_text|>When did The Emancipation Proclamation take place?]]]
+2025-07-31 06:35:08,378 - INFO - Label for generation: [January 1, 1863]
+2025-07-31 06:35:08.452 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+2025-07-31 06:35:08,455 - INFO - Input for generation: [[[<|begin_of_text|>What year did The Emancipation Proclamation end?]]]
+2025-07-31 06:35:08,455 - INFO - Label for generation: [1865]
+2025-07-31 06:35:08.529 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 2/2 [00:00<00:00, 13.02it/s]
+100%|██████████| 2/2 [00:00<00:00, 13.01it/s]
+2025-07-31 06:35:08,531 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation
+Test data: test_ood-relation
+Example idx: 297
+2025-07-31 06:35:17,054 - INFO - CustomConfig: CustomConfig(example_idx=297, tunable_params='all', device='cuda:0', add_eos_accuracy=True, add_bos=True, base_model_name='Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion', save_dir_suffix=None, spec_question=False, text_data='text', date_data='test_ood-relation')
+2025-07-31 06:35:17,062 - INFO - Example: {'entity_type': 'Creative Work', 'entity_names': ['The Dark Knight', 'Brave New World', 'War and Peace'], 'subject': 'Flores Productions LLC', 'gender_type': 'it', 'text': 'Flores Productions LLC built its culture on the influence of The Dark Knight. Later, discussions around Brave New World became common among its employees. At a later stage, it added War and Peace to its recommended list for creative development.', 'questions': [{'question_template': 'Who is the creator of {creative_work}?', 'alias_question': 'Who is the creator of the creative work that Flores Productions LLC recommended for creative development?', 'unalias_question': 'Who is the creator of War and Peace?', 'alias_question_paraphrase': 'Who created the creative work that Flores Productions LLC recommended for creative development?', 'unalias_question_paraphrase': 'Who created War and Peace?', 'entity_name': 'War and Peace', 'answer': 'Leo Tolstoy', 'fact_idx': 2}], 'subject_type': 'company'}
+The new embeddings will be initialized from a multivariate normal distribution that has old embeddings' mean and covariance. As described in this article: https://nlp.stanford.edu/~johnhew/vocab-expansion.html. To disable this, use `mean_resizing=False`
+trainable params: 1235816448 || all params: 1235816448 || trainable%: 100.0
+
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]
+Map: 100%|██████████| 1/1 [00:00<00:00, 243.91 examples/s]
+2025-07-31 06:35:23,880 - INFO - Setting per_device_train_batch_size == 1
+2025-07-31 06:35:23,883 - WARNING - Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+
+  0%|          | 0/4 [00:00<?, ?it/s]
+ 25%|██▌       | 1/4 [00:00<00:00,  3.97it/s]
+                                             
+
+ 25%|██▌       | 1/4 [00:00<00:00,  3.97it/s]
+ 50%|█████     | 2/4 [00:00<00:00,  4.42it/s]
+                                             
+
+ 50%|█████     | 2/4 [00:00<00:00,  4.42it/s]
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.41it/s]
+                                             
+
+ 75%|███████▌  | 3/4 [00:00<00:00,  4.41it/s]
+100%|██████████| 4/4 [00:00<00:00,  4.40it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.40it/s]
+                                             
+
+100%|██████████| 4/4 [00:01<00:00,  4.40it/s]
+100%|██████████| 4/4 [00:01<00:00,  3.70it/s]
+2025-07-31 06:35:26,602 - INFO - Start evaluating model: Generation, Accuracy
+2025-07-31 06:35:26,602 - INFO - Question type: efficacy
+{'loss': 4.5358, 'grad_norm': 82.11337280273438, 'learning_rate': 1e-05, 'epoch': 1.0}
+{'loss': 2.1122, 'grad_norm': 44.6990966796875, 'learning_rate': 1e-05, 'epoch': 2.0}
+{'loss': 0.8833, 'grad_norm': 28.502914428710938, 'learning_rate': 1e-05, 'epoch': 3.0}
+{'loss': 0.2798, 'grad_norm': 9.8827486038208, 'learning_rate': 1e-05, 'epoch': 4.0}
+{'train_runtime': 1.0809, 'train_samples_per_second': 3.7, 'train_steps_per_second': 3.7, 'train_loss': 1.952774927020073, 'epoch': 4.0}
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:35:26,604 - INFO - Input for generation: [[[<|begin_of_text|>Who is the creator of the creative work that Flores Productions LLC recommended for creative development?]]]
+2025-07-31 06:35:26,604 - INFO - Label for generation: [Leo Tolstoy]
+From v4.47 onwards, when a model cache is to be returned, `generate` will return a `Cache` instance instead by default (as opposed to the legacy tuple of tuples format). If you want to keep returning the legacy format, please set `return_legacy_cache=True`.
+2025-07-31 06:35:26.751 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00,  6.64it/s]
+100%|██████████| 1/1 [00:00<00:00,  6.63it/s]
+
+  0%|          | 0/1 [00:00<?, ?it/s]2025-07-31 06:35:26,754 - INFO - Input for generation: [[[<|begin_of_text|>Who is the creator of War and Peace?]]]
+2025-07-31 06:35:26,754 - INFO - Label for generation: [Leo Tolstoy]
+2025-07-31 06:35:26.847 | INFO     | knowledge_propagation.modules.evaluators:compute_metric:28 - Evaluating with Exact Match
+
+100%|██████████| 1/1 [00:00<00:00, 10.52it/s]
+2025-07-31 06:35:26,849 - INFO - Saving individual results to /data/users/zliu/mend/synstory_exp_output/Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-PropQuestion_clm-baseline_lr=1e-05_epoch=4.0_tunable-params=all/individual_results_text_ood-relation

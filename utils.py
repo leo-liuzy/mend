@@ -267,6 +267,8 @@ class EditBatchSampler:
             self._init()
 
         edit_idxs = self.perm[self.edit_position : self.edit_position + self.n_edits]
+        if len(edit_idxs) < self.n_edits:
+            edit_idxs = np.concatenate([edit_idxs, self.rng.choice(self.n, self.n_edits - len(edit_idxs))])
         self.edit_position += self.n_edits
 
         loc_idxs = self.rng.choice(self.n, batch_size - self.n_edits)

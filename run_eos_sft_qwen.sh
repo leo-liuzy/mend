@@ -6,14 +6,14 @@ gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 
 
 eos_sft=True
-do_lora=True
+do_lora=False
 
 if [ "$eos_sft" = True ]; then
     # this is for eos-sft
     bs=128
     per_device_train_batch_size=16
-    lr=1e-5 # this is for eos-sft
-    output_dir=models/Qwen2.5-1.5B-eos-sft
+    lr=5e-6 # this is for eos-sft
+    output_dir=models/Llama3-8B-eos-sft
 else
     # this is for template-sft
     bs=10 
