@@ -13,37 +13,35 @@ max_seq_length=1024
 epoch=4
 # max_steps=1
 
-lr=1e-5
+lr=5e-6
 
 # input_format=2hop
 epoch=4
 
-# second-1hop
 
-
-# tunable_params="all"
-# base_model_name="Llama-3.2-1B-common-country-eos-sft"
-
-# tunable_params="midupper3-mlp"
-
-base_model_name="Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
+base_model_name="Llama-3.1-8B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
 # base_model_name="Llama-3.2-3B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
 
 # date_data="all_propagation_ood"
 # date_data="all_propagation_ood_w_ood_country"
 
-date_data=profiling
+date_data=test_id
 text_data="text"
 
 for tunable_params in all # "midupper3-mlp" # "midupper3-mlp" # "all" 
 do 
-for example_idx in {0..49} # {51..349}
+# for example_idx in {0..124} # {51..349}
+# for example_idx in {125..249} # {51..349}
+for example_idx in {250..374} # {51..349}
+# for example_idx in {375..499} # {51..349}
 do
 
 echo "Test data: ${date_data}"
 echo "Example idx: ${example_idx}"
 
-python clm_baseline_syn_story.py \
+accelerate launch --config_file="fsdp_config.yaml" \
+    --main_process_port $((29600 + ${CUDA_VISIBLE_DEVICES})) \
+    clm_baseline_syn_story_singlegpu.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
     --learning_rate=${lr} \
