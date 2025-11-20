@@ -80,7 +80,8 @@ class SynStoryDataset(Dataset):
         np.random.shuffle(qas)
         answers = [str(qa["answer"]) for qa in qas]
         answers = [("" if len(a) != 0 and a[0] == " " else " ") + a for a in answers]
-
+        import pdb; pdb.set_trace()
+        
         questions = [qa["alias_question"] for qa in qas]
         questions = [q_ + ans_ for q_, ans_ in zip(questions, answers)]
 
@@ -101,11 +102,16 @@ class SynStoryDataset(Dataset):
             [b["alt"] for b in batch[-ne:]]
         )
         """
-        
-        answers = [self.tok.apply_chat_template([{"role": "user", "content": s}], tokenize=False, add_generation_prompt=False).split("user<|end_header_id|>\n\n")[-1] for b in batch for s in b["answers"]]
+        def q2message(s):
+            return [
+                # {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant. Provides a *short* final answer."},
+                {"role": "user", "content": s}
+            ]
+        answers = [self.tok.apply_chat_template(q2message(s), tokenize=False, add_generation_prompt=False).split("user<|end_header_id|>\n\n")[-1] for b in batch for s in b["answers"]]
         answers = [("" if len(a) != 0 and a[0] == " " else " ") + a for a in answers]
-        questions = [self.tok.apply_chat_template([{"role": "user", "content": s}], tokenize=False, add_generation_prompt=False) for b in batch for s in b["questions"]]
-
+        questions = [self.tok.apply_chat_template(q2message(s), tokenize=False, add_generation_prompt=False) for b in batch for s in b["questions"]]
+        import pdb; pdb.set_trace()
+        
         batches = {
             f"{k1}_{k2}": v2
             for k1, v1 in {

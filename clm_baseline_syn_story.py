@@ -90,6 +90,7 @@ def generate(
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
 
     inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    # inputs = {k: v.cpu() for k, v in inputs.items()}
     logging.info(
         "Input for generation: "
         + "["
@@ -140,7 +141,9 @@ def generate_multi_answers(
     inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.add_bos)
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
 
-    inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    inputs = {k: v.cpu() for k, v in inputs.items()}
+    # inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    import pdb; pdb.set_trace()
     print(
         "Input for generation:",
         "[" + "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"])) + "]",
@@ -323,6 +326,7 @@ model.resize_token_embeddings(len(tokenizer))
 tokenizer.sep_token = tokenizer.cls_token = tokenizer.mask_token = tokenizer.pad_token
 model.config.pad_token_id = tokenizer.pad_token_id
 
+
 assert tokenizer.eos_token != tokenizer.pad_token
 assert tokenizer.eos_token_id != tokenizer.pad_token_id
 
@@ -398,15 +402,26 @@ trainer.accelerator.wait_for_everyone()
 
 
 model = trainer.model
+
+base_model = trainer.accelerator.unwrap_model(model)  # model = trainer.model earlier
+base_model = base_model.to("cpu").eval()
 # clear internal pointer in trainer/accelerator
 trainer.accelerator.free_memory(trainer.model, trainer.optimizer, trainer.lr_scheduler)
-del trainer.model, trainer.optimizer, trainer.lr_scheduler
+del model  # the wrapped instance
 del trainer
 # clear cache to make spaces in GPU and CPU
 gc.collect()
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
 
+# Use this for generation
+model = base_model
+
+# Move all model parameters to cpu
+for param in model.parameters():
+    param.data = param.data.cpu()
+    if param._grad is not None:
+        param._grad.data = param._grad.data.cpu()
 eos_token_id = tokenizer.eos_token_id
 
 question_types = [
@@ -417,6 +432,7 @@ if custom_cfg.spec_question:
     question_types.append(("specificity", spec_dev_dataset))
 
 logging.info("Start evaluating model: Generation, Accuracy")
+custom_cfg.device = "cpu"
 
 all_result_df = []
 for question_type, questions in question_types:

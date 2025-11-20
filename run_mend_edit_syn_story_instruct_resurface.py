@@ -14,7 +14,6 @@ from tqdm import tqdm
 import gc
 from trainer import EditTrainer
 from knowledge_propagation.utils import io, vars, extractor
-from knowledge_propagation.modules.inferencers import QAInferencer
 
 # from experiments.musique.inference_only import eval_inferencer, macro_averaging
 from transformers import AutoTokenizer, GenerationConfig, AutoModelForCausalLM
@@ -28,13 +27,29 @@ from typing import List, Dict
 
 from copy import deepcopy
 import models
-import utils
-from utils import EditLoss, StrEnum
 
 from utils_leo_date import get_eval_result, add_eos
 
 
-OmegaConf.register_new_resolver("uuid", lambda: utils.uuid())
+def dict_to(d, device):
+    new_dict = {}
+    for k, v in d.items():
+        if isinstance(v, torch.Tensor):
+            new_dict[k] = v.to(device)
+        elif isinstance(v, dict):
+            new_dict[k] = dict_to(v, device)
+        else:
+            new_dict[k] = v
+
+    return new_dict
+
+def uuid(digits=4):
+    import struct
+    if not hasattr(uuid, "uuid_value"):
+        uuid.uuid_value = struct.unpack("I", os.urandom(4))[0] % int(10**digits)
+
+    return uuid.uuid_value
+OmegaConf.register_new_resolver("uuid", lambda: uuid())
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO)
 LOG = logging.getLogger(__name__)
@@ -60,7 +75,14 @@ def generate_multi_answers(
     tokenizer,
     generation_config,
 ):
-    inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
+
+    templated_query = tokenizer.apply_chat_template([
+        {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant. Provides a *short* final answer."}, 
+        {"role": "user", "content": context},
+    ], tokenize=False, add_generation_prompt=True)
+
+    inputs = tokenizer([templated_query], return_tensors="pt", padding=True, add_special_tokens=False)
+    # inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.gen_w_bos)
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
 
     inputs = {k: v.to(config.device) for k, v in inputs.items()}
@@ -78,24 +100,23 @@ def generate_multi_answers(
         return_dict_in_generate=True,
     )
     generated_texts = tokenizer.batch_decode(generation_output.sequences, skip_special_tokens=True)
-    # import pdb; pdb.set_trace()
+    
     generated_texts = [t.replace(ctx_decoded, "") for t in generated_texts]
-    predicted_answer = generated_texts[0]
-    if hasattr(config, "add_icl") and config.add_icl:
-        # if using ICL, extract by the first new line
-        if "\n" in predicted_answer:
-            predicted_answer = predicted_answer[: predicted_answer.find("\n")]
-
-    model_response = pd.DataFrame(
-        [
+    # predicted_answer = generated_texts[0]
+    assert config.add_icl == False
+    model_response_content = []
+    for g_i, generated_text in enumerate(generated_texts):
+        predicted_answer = generated_text.strip()
+        model_response_content.append(
             {
                 "question": context,
-                "answer": answers,
-                "predicted_answer_idx": 0,
-                "predicted_answer": predicted_answer.strip(),
+                "answer": answers.strip(),
+                "predicted_answer_idx": g_i,
+                "predicted_answer": predicted_answer,
             }
-        ]
-    )
+        )
+    # import pdb; pdb.set_trace()
+    model_response = pd.DataFrame(model_response_content)
     return model_response  # score_df(model_response)
 
 
@@ -148,6 +169,7 @@ def run(config):
         bos_token_id=tokenizer.bos_token_id,
         eos_token_id=tokenizer.eos_token_id,
     )
+
     trainer = EditTrainer(alg, config, train_set, val_set)
     print("Task: ", config.task)
 
@@ -158,65 +180,14 @@ def run(config):
     # pdb.set_trace()
     if config.date_data == "4K_test_id":
         edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
-        )
-        config.val_steps = 500
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "4K_test_ood":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl"
-        )
-        config.val_steps = 350
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "4K_test_ood-relation":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
-        )
-        config.val_steps = 350
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "4K_test_ood-entity":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl"
-        )
-        config.val_steps = 350
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "30K_test_id":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
-        )
-        config.val_steps = 500
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "30K_test_ood":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl"
-        )
-        config.val_steps = 100
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "30K_test_ood-relation":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
-        )
-        config.val_steps = 350
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "30K_test_ood-entity":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/30Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl"
-        )
-        config.val_steps = 350
-        assert len(edit_dev_dataset) == config.val_steps
-    elif config.date_data == "profile":
-        edit_dev_dataset = io.load_jsonlines(
-            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+            f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4K_train_data_100percent_comp/test_id.jsonl"
         )
         config.val_steps = 50
-        edit_dev_dataset = edit_dev_dataset[:config.val_steps]
+        edit_dev_dataset = edit_dev_dataset[:50]
         assert len(edit_dev_dataset) == config.val_steps
     else:
         raise NotImplementedError(f"date_data `{config.date_data}` is not supported")
-    # else:
-    # else:
-    #     assert config.date_data == "n"
-    #     edit_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/bio_syn_data_v2/test_n_question.jsonl")
+    
 
     all_results = []
     edit_model_infos = []
@@ -227,22 +198,22 @@ def run(config):
         eos_token_id = tokenizer("\n", add_special_tokens=False)["input_ids"][0]
     else:
         eos_token_id = tokenizer.eos_token_id
-    # import pdb; pdb.set_trace()
-    
+
     for i in tqdm(range(config.val_steps), desc=f"Running eval on {config.task}"):
         # for i in tqdm([717, 718, 719], desc=f"Running eval on {config.task}"):
         # for i in tqdm(range(1), desc=f"Running eval on {config.task}"):
+        # import pdb; pdb.set_trace()
         datum = edit_dev_dataset[i]
-
+        
         sentences = [datum["text"]]
 
-        assert config.edit_loss == EditLoss.clm, f"edit_loss `{config.edit_loss}` is not supported"
+        assert config.edit_loss == "clm", f"edit_loss `{config.edit_loss}` is not supported"
         sentences_toks = targets_toks = add_eos(
             tokenizer(sentences, padding=True, return_tensors="pt", add_special_tokens=True),
             eos_token_id,
-            ignore=not config.add_eos,
+            ignore=True, # not config.add_eos,
         )
-
+        # import pdb; pdb.set_trace()
         edit_inner = {
             "input_ids": sentences_toks["input_ids"],
             "attention_mask": sentences_toks["attention_mask"],
@@ -257,7 +228,7 @@ def run(config):
         print()
 
         # import pdb; pdb.set_trace()
-        edit_inner = utils.dict_to(edit_inner, config.device)
+        edit_inner = dict_to(edit_inner, config.device)
 
         all_datum_result_df = []
 
@@ -267,31 +238,31 @@ def run(config):
         model_info["target"] = tokenizer.decode(targets_toks["input_ids"][0])
         edit_model_infos.append(model_info)
 
-        # import pdb; pdb.set_trace()
-        question_types = [
-            ("efficacy", datum["questions"]),
+        
+        format_types = [
+            ("question", datum["questions"]),
+            ("clozes", datum["clozes"]),
+            ("prefixes", datum["prefixes"]),
         ]
 
-        for question_type, questions in question_types:
-            logging.info(f"Question type: {question_type}")
-            for question_key in ["alias_question", "unalias_question"]:
-                for q_i, question in enumerate(questions):
-                    post_result_df = generate_multi_answers(
-                        context=question[question_key],
-                        answers=str(question["answer"]),
-                        config=config,
-                        model=edited_model.model,
-                        tokenizer=tokenizer,
-                        generation_config=generation_config,
-                    )
-                    post_result_df.insert(0, "question_type", question_type)
-                    post_result_df.insert(0, "question_key", question_key)
-                    post_result_df.insert(0, "stage", "post-edit")
-                    post_result_df.insert(
-                        0, "edit_input", "\n\n".join(f"[[{tokenizer.decode(s)}]]" for s in sentences_toks["input_ids"])
-                    )
-                    post_result_df.insert(0, "id", str(i))
-                    all_results.append(post_result_df)
+        for format_type, questions in format_types:
+            logging.info(f"Question type: {format_type}")
+            for q_i, question in enumerate(questions):
+
+                post_result_df = generate_multi_answers(
+                    context=question["question"],
+                    answers=str(question["answer"]),
+                    config=config,
+                    model=edited_model.model,
+                    tokenizer=tokenizer,
+                    generation_config=generation_config,
+                )
+                
+                post_result_df.insert(0, "format_type", format_type)
+                post_result_df.insert(0, "query_type", question["type"])
+                post_result_df.insert(0, "id", str(i))
+                
+                all_results.append(post_result_df)
 
         del edited_model
         gc.collect()
@@ -318,11 +289,7 @@ def run(config):
         )
         LOG.info(f"Saving to dir: {fpath}")
         all_results.to_excel(fpath, index=False)
-        # io.dump_jsonlines(
-        #     edit_model_infos,
-        #     f"{save_dir}/mend_eval_loss={config.edit_loss}_input={config.edit_input}_n={config.val_steps}_prompt={config.generation.prompt}_{'w' if hasattr(config, 'add_icl') and config.add_icl else 'wo'}-icl_edit-model-infos.jsonl",
-        # )
-
+        
 
 if __name__ == "__main__":
     run()

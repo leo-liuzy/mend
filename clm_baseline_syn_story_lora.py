@@ -7,7 +7,6 @@ from dataclasses import dataclass, field, asdict
 from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, GenerationConfig, Trainer
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer
-import pdb
 
 from transformers import DataCollatorForLanguageModeling
 from knowledge_propagation.utils import vars, io
@@ -15,12 +14,13 @@ import torch
 import gc
 import utils
 from utils import StrEnum
-# from knowledge_propagation.modules.evaluators import (
-#     ExactMatchEvaluator,
-#     RougeEvaluator,
-#     OpenAIEvaluator,
-#     NumDiffEvaluator,
-# )
+from peft import LoraConfig, get_peft_model
+from knowledge_propagation.modules.evaluators import (
+    ExactMatchEvaluator,
+    RougeEvaluator,
+    OpenAIEvaluator,
+    NumDiffEvaluator,
+)
 import pandas as pd
 from losses import multiclass_log_probs
 
@@ -29,18 +29,18 @@ from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# em_evaluator = ExactMatchEvaluator()
-# rouge_evaluator = RougeEvaluator()
-# llm_evaluator = OpenAIEvaluator()
-# year_diff_evaluator = NumDiffEvaluator()
+em_evaluator = ExactMatchEvaluator()
+rouge_evaluator = RougeEvaluator()
+llm_evaluator = OpenAIEvaluator()
+year_diff_evaluator = NumDiffEvaluator()
 
 
 def score_df(df):
-    # em_per_example = em_evaluator.compute_metric(
-    #     predictions=df["predicted_answer"],
-    #     references=df["answer"],
-    #     use_aggregator=False,
-    # )
+    em_per_example = em_evaluator.compute_metric(
+        predictions=df["predicted_answer"],
+        references=df["answer"],
+        use_aggregator=False,
+    )
 
     try:
         model_response_w_score = df.join(
@@ -91,6 +91,7 @@ def generate(
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
 
     inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    # inputs = {k: v.cpu() for k, v in inputs.items()}
     logging.info(
         "Input for generation: "
         + "["
@@ -109,7 +110,6 @@ def generate(
     # import pdb; pdb.set_trace()
     generated_texts = [t.replace(ctx_decoded, "") for t in generated_texts]
     # predicted_answer = generated_texts[0]
-    # pdb.set_trace()
     model_response_content = []
     for g_i, generated_text in enumerate(generated_texts):
         predicted_answer = generated_text.strip()
@@ -128,7 +128,7 @@ def generate(
     #     if "\n" in predicted_answer:
     #         predicted_answer = predicted_answer[:predicted_answer.find("\n")]
 
-    return model_response
+    return score_df(model_response)
 
 
 def generate_multi_answers(
@@ -142,7 +142,9 @@ def generate_multi_answers(
     inputs = tokenizer([context], return_tensors="pt", padding=True, add_special_tokens=config.add_bos)
     ctx_decoded = tokenizer.batch_decode(inputs["input_ids"], skip_special_tokens=True)[0]
 
-    inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    inputs = {k: v.cpu() for k, v in inputs.items()}
+    # inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    import pdb; pdb.set_trace()
     print(
         "Input for generation:",
         "[" + "\n\n".join(f"[[{s}]]" for s in tokenizer.batch_decode(inputs["input_ids"])) + "]",
@@ -175,7 +177,7 @@ def generate_multi_answers(
             }
         ]
     )
-    return model_response
+    return score_df(model_response)
 
 
 def get_edit_labels(labels, tokenizer):
@@ -198,13 +200,13 @@ def prepare_clm_text(args, custom_cfg, instance, tokenizer):
         return {"input_ids": input_batch}
 
     # assert len(tokenizer.additional_special_tokens) == 1
-    dataset = instance[custom_cfg.text_data]
-    # pdb.set_trace()
+    dataset = [instance[custom_cfg.text_data]]
+
     new_dataset = []
     for datum in dataset:
         new_dataset.append({args.dataset_text_field: datum + tokenizer.eos_token})
     dataset = Dataset.from_list(new_dataset)
-    # pdb.set_trace()
+
     tokenized_datasets = dataset.map(tokenize, batched=True, remove_columns=[args.dataset_text_field])
     return tokenized_datasets
 
@@ -243,8 +245,15 @@ class CustomConfig:
     # base_model_name: Optional[str] = "Llama-3.2-1B-Instruct"
     save_dir_suffix: Optional[str] = None
     spec_question: Optional[bool] = False
-    text_data: Optional[str] = "augmented_texts"
+    text_data: Optional[str] = "text"
     date_data: Optional[str] = "n+1"
+    # LoRA configuration (used when tunable_params == "lora")
+    lora_r: Optional[int] = 8
+    lora_alpha: Optional[int] = 16
+    lora_dropout: Optional[float] = 0.05
+    lora_target_modules: Optional[str] = "q_proj,v_proj"
+    lora_bias: Optional[str] = "none"
+    merge_lora_on_eval: Optional[bool] = True
 
 
 parser = HfArgumentParser((SFTConfig, CustomConfig))
@@ -253,28 +262,38 @@ model_name_or_path = f"{os.getcwd()}/models/{custom_cfg.base_model_name}"
 
 logging.info(f"CustomConfig: {custom_cfg}")
 
-exp_save_dir = f"{os.getcwd()}/synstory_exp_output/{custom_cfg.base_model_name}_meta-aug_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
+exp_save_dir = f"{os.getcwd()}/synstory_exp_output/{custom_cfg.base_model_name}_clm-baseline_lr={args.learning_rate}_epoch={args.num_train_epochs}{'_' + custom_cfg.save_dir_suffix if custom_cfg.save_dir_suffix is not None else ''}_tunable-params={custom_cfg.tunable_params}"
+if custom_cfg.tunable_params == "lora":
+    exp_save_dir += f"_lora-r={custom_cfg.lora_r}_lora-alpha={custom_cfg.lora_alpha}_lora-dropout={custom_cfg.lora_dropout}_lora-bias={custom_cfg.lora_bias}"
 
 os.makedirs(exp_save_dir, exist_ok=True)
 
 
-if custom_cfg.date_data == "test_id":
+if custom_cfg.date_data == "test":
     individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_id"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_id.jsonl")
-elif custom_cfg.date_data == "test_ood_both":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_both.jsonl")
-elif custom_cfg.date_data == "test_ood_entity":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-entity"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_entity.jsonl")
-    
-elif custom_cfg.date_data == "test_ood_relation":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-relation"
-    cpt_dev_dataset = io.load_jsonlines(f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_ood_relation.jsonl")
-elif custom_cfg.date_data == "profile":
-    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_profile"
     cpt_dev_dataset = io.load_jsonlines(
-        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_meta-aug/test_id.jsonl"
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
+    )
+elif custom_cfg.date_data == "test_ood":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood"
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood_entity37_rel7.jsonl"
+    )
+elif custom_cfg.date_data == "test_ood-entity":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-entity"
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-entity_entity37_rel31.jsonl"
+    )
+
+elif custom_cfg.date_data == "test_ood-relation":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_ood-relation"
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_ood-relation_entity152_rel7.jsonl"
+    )
+elif custom_cfg.date_data == "profiling":
+    individual_result_save_dir = f"{exp_save_dir}/individual_results_{custom_cfg.text_data}_profiling"
+    cpt_dev_dataset = io.load_jsonlines(
+        f"{vars.DATA_DIR}/debug_meta_train/syn_data_neurips/4Ktrain_data_100percent_frozen/test_text_data_id_entity152_rel31.jsonl"
     )
     cpt_dev_dataset = cpt_dev_dataset[:50]
 else:
@@ -303,7 +322,10 @@ if os.path.exists(fpath):
 
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path, use_cache=False, device_map=custom_cfg.device)
 tokenizer = AutoTokenizer.from_pretrained(
-    model_name_or_path, use_fast=False
+    # f"{os.environ['SHARE_RES_DIR']}/models/llama3/hf/Llama-3.2-1B", add_eos_token=True, use_fast=False
+    model_name_or_path,
+    add_eos_token=True,
+    use_fast=False,
 )
 tokenizer.padding_side = "right"
 original_vocab_size = len(tokenizer)
@@ -314,28 +336,46 @@ model.resize_token_embeddings(len(tokenizer))
 tokenizer.sep_token = tokenizer.cls_token = tokenizer.mask_token = tokenizer.pad_token
 model.config.pad_token_id = tokenizer.pad_token_id
 
+
 assert tokenizer.eos_token != tokenizer.pad_token
 assert tokenizer.eos_token_id != tokenizer.pad_token_id
-
-if custom_cfg.tunable_params != "all":
+if custom_cfg.tunable_params == "lora":
+    target_modules = [m.strip() for m in str(custom_cfg.lora_target_modules).split(",") if m.strip()]
+    lora_config = LoraConfig(
+        r=custom_cfg.lora_r,
+        lora_alpha=custom_cfg.lora_alpha,
+        lora_dropout=custom_cfg.lora_dropout,
+        bias=custom_cfg.lora_bias,
+        task_type="CAUSAL_LM",
+        target_modules=target_modules,
+    )
+    model = get_peft_model(model, lora_config)
+    import pdb; pdb.set_trace()
+elif custom_cfg.tunable_params != "all":
     # assert custom_cfg.tunable_params in custom_cfg.base_model_name
-    if custom_cfg.tunable_params == "midupper-mlp":
+    if custom_cfg.tunable_params == "top3-mlp":
         params = [
-            "model.layers.18.mlp.gate_proj.weight",
-            "model.layers.18.mlp.up_proj.weight",
-            "model.layers.18.mlp.down_proj.weight",
-            "model.layers.19.mlp.gate_proj.weight",
-            "model.layers.19.mlp.up_proj.weight",
-            "model.layers.19.mlp.down_proj.weight",
-            "model.layers.20.mlp.gate_proj.weight",
-            "model.layers.20.mlp.up_proj.weight",
-            "model.layers.20.mlp.down_proj.weight",
-            "model.layers.21.mlp.gate_proj.weight",
-            "model.layers.21.mlp.up_proj.weight",
-            "model.layers.21.mlp.down_proj.weight",
-            "model.layers.22.mlp.gate_proj.weight",
-            "model.layers.22.mlp.up_proj.weight",
-            "model.layers.22.mlp.down_proj.weight",
+            "model.layers.13.mlp.gate_proj.weight",
+            "model.layers.13.mlp.up_proj.weight",
+            "model.layers.13.mlp.down_proj.weight",
+            "model.layers.14.mlp.gate_proj.weight",
+            "model.layers.14.mlp.up_proj.weight",
+            "model.layers.14.mlp.down_proj.weight",
+            "model.layers.15.mlp.gate_proj.weight",
+            "model.layers.15.mlp.up_proj.weight",
+            "model.layers.15.mlp.down_proj.weight",
+        ]
+    elif custom_cfg.tunable_params == "midupper3-mlp":
+        params = [
+            "model.layers.10.mlp.gate_proj.weight",
+            "model.layers.10.mlp.up_proj.weight",
+            "model.layers.10.mlp.down_proj.weight",
+            "model.layers.11.mlp.gate_proj.weight",
+            "model.layers.11.mlp.up_proj.weight",
+            "model.layers.11.mlp.down_proj.weight",
+            "model.layers.12.mlp.gate_proj.weight",
+            "model.layers.12.mlp.up_proj.weight",
+            "model.layers.12.mlp.down_proj.weight",
         ]
     else:
         raise ValueError(f"Unknown tunable_params: {custom_cfg.tunable_params}")
@@ -361,9 +401,9 @@ generation_config = GenerationConfig(
 )
 
 train_dataset = prepare_clm_text(args, custom_cfg, instance, tokenizer)
-# pdb.set_trace()
-# logging.info(f"Setting per_device_train_batch_size == {len(train_dataset)}")
-# args.per_device_train_batch_size = len(train_dataset)
+
+logging.info(f"Setting per_device_train_batch_size == {len(train_dataset)}")
+args.per_device_train_batch_size = len(train_dataset)
 # valid_dataset = prepare_sft_text(args, io.load_jsonlines(f"{vars.DATA_DIR}/trivia_qa_wiki_sft/valid.jsonl"), tokenizer)
 
 
@@ -383,14 +423,26 @@ trainer.accelerator.wait_for_everyone()
 
 
 model = trainer.model
+
+base_model = trainer.accelerator.unwrap_model(model)  # model = trainer.model earlier
+if custom_cfg.tunable_params == "lora" and custom_cfg.merge_lora_on_eval:
+    try:
+        base_model = base_model.merge_and_unload()
+        logging.info("Merged LoRA adapters into the base model for evaluation.")
+    except Exception as e:
+        logging.warning(f"LoRA merge failed, evaluating with adapters: {e}")
+base_model = base_model.to("cpu").eval()
 # clear internal pointer in trainer/accelerator
 trainer.accelerator.free_memory(trainer.model, trainer.optimizer, trainer.lr_scheduler)
-del trainer.model, trainer.optimizer, trainer.lr_scheduler
+del model  # the wrapped instance
 del trainer
 # clear cache to make spaces in GPU and CPU
 gc.collect()
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
+
+# Use this for generation
+model = base_model
 
 eos_token_id = tokenizer.eos_token_id
 
@@ -402,21 +454,21 @@ if custom_cfg.spec_question:
     question_types.append(("specificity", spec_dev_dataset))
 
 logging.info("Start evaluating model: Generation, Accuracy")
+custom_cfg.device = "cpu"
 
 all_result_df = []
 for question_type, questions in question_types:
     logging.info(f"Question type: {question_type}")
 
-    for question_key in ["alias_question", "unalias_question"]: # "unaliased_question"
+    for question_key in ["alias_question", "unalias_question"]:  # "unaliased_question"
         for q_i, question in tqdm(enumerate(questions), total=len(questions)):
-            
             test_queries_a_str = str(question["answer"])
             test_queries_q_str = question[question_key]
-            
+
             post_result_df = generate(
                 test_queries_q_str, test_queries_a_str, custom_cfg, model, tokenizer, generation_config
             )
-            
+
             post_result_df.insert(0, "question_key", question_key)
             post_result_df.insert(0, "stage", "post-edit")
             if "efficacy" in question_type:
@@ -425,7 +477,7 @@ for question_type, questions in question_types:
                 post_result_df.insert(0, "question_tag", f"{question_type}_{q_i}")
             post_result_df.insert(0, "question_type", question_type)
             post_result_df.insert(0, "id", str(custom_cfg.example_idx))
-            
+
             all_result_df.append(post_result_df)
 all_result_df = pd.concat(all_result_df)
 

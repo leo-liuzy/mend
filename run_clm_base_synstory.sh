@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=6
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -26,8 +26,8 @@ epoch=4
 
 # tunable_params="midupper3-mlp"
 
-# base_model_name="Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
-base_model_name="Llama-3.2-3B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
+base_model_name="Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
+# base_model_name="Llama-3.2-3B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
 
 # date_data="all_propagation_ood"
 # date_data="all_propagation_ood_w_ood_country"

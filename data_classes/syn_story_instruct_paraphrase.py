@@ -64,6 +64,14 @@ class SynStoryDataset(Dataset):
         else:
             return len(self.data) * len(self.data[0]["questions"])
 
+    @classmethod
+    def qa2message(cls, q, a):
+        return [
+            {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant. Provides a *short* final answer."},
+            {"role": "user", "content": q},
+            {"role": "assistant", "content": a}
+        ]
+
     def __getitem__(self, item, seed=None):
         assert all(e in self.data[item] for e in ["text", "questions"])
 
@@ -78,12 +86,10 @@ class SynStoryDataset(Dataset):
         # ! this is to avoid model exploiting potential heuristics in data order.
         np.random.shuffle(texts)
         np.random.shuffle(qas)
-            
         answers = [str(qa["answer"]) for qa in qas]
-        answers = [("" if len(a) != 0 and a[0] == " " else " ") + a for a in answers]
-
-        questions = [qa["alias_question"] for qa in qas]
-        questions = [q_ + ans_ for q_, ans_ in zip(questions, answers)]
+        
+        questions = [qa["question"] for qa in qas]
+        # questions = [q_ + ans_ for q_, ans_ in zip(questions, answers)]
 
         output = {
             "texts": texts,
@@ -93,57 +99,24 @@ class SynStoryDataset(Dataset):
         return output
 
     def collate_fn(self, batch):
-        
-        if hasattr(self.config.data, "truncate_first_k_examples"):
-            # import pdb; pdb.set_trace()
-            # truncate first k instances
-            texts = [s for b in batch[self.config.data.truncate_first_k_examples:] for s in b["texts"]]
-            # construct propagation question from the last instance and one other randomly chosen instance
-            rand_idx = np.random.choice(len(batch)-1)
-            qa_batch_ids = [len(batch)-1, rand_idx]
-            np.random.shuffle(qa_batch_ids)
-            answers = [s for b_i in qa_batch_ids for s in batch[b_i]["answers"]]
-            questions = [s for b_i in qa_batch_ids for s in batch[b_i]["questions"]]
-            # import pdb; pdb.set_trace()
-        else:
-            texts = [s for b in batch for s in b["texts"]]
+        texts = [s for b in batch for s in b["texts"]]
 
-            """ 
-            ! original line
-            trg = (
-                [b["answers"][0] for b in batch[:-ne]] +
-                [b["alt"] for b in batch[-ne:]]
-            )
-            """
-            answers = [s for b in batch for s in b["answers"]]
-            questions = [s for b in batch for s in b["questions"]]
-        # Shuffle questions and answers together while maintaining their pairing
+        """ 
+        ! original line
+        trg = (
+            [b["answers"][0] for b in batch[:-ne]] +
+            [b["alt"] for b in batch[-ne:]]
+        )
+        """
         
-        # ! (Leo) this is not helping with speed
-        # if hasattr(self.config.data, "n_prop_q"):
-        #     qa_pairs = list(zip(questions, answers))
-        #     np.random.shuffle(qa_pairs)
-        #     # import pdb; pdb.set_trace()
-        #     qa_pairs = qa_pairs[:self.config.data.n_prop_q]
-        #     questions, answers = zip(*qa_pairs)
-        #     questions = list(questions)
-        #     answers = list(answers)
-
+        
+        answers = [self.tok.apply_chat_template(self.qa2message(q, a), tokenize=False, add_generation_prompt=False).split("<|im_start|>assistant\n")[-1] for b in batch for q, a in zip(b["questions"], b["answers"])]
+        # answers = [("" if len(a) != 0 and a[0] == " " else " ") + a for a in answers]
+        questions = [self.tok.apply_chat_template(self.qa2message(q, a), tokenize=False, add_generation_prompt=False) for b in batch for q, a in zip(b["questions"], b["answers"])]
+        
+        
         batches = {
-            f"{k1}_{k2}": torch.concat(
-                [
-                    v2,
-                    torch.full(
-                        (v2.shape[0], 1),  # shape of the constant tensor
-                        (
-                            1
-                            if k2 == "attention_mask"
-                            else self.tok.eos_token_id  # this is to teach the model to end after outputing the answer.
-                        ),
-                    ),
-                ],
-                dim=-1,
-            )
+            f"{k1}_{k2}": v2
             for k1, v1 in {
                 "texts": texts,
                 "questions": questions,
@@ -158,7 +131,6 @@ class SynStoryDataset(Dataset):
                 truncation=True,
             ).items()
         }
-
         batches["raw"] = batch
         return batches
 
@@ -173,16 +145,12 @@ class SynStoryDataset(Dataset):
         if n is None:
             n = len(self)
         sampler = EditBatchSampler(
-            n, 
-            n_edits=self.config.data.n_edits,
-            memorize_mode=self.config.single_batch, loc_disjoint=not self.use_nq, seed=self.config.seed
+            n, memorize_mode=self.config.single_batch, loc_disjoint=not self.use_nq, seed=self.config.seed
         )
 
         while True:
             edit_idxs, loc_idxs = sampler.sample(batch_size)
-            # import pdb; pdb.set_trace()
-            # assert len(edit_idxs) == self.config.data.n_edits
-            # assert len(loc_idxs) == 1
+            assert len(edit_idxs) == 1
             # idxs = loc_idxs + edit_idxs
             toks = self.collate_fn([self[idx] for idx in edit_idxs])
 
@@ -192,7 +160,6 @@ class SynStoryDataset(Dataset):
             edit_inner["attention_mask"] = toks["texts_attention_mask"]
             edit_inner["labels"] = self.get_edit_labels(toks["texts_input_ids"])
 
-            # import pdb; pdb.set_trace()
             assert edit_inner["labels"].size(1) <= edit_inner["input_ids"].size(1)
 
             # in this case, rephrase means using propogation questions for L_e
@@ -203,12 +170,16 @@ class SynStoryDataset(Dataset):
 
             loc = {}
             if self.use_nq:
+                # import pdb; pdb.set_trace()
                 batch = [self.nq[idx] for idx in loc_idxs]
-                questions = [b[0] for b in batch]
-                answers = [b[1] for b in batch]
-                answers = [("" if answer[0] == " " else " ") + answer for answer in answers]
-                questions = [q + a for (q, a) in zip(questions, answers)]
+                questions_str = [b[0] if b[0].endswith("?") else b[0] + "?" for b in batch]
+                answers_str = [b[1] for b in batch]
+                
+                questions = [self.tok.apply_chat_template(self.qa2message(q, a), tokenize=False, add_generation_prompt=False) for q, a in zip(questions_str, answers_str)]
 
+                answers = [self.tok.apply_chat_template(self.qa2message(q, a), tokenize=False, add_generation_prompt=False).split("<|im_start|>assistant\n")[-1] for q, a in zip(questions_str, answers_str)]
+
+                
                 loc = dict(
                     self.tok(questions, return_tensors="pt", padding=True, max_length=self.max_length, truncation=True)
                 )
@@ -261,7 +232,7 @@ class SynStoryDataset(Dataset):
 
                 self.show_first_example = True
             # cond = {k[5:]: v for k, v in toks.items() if k.startswith("cond")}
-
+            # import pdb; pdb.set_trace()
             batch = {"edit_inner": edit_inner, "edit_outer": edit_outer, "loc": loc, "cond": None, "raw": toks["raw"]}
 
             yield dict_to(batch, self.config.device)

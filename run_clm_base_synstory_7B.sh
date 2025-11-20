@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=4
+export CUDA_VISIBLE_DEVICES=6
 
 gpu_count=$(awk -F',' '{print NF}' <<< "$CUDA_VISIBLE_DEVICES")
 bs=1
@@ -13,10 +13,10 @@ max_seq_length=1024
 epoch=4
 # max_steps=1
 
-lr=1e-5
+lr=5e-6
 
 # input_format=2hop
-epoch=4
+epoch=1
 
 # second-1hop
 
@@ -26,26 +26,26 @@ epoch=4
 
 # tunable_params="midupper3-mlp"
 
-base_model_name="Qwen2.5-1.5B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
+# base_model_name="Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-10"
+base_model_name="Llama-3.1-8B-eos-sft-template-format-curated-v1-lr5e-6-sample-10"
 
 # date_data="all_propagation_ood"
 # date_data="all_propagation_ood_w_ood_country"
 
-date_data=test_ood_entity
+date_data=test_ood-entity
 text_data="text"
 
-# tunable_params="midupper-mlp"
-tunable_params="all"
-
-# for tunable_params in "midupper-mlp" # "midupper3-mlp" # "all" 
-# do 
-for example_idx in {0..349}
+for tunable_params in lora # "midupper3-mlp" # "midupper3-mlp" # "all" 
+do 
+for example_idx in {0..0} # {51..349}
 do
 
 echo "Test data: ${date_data}"
 echo "Example idx: ${example_idx}"
 
-python clm_baseline_syn_story_qwen.py \
+# accelerate launch --config_file="fsdp_config.yaml" \
+    # --main_process_port 29601 \
+python clm_baseline_syn_story_lora.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
     --learning_rate=${lr} \
@@ -72,10 +72,11 @@ python clm_baseline_syn_story_qwen.py \
     --date_data=${date_data} \
     --text_data=${text_data} \
     --tunable_params=${tunable_params} \
-    --base_model_name=${base_model_name} 
+    --base_model_name=${base_model_name} \
+    --device=cpu
 
 done
-# done
+done
 
 # date_data="test_ood"
 
@@ -89,45 +90,6 @@ done
 # # accelerate launch --config_file="fsdp_config.yaml" \
 #     # --main_process_port 29700 \
 # python clm_baseline_syn_story.py \
-#     --seed=${seed} \
-#     --output_dir="${PWD}/models" \
-#     --learning_rate=${lr} \
-#     --lr_scheduler_type=constant \
-#     --weight_decay=${weight_decay} \
-#     --per_device_train_batch_size=${per_device_train_batch_size} \
-#     --gradient_accumulation_steps=${grad_acc} \
-#     --max_seq_length=${max_seq_length} \
-#     --max_grad_norm=${max_grad_norm} \
-#     --optim="adamw_torch" \
-#     --dataset_text_field="text" \
-#     --bf16=True \
-#     --eval_strategy="no" \
-#     --save_strategy="no" \
-#     --logging_strategy="steps" \
-#     --logging_first_step=True \
-#     --logging_steps=1 \
-#     --report_to="wandb" \
-#     --num_train_epochs=${epoch} \
-#     --run_name="propagator-clm-baseline" \
-#     --example_idx=${example_idx} \
-#     --report_to="none" \
-#     --spec_question=False \
-#     --date_data=${date_data} \
-#     --text_data=${text_data} \
-#     --tunable_params=${tunable_params} \
-#     --base_model_name=${base_model_name} 
-
-# done
-# done
-# for date_data in "test_ood" "test_ood-entity" "test_ood-relation"
-# do
-# for example_idx in {0..349}
-# do
-
-# echo "Test data: ${date_data}"
-# echo "Example idx: ${example_idx}"
-
-# python clm_baseline_syn_story_qwen.py \
 #     --seed=${seed} \
 #     --output_dir="${PWD}/models" \
 #     --learning_rate=${lr} \

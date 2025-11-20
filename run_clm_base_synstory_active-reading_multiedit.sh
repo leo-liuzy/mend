@@ -30,7 +30,7 @@ base_model_name="Llama-3.2-1B-eos-sft-template-format-curated-v1-lr2e-6-sample-1
 # date_data="all_propagation_ood"
 # date_data="all_propagation_ood_w_ood_country"
 
-date_data=test_id
+date_data=test_ood_relation
 text_data="augmented_texts"
 n_edits=${bs}
 
@@ -39,7 +39,7 @@ tunable_params="all"
 
 # for tunable_params in "midupper-mlp" # "midupper3-mlp" # "all" 
 # do 
-for example_idx in {0..25} # {0..349} # {0..499}
+for example_idx in {0..35} # {0..349} # {0..499}
 do
 
 echo "Test data: ${date_data}"
