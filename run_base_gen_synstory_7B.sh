@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=4
+export CUDA_VISIBLE_DEVICES=5
 
 declare -A name2id=(
     [llama3.2-1B_on_zsre-full]=2025-02-10_08-19-14_2641409766
@@ -40,7 +40,8 @@ archive=${name2id[$exp_dir_name]}
 # base_model_name=llama3.2-1B-common-country-eos-sft # country_syn-pretrain-all
 # base_model_name=llama3.2-1B-common-country-eos-sft
 # base_model_name=llama3.2-1B-eos-sft-country-template-format-lr1e-6
-base_model_name=llama3.1-8B-eos-sft-template-format-curated-v1-lr5e-6-sample-10-8-31
+# base_model_name=llama3.1-8B-eos-sft-template-format-curated-v1-lr5e-6-sample-10-8-31
+base_model_name=llama3.1-8B-eos-sft-template-format-curated-v1-lr2e-6-sample-10-max
 # base_model_name=llama3.1-8B-eos-sft-template-format-curated-v1-lr2e-6-sample-10
 # base_model_name=llama3.2-3B-eos-sft-template-format-curated-v1-lr2e-6-sample-10
 # base_model_name=llama3.2-1B-eos-sft
@@ -48,7 +49,7 @@ base_model_name=llama3.1-8B-eos-sft-template-format-curated-v1-lr5e-6-sample-10-
 # base_model_name=qwen2.5-1.5B
 
 # sft(q_p, a_p)
-ice=True
+ice=False
 
 for date_data in 4K_test_id 4K_test_ood-entity 4K_test_ood-relation 4K_test_ood
 do

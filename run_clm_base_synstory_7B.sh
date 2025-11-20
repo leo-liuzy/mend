@@ -16,7 +16,7 @@ epoch=4
 lr=5e-6
 
 # input_format=2hop
-epoch=4
+epoch=1
 
 # second-1hop
 
@@ -35,17 +35,17 @@ base_model_name="Llama-3.1-8B-eos-sft-template-format-curated-v1-lr5e-6-sample-1
 date_data=test_ood-entity
 text_data="text"
 
-for tunable_params in all # "midupper3-mlp" # "midupper3-mlp" # "all" 
+for tunable_params in lora # "midupper3-mlp" # "midupper3-mlp" # "all" 
 do 
-for example_idx in {0..349} # {51..349}
+for example_idx in {0..0} # {51..349}
 do
 
 echo "Test data: ${date_data}"
 echo "Example idx: ${example_idx}"
 
-accelerate launch --config_file="fsdp_config.yaml" \
-    --main_process_port 29601 \
-    clm_baseline_syn_story.py \
+# accelerate launch --config_file="fsdp_config.yaml" \
+    # --main_process_port 29601 \
+python clm_baseline_syn_story_lora.py \
     --seed=${seed} \
     --output_dir="${PWD}/models" \
     --learning_rate=${lr} \
@@ -72,7 +72,8 @@ accelerate launch --config_file="fsdp_config.yaml" \
     --date_data=${date_data} \
     --text_data=${text_data} \
     --tunable_params=${tunable_params} \
-    --base_model_name=${base_model_name} 
+    --base_model_name=${base_model_name} \
+    --device=cpu
 
 done
 done

@@ -13,7 +13,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 train_set_size=40_000
 
-python -m run +alg=mend +experiment=syn_story +model=llama3.1-8B-eos-sft-template-format-curated-v1-lr5e-6-sample-10-16-23 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=True train_prefix=4K mend.rank=60
+python -m run +alg=mend +experiment=syn_story +model=llama3.1-8B-eos-sft-template-format-curated-v1-lr5e-6-sample-10-8-31 val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=True train_prefix=4K mend.rank=960
 
 # python -m run +alg=mend +experiment=ripple_edits +model=llama3.2-1B-eos-sft-mid-upper val_steps=100 log_interval=10 val_interval=100 early_stop_patience=2000 +train_set_size=${train_set_size} heavy_outerloop=True mend.shared=False seed=1
 
