@@ -35,7 +35,7 @@ base_model_name="Llama-3.1-8B-eos-sft-template-format-curated-v1-lr5e-6-sample-1
 date_data=test_ood-entity
 text_data="text"
 
-for tunable_params in all # "midupper3-mlp" # "midupper3-mlp" # "all" 
+for tunable_params in lora # "midupper3-mlp" # "midupper3-mlp" # "all" 
 do 
 for example_idx in {0..0} # {51..349}
 do

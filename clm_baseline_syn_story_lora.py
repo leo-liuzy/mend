@@ -350,6 +350,7 @@ if custom_cfg.tunable_params == "lora":
         target_modules=target_modules,
     )
     model = get_peft_model(model, lora_config)
+    import pdb; pdb.set_trace()
 elif custom_cfg.tunable_params != "all":
     # assert custom_cfg.tunable_params in custom_cfg.base_model_name
     if custom_cfg.tunable_params == "top3-mlp":
